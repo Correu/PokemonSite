@@ -1,2 +1,16 @@
-<p>pokemon works!</p>
-<p>branching test</p>
+<div id="search-form">
+    <form>
+        <mat-form-field>
+            <mat-label>Rider Name</mat-label>
+            <input matInput placeholder="Eli Tomac" [value]="pokemonName" name="pokemonName" [(ngModel)]="pokemonName">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="searchForPokemon(pokemonName)">Search</button>
+    </form>
+</div>
+<div id="results">
+    <div [hidden]="!pokemon">
+        <mat-card>
+            {{pokemon}}
+        </mat-card>
+    </div>
+</div>
