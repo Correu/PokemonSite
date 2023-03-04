@@ -1,3 +1,6 @@
+<div>
+    <p *ngFor="let poke of pokemon">{{poke.ability.name}}</p>
+</div>
 <div id="search-form">
     <form>
         <mat-form-field>
@@ -8,9 +11,10 @@
     </form>
 </div>
 <div id="results">
-    <div [hidden]="!pokemon">
+    <div [hidden]="!pokemon" *ngFor="let r of pokemon">
         <mat-card>
-            {{pokemon}}
+            <p>{{r.height}}</p>
+            <p *ngFor="let move of moves">{{move.move.name}}</p>
         </mat-card>
     </div>
 </div>
