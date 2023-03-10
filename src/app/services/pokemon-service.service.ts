@@ -15,4 +15,10 @@ export class PokemonServiceService {
     let url = 'https://pokeapi.co/api/v2/pokemon/1';
     return this.http.get(url);
   }
+
+  //returns list of all pokemon
+  public getPokedex(): Observable<any> {
+    let url = 'https://pokeapi.co/api/v2/pokemon/?limit=100';
+    return this.http.get(url);
+  }
 }

@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatAccordion } from '@angular/material/expansion';
 import { PokemonServiceService } from '../services/pokemon-service.service';
 
 @Component({
@@ -9,11 +10,13 @@ import { PokemonServiceService } from '../services/pokemon-service.service';
 export class PokemonComponent implements OnInit {
   pokemonName:string = '';
   pokemon: any[] = [];
+  pokemonList: Array<{position: number, poke_info: any[]}> = [];
+  randomTeam: any[] = [];
   moves: any[] = [];
   constructor(private pokemonService: PokemonServiceService) { }
   
   ngOnInit(): void {
-    this.buildTeam();
+    this.getPokedex();
   }
 
   searchForPokemon(name: string) {
@@ -32,9 +35,22 @@ export class PokemonComponent implements OnInit {
   buildTeam() {
     this.pokemon = [];
     this.pokemonService.getPokemon("1").subscribe(res => {
-      this.pokemon = res.abilities;
+      this.pokemon = res.name;
+      this.pokemonList.push.apply(1, this.pokemon);
       console.log("Testing init build team.");
       console.log(this.pokemon);
+      console.log(this.pokemonList);
     })
+  }
+
+  getPokedex() {
+    this.pokemon = [];
+    this.pokemonService.getPokedex().subscribe(res => {
+      this.pokemon = res.results;
+    })
+  }
+
+  generateRandomTeam() {
+
   }
 }
