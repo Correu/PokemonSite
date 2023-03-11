@@ -1,15 +1,16 @@
-<div>
+<!-- <div>
     <p *ngFor="let poke of pokemon">{{poke.name}} <button></button></p>
-</div>
-<div>
-    <mat-accordion>
-        <mat-expansion-panel>
-            <mat-expansion-panel-header>
-                <mat-panel-title>test</mat-panel-title>
-            </mat-expansion-panel-header>
-        </mat-expansion-panel>
-    </mat-accordion>
-</div>
+</div> -->
+<mat-accordion multi>
+    <mat-expansion-panel *ngFor="let poke of pokemon">
+        <mat-expansion-panel-header>
+            <mat-panel-title>test</mat-panel-title>
+            <mat-panel-description>Test description</mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>{{poke.name}}</p>
+    </mat-expansion-panel>
+</mat-accordion>
+
 <div id="search-form">
     <form>
         <mat-form-field>
