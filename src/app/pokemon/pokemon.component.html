@@ -1,28 +1,21 @@
-<div style="width: 20%;">
-    <mat-accordion multi>
-        <mat-expansion-panel *ngFor="let poke of pokemon">
-            <mat-expansion-panel-header>
-                <mat-panel-title>test</mat-panel-title>
-                <mat-panel-description>Test description</mat-panel-description>
-            </mat-expansion-panel-header>
-            <p>{{poke.name}}</p>
-        </mat-expansion-panel>
-    </mat-accordion>
-</div>
-<div id="search-form">
-    <form>
-        <mat-form-field>
-            <mat-label>Rider Name</mat-label>
-            <input matInput placeholder="Eli Tomac" [value]="pokemonName" name="pokemonName" [(ngModel)]="pokemonName">
-        </mat-form-field>
-        <button mat-raised-button color="primary" (click)="searchForPokemon(pokemonName)">Search</button>
-    </form>
-</div>
-<div id="results">
-    <div [hidden]="!pokemon" *ngFor="let r of pokemon">
-        <mat-card>
-            <p>{{r.height}}</p>
-            <p *ngFor="let move of moves">{{move.move.name}}</p>
+<mat-grid-list cols="2" rowHeight="2:1">
+    <mat-grid-tile *ngFor="let poke of pokemon">
+        <mat-card class="pokemonCard">
+            <mat-card-header>{{poke.name}}</mat-card-header>
+            <p>{{poke.url}}</p>
+            <mat-card-actions>
+                <button mat-raised-button (click)="pokemonInfo(poke.name)">MORE INFO</button>
+            </mat-card-actions>
+            <img src={{pokemonImage}}/>
         </mat-card>
-    </div>
-</div>
+    </mat-grid-tile>
+</mat-grid-list>
+<!-- <mat-accordion multi class="pokemonInfo">
+    <mat-expansion-panel *ngFor="let poke of pokemon">
+        <mat-expansion-panel-header>
+            <mat-panel-title>test</mat-panel-title>
+            <mat-panel-description>Test description</mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>{{poke.name}}</p>
+    </mat-expansion-panel>
+</mat-accordion> -->

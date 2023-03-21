@@ -10,9 +10,12 @@ import { PokemonServiceService } from '../services/pokemon-service.service';
 export class PokemonComponent implements OnInit {
   pokemonName:string = '';
   pokemon: any[] = [];
+  test: any[] = [];
+  pokemonImage:string = '';
   pokemonList: Array<{position: number, poke_info: any[]}> = [];
   randomTeam: any[] = [];
   moves: any[] = [];
+
   constructor(private pokemonService: PokemonServiceService) { }
   
   ngOnInit(): void {
@@ -52,5 +55,14 @@ export class PokemonComponent implements OnInit {
 
   generateRandomTeam() {
 
+  }
+
+  pokemonInfo(name: string) {
+    this.pokemonImage;
+    this.pokemonService.getPokemon(name).subscribe(res => {
+      this.test = res.forms;
+      this.pokemonImage = res.sprites.back_default;
+      console.log(this.pokemonImage + " " + res)
+    })
   }
 }

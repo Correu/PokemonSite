@@ -12,7 +12,8 @@ export class PokemonServiceService {
   //returns pokemon by name
   //currently defaults to hit id 1
   public getPokemon(name:string): Observable<any> {
-    let url = 'https://pokeapi.co/api/v2/pokemon/1';
+    let url = 'https://pokeapi.co/api/v2/pokemon-form/' + name;
+    console.log(url);
     return this.http.get(url);
   }
 
