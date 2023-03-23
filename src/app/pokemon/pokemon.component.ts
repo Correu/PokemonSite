@@ -7,7 +7,11 @@ import { PokemonServiceService } from '../services/pokemon-service.service';
   templateUrl: './pokemon.component.html',
   styleUrls: ['./pokemon.component.css']
 })
+
+
 export class PokemonComponent implements OnInit {
+  teamOne: any[] = [];
+  teamTwo: any[] = [];
   pokemonName:string = '';
   pokemon: any[] = [];
   test: any[] = [];
@@ -19,6 +23,7 @@ export class PokemonComponent implements OnInit {
   constructor(private pokemonService: PokemonServiceService) { }
   
   ngOnInit(): void {
+    this.buildTeams();
     this.getPokedex();
   }
 
@@ -35,7 +40,11 @@ export class PokemonComponent implements OnInit {
     });
   }
 
-  buildTeam() {
+  buildTeams() {
+    this.teamOne = [];
+    this.teamTwo = [];
+
+    Math.random();
     this.pokemon = [];
     this.pokemonService.getPokemon("1").subscribe(res => {
       this.pokemon = res.name;
