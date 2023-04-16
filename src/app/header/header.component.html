@@ -1,3 +1,7 @@
 <div class="pokedex-header">
-    <h1>Pokedex</h1>
+    <button mat-button [matMenuTriggerFor]="menu">Menu</button>
+    <mat-menu #menu="matMenu">
+        <button mat-menu-item>Pokedex</button>
+        <butotn mat-menu-item>Battle</butotn>
+    </mat-menu>
 </div>

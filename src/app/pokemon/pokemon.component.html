@@ -1,21 +1,14 @@
-<mat-grid-list cols="2" rowHeight="2:1">
-    <mat-grid-tile *ngFor="let poke of pokemon">
-        <mat-card class="pokemonCard">
-            <mat-card-header>{{poke.name}}</mat-card-header>
-            <p>{{poke.url}}</p>
-            <mat-card-actions>
-                <button mat-raised-button (click)="pokemonInfo(poke.name)">MORE INFO</button>
-            </mat-card-actions>
-            <img src={{pokemonImage}}/>
-        </mat-card>
-    </mat-grid-tile>
-</mat-grid-list>
-<!-- <mat-accordion multi class="pokemonInfo">
-    <mat-expansion-panel *ngFor="let poke of pokemon">
-        <mat-expansion-panel-header>
-            <mat-panel-title>test</mat-panel-title>
-            <mat-panel-description>Test description</mat-panel-description>
-        </mat-expansion-panel-header>
-        <p>{{poke.name}}</p>
-    </mat-expansion-panel>
-</mat-accordion> -->
+<div>
+    <mat-grid-list cols="2" rowHeight="2:1">
+        <mat-grid-tile *ngFor="let poke of pokemon">
+            <mat-card class="pokemonCard">
+                <mat-card-header>{{poke.name}}</mat-card-header>
+                <p>{{poke.url}}</p>
+                <mat-card-actions>
+                    <button mat-raised-button (click)="pokemonInfo(poke.name)">MORE INFO</button>
+                </mat-card-actions>
+                <img src={{pokemonImage}} />
+            </mat-card>
+        </mat-grid-tile>
+    </mat-grid-list>
+</div>

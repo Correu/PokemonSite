@@ -23,7 +23,7 @@ export class PokemonComponent implements OnInit {
   constructor(private pokemonService: PokemonServiceService) { }
   
   ngOnInit(): void {
-    this.buildTeams();
+    //this.buildTeams();
     this.getPokedex();
   }
 
@@ -40,6 +40,9 @@ export class PokemonComponent implements OnInit {
     });
   }
 
+  /**
+   * builds the individual users team, showing the first one and having the remainder in pokeballs in the inventory.
+   */
   buildTeams() {
     this.teamOne = [];
     this.teamTwo = [];
