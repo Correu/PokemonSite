@@ -1,13 +1,14 @@
 <div>
     <mat-grid-list cols="2" rowHeight="2:1">
-        <mat-grid-tile *ngFor="let poke of pokemon">
+        <mat-grid-tile *ngFor="let poke of pokemonList">
             <mat-card class="pokemonCard">
-                <mat-card-header>{{poke.name}}</mat-card-header>
-                <p>{{poke.url}}</p>
+                <mat-card-header>{{poke.pokemonName}}</mat-card-header>
+                <p>{{poke.pokemonUrl}}</p>
+                <img src={{poke.pokemonImageUrl}}>
                 <mat-card-actions>
-                    <button mat-raised-button (click)="pokemonInfo(poke.name)">MORE INFO</button>
+                    <!-- <button mat-raised-button (click)="">MORE INFO</button> -->
                 </mat-card-actions>
-                <img src={{pokemonImage}} />
+                <!-- <img src={{pokemonImage}} /> -->
             </mat-card>
         </mat-grid-tile>
     </mat-grid-list>

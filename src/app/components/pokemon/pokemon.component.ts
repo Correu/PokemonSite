@@ -16,7 +16,7 @@ export class PokemonComponent implements OnInit {
   pokemon: any[] = [];
   test: any[] = [];
   pokemonImage:string = '';
-  pokemonList: Array<{position: number, poke_info: any[]}> = [];
+  pokemonList: Array<Pokemon> = [];
   randomTeam: any[] = [];
   moves: any[] = [];
 
@@ -61,8 +61,15 @@ export class PokemonComponent implements OnInit {
   getPokedex() {
     this.pokemon = [];
     this.pokemonService.getPokedex().subscribe(res => {
-      this.pokemon = res.results;
-    })
+      for (let index = 0; index < res.results.length; index++) {
+        const element = res.results[index];
+        this.pokemonService.getPokemon(element.url).subscribe(resource => {
+          this.pokemonList.push({pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default})
+        });
+      }
+      // this.pokemonService.getPokemon(res.results)
+      // this.pokemon = res.results;
+    });
   }
 
   generateRandomTeam() {
@@ -77,4 +84,12 @@ export class PokemonComponent implements OnInit {
       console.log(this.pokemonImage + " " + res)
     })
   }
+
+}
+
+type Pokemon = {
+  pokemonName: String;
+  pokemonUrl: String;
+  pokemonImageUrl: String;
+  
 }
