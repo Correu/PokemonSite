@@ -6,23 +6,26 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HeaderComponent } from './components/header/header.component';
 import { PokemonComponent } from './components/pokemon/pokemon.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { PokedexComponent } from './components/pokedex/pokedex.component';
+import { NavigationComponent } from './components/navigation/navigation.component';
+import { BattleComponent } from './components/battle/battle.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PokemonComponent,
-    HeaderComponent,
-    PokedexComponent
+    PokedexComponent,
+    NavigationComponent,
+    BattleComponent
   ],
   imports: [
     BrowserModule,
@@ -36,7 +39,8 @@ import { PokedexComponent } from './components/pokedex/pokedex.component';
     MatExpansionModule,
     BrowserAnimationsModule,
     MatGridListModule,
-    MatMenuModule
+    MatMenuModule,
+    MatTabsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
