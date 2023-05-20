@@ -23,10 +23,10 @@ export class PokedexComponent implements OnInit{
   getPokedex() {
     this.pokemon = [];
     this.pokemonService.getPokedex().subscribe(res => {
-      for (let index = 0; index < res.length; index++) {
-        const element = res.resluts[index];
+      for (let index = 0; index < res.results.length; index++) {
+        const element = res.results[index];
         this.pokemonService.getPokemon(element.url).subscribe(resource => {
-          this.pokemonList.push({pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default})
+          this.pokemonList.push({pokemonId: resource.id, pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default})
         });
       }
     });
@@ -34,6 +34,7 @@ export class PokedexComponent implements OnInit{
 }
 
 type Pokemon = {
+  pokemonId: number;
   pokemonName: String;
   pokemonUrl: String;
   pokemonImageUrl: String;

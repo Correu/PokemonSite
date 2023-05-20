@@ -12,9 +12,13 @@ export class PokemonServiceService {
 
   //returns pokemon by name
   public getPokemon(name:string): Observable<any> {
-    //let url = 'https://pokeapi.co/api/v2/pokemon-form/' + name;
-    console.log(name);
     return this.http.get(name);
+  }
+
+  public getPokemonById(id: string): Observable<any> {
+    let url = 'https://pokeapi.co/api/v2/pokemon/' + id;
+    console.log(url);
+    return this.http.get(url);
   }
 
   //returns list of all pokemon
