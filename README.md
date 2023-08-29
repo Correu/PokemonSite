@@ -6,9 +6,9 @@ https://pokeapi.co/docs/v2
 
 ## TODO
 
-[ ] build out the battle page
-[ ] refactor the pokedex to show more information on the pokemon.
-[ ] 
+- [ ] build out the battle page
+- [ ] refactor the pokedex to show more information on the pokemon.
+- [ ] 
 
 ## Angular Information
 
