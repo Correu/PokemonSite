@@ -4,6 +4,12 @@ PokeAPI used for the project
 
 https://pokeapi.co/docs/v2
 
+## TODO
+
+[ ] build out the battle page
+[ ] refactor the pokedex to show more information on the pokemon.
+[ ] 
+
 ## Angular Information
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.1.3.

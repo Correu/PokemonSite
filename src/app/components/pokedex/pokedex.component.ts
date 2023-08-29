@@ -9,6 +9,8 @@ import { PokemonServiceService } from '../services/pokemon-service.service';
 
 @Injectable()
 export class PokedexComponent implements OnInit{
+
+  //more information about the pokemon in the pages.
   
   pokemon: any[] = [];
   pokemonList: Array<Pokemon> = [];
@@ -21,7 +23,6 @@ export class PokedexComponent implements OnInit{
   }
 
   getPokedex() {
-    this.pokemon = [];
     this.pokemonService.getPokedex().subscribe(res => {
       for (let index = 0; index < res.results.length; index++) {
         const element = res.results[index];
