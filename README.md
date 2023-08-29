@@ -1,11 +1,8 @@
 # PokemonSite
 
-This is a Pokemon/Pokedex site that I built to develop an understanding of how to create an API driven site using the Angular framework.
-
 PokeAPI used for the project
 
 https://pokeapi.co/docs/v2
-
 
 ## Angular Information
 
