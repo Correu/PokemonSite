@@ -16,7 +16,7 @@ export class BattleComponent implements OnInit {
   //turn based
 
   playerTeam: Array<Pokemon> = [];
-
+  opponentTeam: Array<Pokemon> = [];
 
 
   constructor(private pokemonService: PokemonServiceService) { }
