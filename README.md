@@ -6,9 +6,14 @@ https://pokeapi.co/docs/v2
 
 ## TODO
 
-- [ ] build out the battle page
+- [ ] add display of two teams on battle
+- [ ] add turn based functionality to battle
+- [ ] add health functionality to the battle
+- [ ] add move qtys to battle
+- [ ] add random opponent pokemon values to battle
+- [ ] add a pokemon bag for the user to access.
 - [ ] refactor the pokedex to show more information on the pokemon.
-- [ ] 
+- [ ] fix delay on pokedex.
 
 ## Angular Information
 

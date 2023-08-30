@@ -23,7 +23,7 @@ export class BattleComponent implements OnInit {
 
   ngOnInit(): void {
     //methods to initialize
-
+    this.buildTeam();
   }
 
   //hit a random 6 pokemon between 1-151
