@@ -1,11 +1,14 @@
 <div>
     <h1 style="text-align: center;">Pokemon Battle</h1>
 </div>
-<mat-grid-list cols="6" rowHeight="2:1">
+<mat-grid-list cols="2" rowHeight="2:1">
     <mat-grid-tile *ngFor="let poke of playerTeam">
-        <mat-card class="pokemonCard">
+        <mat-card>
             <mat-card-header>{{poke.pokemonName}}</mat-card-header>
             <img src="{{poke.pokemonImageUrl}}">
+            <mat-card-content>
+                <h1 *ngFor="let stats of poke.pokemonStats">{{stats.baseStat}}</h1>
+            </mat-card-content>
         </mat-card>
     </mat-grid-tile>
 </mat-grid-list>

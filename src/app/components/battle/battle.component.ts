@@ -33,7 +33,7 @@ export class BattleComponent implements OnInit {
       for(let index = 0; index < res.results.length; index++) {
         const element = res.results[index];
         this.pokemonService.getPokemon(element.url).subscribe(resource => {
-          this.playerTeam.push({pokemonId: resource.id, pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default})
+          this.playerTeam.push({pokemonId: resource.id, pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default, pokemonStats: resource.stats})
         });
       }
     });
@@ -49,4 +49,16 @@ type Pokemon = {
   pokemonName: String;
   pokemonUrl: String;
   pokemonImageUrl: String;
+  pokemonStats: Array<Stats>;
+}
+
+type Stats = {
+  baseStat: number;
+  effort: number;
+  stat: Array<Stat>;
+}
+
+type Stat = {
+  statName: string;
+  statUrl: string;
 }

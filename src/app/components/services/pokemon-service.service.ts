@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 
 export class PokemonServiceService {
 
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient) {  }
 
   //returns pokemon by name
   public getPokemon(name:string): Observable<any> {
