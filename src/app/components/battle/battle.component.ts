@@ -58,19 +58,19 @@ type Team = {
 
 type Pokemon = {
   pokemonId: number;
-  pokemonName: String;
-  pokemonUrl: String;
-  pokemonImageUrl: String;
-  pokemonStats: Array<Stats>;
+  pokemonName: string;
+  pokemonUrl: string;
+  pokemonImageUrl: string;
+  pokemonStats: {name: string, url: string};
 }
 
 type Stats = {
   baseStat: number;
   effort: number;
-  stat: Stat;
+  stat: Array<Stat>;
 }
 
 type Stat = {
-  statName: String;
-  statUrl: String;
+  statName: string;
+  statUrl: string;
 }
