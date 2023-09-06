@@ -1,6 +1,5 @@
 import { Component, Injectable, OnInit } from '@angular/core';
-import { PokemonServiceService } from '../services/pokemon-service.service';
-
+import { PokemonService } from 'src/app/services/pokemon.service';
 @Component({
   selector: 'app-pokedex',
   templateUrl: './pokedex.component.html',
@@ -16,7 +15,7 @@ export class PokedexComponent implements OnInit{
   pokemonList: Array<Pokemon> = [];
   pokedex: Pokemon[] = [];
 
-  constructor(private pokemonService: PokemonServiceService) { }
+  constructor(private pokemonService: PokemonService) { }
 
   ngOnInit(): void {
     //methods to initialize

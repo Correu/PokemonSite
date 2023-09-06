@@ -1,5 +1,5 @@
 import { Component, Injectable, OnInit } from '@angular/core';
-import { PokemonServiceService } from '../services/pokemon-service.service';
+import { PokemonService } from 'src/app/services/pokemon.service';
 
 @Component({
   selector: 'app-battle',
@@ -20,7 +20,7 @@ export class BattleComponent implements OnInit {
 
 
 
-  constructor(private pokemonService: PokemonServiceService) { }
+  constructor(private pokemonService: PokemonService) { }
 
   ngOnInit(): void {
     //methods to initialize

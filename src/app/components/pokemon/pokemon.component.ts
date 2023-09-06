@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
-import { PokemonServiceService } from '../services/pokemon-service.service';
+import { PokemonService } from 'src/app/services/pokemon.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable, switchMap } from 'rxjs';
 
@@ -17,7 +17,7 @@ export class PokemonComponent implements OnInit {
   pokemonName: string = '';
   pokemonImgUrl: string = '';
   //pokemonId!: Observable<Pokemon>;
-  constructor(private pokemonService: PokemonServiceService, private route: ActivatedRoute) { }
+  constructor(private pokemonService: PokemonService, private route: ActivatedRoute) { }
   
   ngOnInit(): void {
     // this.pokemonId$ = 
