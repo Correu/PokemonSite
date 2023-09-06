@@ -1,10 +1,10 @@
 <mat-grid-list cols="2" rowHeight="2:1">
-    <mat-grid-tile *ngFor="let poke of pokemonList">
+    <mat-grid-tile *ngFor="let poke of pokedex">
         <mat-card class="pokemonCard">
             <mat-card-header>{{poke.pokemonName}}</mat-card-header>
             <p>{{poke.pokemonUrl}}</p>
-            <img src={{poke.pokemonImageUrl}}>
-            <button mat-raised-button color="primary" [routerLink]="['/pokemon', poke.pokemonId]">Pokemon Information</button>
+            <!-- <img src={{poke.pokemonImageUrl}}>
+            <button mat-raised-button color="primary" [routerLink]="['/pokemon', poke.pokemonId]">Pokemon Information</button> -->
         </mat-card>
     </mat-grid-tile>
 </mat-grid-list>

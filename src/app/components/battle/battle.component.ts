@@ -15,8 +15,9 @@ export class BattleComponent implements OnInit {
   //each pokemon has 4 moves random up to the current level they are at
   //turn based
 
-  playerTeam: Array<Pokemon> = [];
-  opponentTeam: Array<Pokemon> = [];
+  playerTeam: Pokemon[] = [];
+  opponentTeam: Pokemon[] = [];
+
 
 
   constructor(private pokemonService: PokemonServiceService) { }
@@ -32,13 +33,24 @@ export class BattleComponent implements OnInit {
     this.pokemonService.getPokedex().subscribe(res => {
       for(let index = 0; index < res.results.length; index++) {
         const element = res.results[index];
-        this.pokemonService.getPokemon(element.url).subscribe(resource => {
-          this.playerTeam.push({pokemonId: resource.id, pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default, pokemonStats: resource.stats})
+        this.pokemonService.getPokemon(element.url).subscribe(p => {
+          //console.log(p);
+          const pokemon: Pokemon = {
+            pokemonId: p.id,
+            pokemonName:  p.name,
+            pokemonUrl: element.url,
+            pokemonImageUrl: "",
+            pokemonStats: { name: " ", url: " "}
+          }
+
+          this.playerTeam.push(pokemon);
+          //console.log(this.playerTeam);
         });
       }
     });
   }
 }
+
 
 type Team = {
   pokemon: Pokemon;   
@@ -46,10 +58,10 @@ type Team = {
 
 type Pokemon = {
   pokemonId: number;
-  pokemonName: String;
-  pokemonUrl: String;
-  pokemonImageUrl: String;
-  pokemonStats: Array<Stats>;
+  pokemonName: string;
+  pokemonUrl: string;
+  pokemonImageUrl: string;
+  pokemonStats: {name: string, url: string};
 }
 
 type Stats = {

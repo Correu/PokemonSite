@@ -14,6 +14,7 @@ export class PokedexComponent implements OnInit{
   
   pokemon: any[] = [];
   pokemonList: Array<Pokemon> = [];
+  pokedex: Pokemon[] = [];
 
   constructor(private pokemonService: PokemonServiceService) { }
 
@@ -23,20 +24,31 @@ export class PokedexComponent implements OnInit{
   }
 
   getPokedex() {
-    this.pokemonService.getPokedex().subscribe(res => {
-      for (let index = 0; index < res.results.length; index++) {
-        const element = res.results[index];
-        this.pokemonService.getPokemon(element.url).subscribe(resource => {
-          this.pokemonList.push({pokemonId: resource.id, pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default})
-        });
-      }
+    this.pokemonService.getPokedex().subscribe(pokemon => {
+      // for (let index = 0; index < res.results.length; index++) {
+      //   const element = res.results[index];
+      //   this.pokemonService.getPokemon(element.url).subscribe(resource => {
+      //     this.pokemonList.push({pokemonId: resource.id, pokemonName: resource.name, pokemonUrl: element.url, pokemonImageUrl: resource.sprites.back_default})
+      //   });
+      // }
+      pokemon.results.forEach((element : any) => {
+        const poke: Pokemon = {
+          pokemonName: element.name,
+          pokemonUrl: element.url
+        }
+  
+        this.pokedex.push(poke);
+      }); 
+
+      console.log(pokemon);
+      console.log(this.pokedex);
     });
   }
 }
 
+
+
 type Pokemon = {
-  pokemonId: number;
-  pokemonName: String;
-  pokemonUrl: String;
-  pokemonImageUrl: String;
+  pokemonName: string;
+  pokemonUrl: string;
 }
