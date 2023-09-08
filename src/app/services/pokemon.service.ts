@@ -14,15 +14,16 @@ export class PokemonService {
 
   constructor(private http:HttpClient) {
     this.getPokedex().subscribe(res => {
-      console.log(res);
-      this.pokemonIds = res.results;
+      //console.log(res);
+      this.pokemonIds.push(res.results);
     });
 
-    console.log(this.pokemonIds);
+    //console.log(this.pokemonIds);
 
     this.pokemonIds.forEach(id => {
+      console.log(id.url);
       this.getPokemon(id.url).subscribe(p => {
-
+        console.log(p);
         const sprite: Sprite = {
           frontDefault: p.sprites.front_default,
           backDefault: p.sprites.back_default,
@@ -47,7 +48,8 @@ export class PokemonService {
 
         this.pokedex.push(pokemon);
       })
-    })
+    });
+    //console.log(this.pokedex);
    }
 
   public getPokemon(name:string): Observable<any> {
@@ -56,7 +58,7 @@ export class PokemonService {
 
   public getPokemonById(id: string): Observable<any> {
     let url = 'https://pokeapi.co/api/v2/pokemon/' + id;
-    console.log(url);
+    //console.log(url);
     return this.http.get(url);
   }
 

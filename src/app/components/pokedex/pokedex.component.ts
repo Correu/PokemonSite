@@ -17,11 +17,12 @@ export class PokedexComponent implements OnInit{
   pokemonList: Pokemon[] = [];
   pokedex: Pokemon[] = [];
 
-  constructor(private pokemonService: PokemonService) { }
+  constructor(public pokemonService: PokemonService) { }
 
   ngOnInit(): void {
     //methods to initialize
     this.pokedex = this.pokemonService.getPokedexList();
+    console.log(this.pokedex);
   }
 
 }
