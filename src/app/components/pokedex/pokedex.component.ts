@@ -22,7 +22,7 @@ export class PokedexComponent implements OnInit{
   ngOnInit(): void {
     //methods to initialize
     this.pokedex = this.pokemonService.getPokedexList();
-    console.log(this.pokedex);
+    //console.log(this.pokedex);
   }
 
 }
