@@ -14,19 +14,20 @@ export class PokemonService {
 
   constructor(private http:HttpClient) {
     this.getPokedex().subscribe(res => {
-      //console.log(res);
-      this.pokemonIds.push(res.results);
+      res.results.forEach((pokem: { name: any; url: any; }) => {
+        const poke: PokeIds = {
+          name: pokem.name,
+          url: pokem.url,
+        };
+        this.pokemonIds.push(poke);
+      });
     });
 
     console.log(this.pokemonIds);
-    //console.log(this.pokemonIds.length.toString());
-    for(var i = 0; i < this.pokemonIds.length; i++) {
-      //console.log(pokemon[i].name);
-    }
 
     this.pokemonIds.forEach(pokemon => {
       console.log(pokemon.name);
-    })
+    });
 
     for(var index in this.pokemonIds) {
       this.getPokemon(this.pokemonIds[index].url).subscribe(poke => {
@@ -54,7 +55,7 @@ export class PokemonService {
         };
 
         this.pokedex.push(pokemon);
-      })
+      });
     }
     // this.pokemonIds.forEach( (id) => {
     //   console.log(id.url);
