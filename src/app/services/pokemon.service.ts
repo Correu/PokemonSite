@@ -19,7 +19,14 @@ export class PokemonService {
     });
 
     console.log(this.pokemonIds);
-    console.log(this.pokemonIds.length.toString());
+    //console.log(this.pokemonIds.length.toString());
+    for(var i = 0; i < this.pokemonIds.length; i++) {
+      //console.log(pokemon[i].name);
+    }
+
+    this.pokemonIds.forEach(pokemon => {
+      console.log(pokemon.name);
+    })
 
     for(var index in this.pokemonIds) {
       this.getPokemon(this.pokemonIds[index].url).subscribe(poke => {
