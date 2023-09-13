@@ -19,45 +19,44 @@ export class PokemonService {
           name: pokem.name,
           url: pokem.url,
         };
-        this.pokemonIds.push(poke);
+          this.pokemonIds.push(poke);
       });
     });
 
     console.log(this.pokemonIds);
-    console.log(this.pokemonIds.length);
 
     this.pokemonIds.forEach(pokemon => {
       console.log(pokemon.name);
     });
 
-    for(var index in this.pokemonIds) {
-      this.getPokemon(this.pokemonIds[index].url).subscribe(poke => {
-        console.log(poke);
-        const sprite: Sprite = {
-          frontDefault: poke.sprites.front_default,
-          backDefault: poke.sprites.back_default,
-          frontShiny: poke.sprites.front_default_shiny,
-          backShiny: poke.sprites.back_shiny,
-        };
+    // for(var index in this.pokemonIds) {
+    //   this.getPokemon(this.pokemonIds[index].url).subscribe(poke => {
+    //     console.log(poke);
+    //     const sprite: Sprite = {
+    //       frontDefault: poke.sprites.front_default,
+    //       backDefault: poke.sprites.back_default,
+    //       frontShiny: poke.sprites.front_default_shiny,
+    //       backShiny: poke.sprites.back_shiny,
+    //     };
 
-        const pokemon: Pokemon = {
-          id: poke.id,
-          name: poke.name,
-          baseExperience: poke.base_experience,
-          height: poke.height,
-          order: poke.order,
-          weight: poke.weight,
-          abilities: poke.ability,
-          forms: poke.forms,
-          heldItems: poke.item,
-          moves: poke.moves.move,
-          sprites: sprite,
-          stats: poke.stat
-        };
+    //     const pokemon: Pokemon = {
+    //       id: poke.id,
+    //       name: poke.name,
+    //       baseExperience: poke.base_experience,
+    //       height: poke.height,
+    //       order: poke.order,
+    //       weight: poke.weight,
+    //       abilities: poke.ability,
+    //       forms: poke.forms,
+    //       heldItems: poke.item,
+    //       moves: poke.moves.move,
+    //       sprites: sprite,
+    //       stats: poke.stat
+    //     };
 
-        this.pokedex.push(pokemon);
-      });
-    }
+    //     this.pokedex.push(pokemon);
+    //   });
+    // }
     // this.pokemonIds.forEach( (id) => {
     //   console.log(id.url);
     //   this.getPokemon(id.url).subscribe(p => {
