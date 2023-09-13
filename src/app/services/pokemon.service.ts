@@ -24,6 +24,7 @@ export class PokemonService {
     });
 
     console.log(this.pokemonIds);
+    console.log(this.pokemonIds.length);
 
     this.pokemonIds.forEach(pokemon => {
       console.log(pokemon.name);
