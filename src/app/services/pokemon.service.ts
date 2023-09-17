@@ -25,9 +25,9 @@ export class PokemonService {
     }, err => console.error("test error" + err), () => console.log("Observable completed"));
     
     console.log(this.pokemonIds);
-    console.log(this.pokemonIds);
-    console.log(this.pokemonIds.length);
-    console.log(this.pokemonIds);
+    
+    console.log(Object.keys(this.pokemonIds).length);
+
     this.pokemonIds.forEach(test => {
       console.log(test.name);
     });
