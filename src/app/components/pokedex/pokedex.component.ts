@@ -14,15 +14,19 @@ export class PokedexComponent implements OnInit{
   //more information about the pokemon in the pages.
   
   pokemon: any[] = [];
-  pokemonList: Pokemon[] = [];
+  pokemonList: PokeIds[] = [];
   pokedex: Pokemon[] = [];
 
   constructor(public pokemonService: PokemonService) { }
 
   ngOnInit(): void {
     //methods to initialize
-    this.pokedex = this.pokemonService.getPokedexList();
-    //console.log(this.pokedex);
+    this.pokemonList = this.pokemonService.getPokeIdList();
+    console.log(this.pokemonList);
   }
 
+}
+type PokeIds = {
+  name: string,
+  url: string;
 }

@@ -13,6 +13,7 @@ export class PokemonService {
   pokedex: Pokemon[] = [];
 
   constructor(private http:HttpClient) {
+
     this.getPokedex().subscribe(res => {
       res.results.forEach((pokem: { name: any; url: any; }) => {
         const poke: PokeIds = {
@@ -21,12 +22,12 @@ export class PokemonService {
         };
           this.pokemonIds.push(poke);
       });
-    });
-
-    console.log(this.pokemonIds);
+    }, err => console.error("test error" + err), () => console.log("Observable completed"));
     
-    console.log(Object.keys(this.pokemonIds).length);
-
+    console.log(this.pokemonIds);
+    console.log(this.pokemonIds);
+    console.log(this.pokemonIds.length);
+    console.log(this.pokemonIds);
     this.pokemonIds.forEach(test => {
       console.log(test.name);
     });
@@ -108,6 +109,10 @@ export class PokemonService {
 
   public getPokedexList() {
     return this.pokedex;
+  }
+
+  public getPokeIdList() {
+    return this.pokemonIds;
   }
 }
 
