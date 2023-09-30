@@ -25,12 +25,7 @@ export class PokemonService {
     }, err => console.error("test error" + err), () => console.log("Observable completed"));
     
     console.log(this.pokemonIds);
-    
-    console.log(Object.keys(this.pokemonIds).length);
-
-    this.pokemonIds.forEach(test => {
-      console.log(test.name);
-    });
+    console.log(this.pokemonIds);    
 
     // for(var index in this.pokemonIds) {
     //   this.getPokemon(this.pokemonIds[index].url).subscribe(poke => {
@@ -60,39 +55,41 @@ export class PokemonService {
     //     this.pokedex.push(pokemon);
     //   });
     // }
-    // this.pokemonIds.forEach( (id) => {
-    //   console.log(id.url);
-    //   this.getPokemon(id.url).subscribe(p => {
-    //     console.log(p);
-    //     const sprite: Sprite = {
-    //       frontDefault: p.sprites.front_default,
-    //       backDefault: p.sprites.back_default,
-    //       frontShiny: p.sprites.front_default_shiny,
-    //       backShiny: p.sprites.back_shiny,
-    //     };
 
-    //     const pokemon: Pokemon = {
-    //       id: p.id,
-    //       name: p.name,
-    //       baseExperience: p.base_experience,
-    //       height: p.height,
-    //       order: p.order,
-    //       weight: p.weight,
-    //       abilities: p.ability,
-    //       forms: p.forms,
-    //       heldItems: p.item,
-    //       moves: p.moves.move,
-    //       sprites: sprite,
-    //       stats: p.stat
-    //     };
 
-    //     this.pokedex.push(pokemon);
-    //   })
-    // });
-    //console.log(this.pokedex);
+    console.log(this.pokemonIds.length);
+    this.pokemonIds.forEach( async (id) => {
+      console.log("Test");
+      (await this.getPokemon(id.url)).subscribe(p => {
+        const sprite: Sprite = {
+          frontDefault: p.sprites.front_default,
+          backDefault: p.sprites.back_default,
+          frontShiny: p.sprites.front_default_shiny,
+          backShiny: p.sprites.back_shiny,
+        };
+
+        const pokemon: Pokemon = {
+          id: p.id,
+          name: p.name,
+          baseExperience: p.base_experience,
+          height: p.height,
+          order: p.order,
+          weight: p.weight,
+          abilities: p.ability,
+          forms: p.forms,
+          heldItems: p.item,
+          moves: p.moves.move,
+          sprites: sprite,
+          stats: p.stat
+        };
+
+        this.pokedex.push(pokemon);
+      })
+    });
+    console.log(this.pokedex);
    }
 
-  public getPokemon(name:string): Observable<any> {
+  async getPokemon(name:string): Promise<Observable<any>> {
     return this.http.get(name);
   }
 

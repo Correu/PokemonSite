@@ -30,10 +30,10 @@ export class BattleComponent implements OnInit {
   //hit a random 6 pokemon between 1-151
   //assign them to each team
   buildTeam() {
-    this.pokemonService.getPokedex().subscribe(res => {
+    this.pokemonService.getPokedex().subscribe(async res => {
       for(let index = 0; index < res.results.length; index++) {
         const element = res.results[index];
-        this.pokemonService.getPokemon(element.url).subscribe(p => {
+        (await this.pokemonService.getPokemon(element.url)).subscribe(p => {
           //console.log(p);
           const pokemon: Pokemon = {
             pokemonId: p.id,
