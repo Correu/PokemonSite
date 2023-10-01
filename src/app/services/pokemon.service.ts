@@ -24,8 +24,7 @@ export class PokemonService {
       });
     }, err => console.error("test error" + err), () => console.log("Observable completed"));
     
-    console.log(this.pokemonIds);
-    console.log(this.pokemonIds);    
+    console.log(this.pokemonIds);  
 
     // for(var index in this.pokemonIds) {
     //   this.getPokemon(this.pokemonIds[index].url).subscribe(poke => {
@@ -56,41 +55,39 @@ export class PokemonService {
     //   });
     // }
 
-
-    console.log(this.pokemonIds.length);
     this.pokemonIds.forEach( async (id) => {
       console.log("Test");
       (await this.getPokemon(id.url)).subscribe(p => {
-        const sprite: Sprite = {
-          frontDefault: p.sprites.front_default,
-          backDefault: p.sprites.back_default,
-          frontShiny: p.sprites.front_default_shiny,
-          backShiny: p.sprites.back_shiny,
-        };
+        // const sprite: Sprite = {
+        //   frontDefault: p.sprites.front_default,
+        //   backDefault: p.sprites.back_default,
+        //   frontShiny: p.sprites.front_default_shiny,
+        //   backShiny: p.sprites.back_shiny,
+        // };
 
-        const pokemon: Pokemon = {
-          id: p.id,
-          name: p.name,
-          baseExperience: p.base_experience,
-          height: p.height,
-          order: p.order,
-          weight: p.weight,
-          abilities: p.ability,
-          forms: p.forms,
-          heldItems: p.item,
-          moves: p.moves.move,
-          sprites: sprite,
-          stats: p.stat
-        };
+        // const pokemon: Pokemon = {
+        //   id: p.id,
+        //   name: p.name,
+        //   baseExperience: p.base_experience,
+        //   height: p.height,
+        //   order: p.order,
+        //   weight: p.weight,
+        //   abilities: p.ability,
+        //   forms: p.forms,
+        //   heldItems: p.item,
+        //   moves: p.moves.move,
+        //   sprites: sprite,
+        //   stats: p.stat
+        // };
 
-        this.pokedex.push(pokemon);
+        this.pokedex.push(p);
       })
     });
     console.log(this.pokedex);
    }
 
-  async getPokemon(name:string): Promise<Observable<any>> {
-    return this.http.get(name);
+  async getPokemon(name:string): Promise<Observable<Pokemon>> {
+    return this.http.get<Pokemon>(name);
   }
 
   public getPokemonById(id: string): Observable<any> {
