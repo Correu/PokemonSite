@@ -17,6 +17,7 @@ export class BattleComponent implements OnInit {
 
   playerTeam: Pokemon[] = [];
   opponentTeam: Pokemon[] = [];
+  //pokeIds: PokeIds[] = [];
 
 
 
@@ -24,31 +25,12 @@ export class BattleComponent implements OnInit {
 
   ngOnInit(): void {
     //methods to initialize
-    this.buildTeam();
+    //this.buildTeam();
   }
 
   //hit a random 6 pokemon between 1-151
   //assign them to each team
-  buildTeam() {
-    this.pokemonService.getPokedex().subscribe(async res => {
-      for(let index = 0; index < res.results.length; index++) {
-        const element = res.results[index];
-        (await this.pokemonService.getPokemon(element.url)).subscribe(p => {
-          //console.log(p);
-          const pokemon: Pokemon = {
-            pokemonId: p.id,
-            pokemonName:  p.name,
-            pokemonUrl: element.url,
-            pokemonImageUrl: "",
-            pokemonStats: { name: " ", url: " "}
-          }
-
-          this.playerTeam.push(pokemon);
-          //console.log(this.playerTeam);
-        });
-      }
-    });
-  }
+  
 }
 
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Pokemon, Sprite } from '../interfaces/pokemon';
 
 @Injectable({
@@ -14,15 +15,12 @@ export class PokemonService {
 
   constructor(private http:HttpClient) {
 
-    this.getPokedex().subscribe(res => {
-      res.results.forEach((pokem: { name: any; url: any; }) => {
-        const poke: PokeIds = {
-          name: pokem.name,
-          url: pokem.url,
-        };
-          this.pokemonIds.push(poke);
+    this.getPokedex().subscribe(response => {
+      console.log(response);
+      this.pokemonIds = response.map(item => {
+        return item;
       });
-    }, err => console.error("test error" + err), () => console.log("Observable completed"));
+    })
     
     this.pokemonIds.forEach( async (id) => {
       console.log("Test");
@@ -65,9 +63,9 @@ export class PokemonService {
     return this.http.get(url);
   }
 
-  public getPokedex(): Observable<any> {
+  public getPokedex(): Observable<PokeIds[]> {
     let url = 'https://pokeapi.co/api/v2/pokemon/?limit=100';
-    return this.http.get(url);
+    return this.http.get<PokeIds[]>(url);
   }
 
   public getPokedexList() {
