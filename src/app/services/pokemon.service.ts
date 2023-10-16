@@ -17,9 +17,7 @@ export class PokemonService {
 
     this.getPokedex().subscribe(response => {
       console.log(response);
-      this.pokemonIds = response.map(item => {
-        return item;
-      });
+      this.pokemonIds = response;
     })
     
     this.pokemonIds.forEach( async (id) => {
