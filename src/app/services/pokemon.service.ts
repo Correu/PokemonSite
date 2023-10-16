@@ -33,7 +33,7 @@ export class PokemonService {
         // };
 
         // const pokemon: Pokemon = {
-        //   id: p.id,
+        //   id: p.id, 
         //   name: p.name,
         //   baseExperience: p.base_experience,
         //   height: p.height,
@@ -65,6 +65,7 @@ export class PokemonService {
 
   public getPokedex(): Observable<PokeIds[]> {
     let url = 'https://pokeapi.co/api/v2/pokemon/?limit=100';
+    console.log(this.http.get<PokeIds[]>(url));
     return this.http.get<PokeIds[]>(url);
   }
 
