@@ -15,9 +15,11 @@ export class PokemonService {
 
   constructor(private http:HttpClient) {
 
-    this.getPokedex().subscribe((pokeId: PokeIds[]) => {
-      console.log(pokeId);
-      this.pokemonIds = pokeId;
+    this.getPokedex().subscribe(response => {
+      console.log(response);
+      this.pokemonIds = response.map(item => {
+        return item;
+      });
     })
 
     console.log(this.pokemonIds);
