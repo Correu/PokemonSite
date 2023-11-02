@@ -1,4 +1,4 @@
-import { Component, Injectable, OnInit } from '@angular/core';
+import { Component, Injectable, OnInit, Output } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 
@@ -12,10 +12,11 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 export class PokedexComponent implements OnInit{
 
   //more information about the pokemon in the pages.
-  
+  @Output() pokemonName: string = '';
   pokemon: any[] = [];
   pokemonList: PokeIds[] = [];
   pokedex: Pokemon[] = [];
+  pokemonList2: PokeIds[] = [];
 
   constructor(public pokemonService: PokemonService) { }
 
@@ -28,6 +29,9 @@ export class PokedexComponent implements OnInit{
     this.pokedex = this.pokemonService.pokedex;
   }
 
+  updateViewingPokemon(pokemonName: string) {
+    this.pokemonName = pokemonName;
+  }
 }
 type PokeIds = {
   name: string,

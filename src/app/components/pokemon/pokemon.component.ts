@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
 import { PokemonService } from 'src/app/services/pokemon.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable, switchMap } from 'rxjs';
-
-//import { Pokemon } from 'src/app/objects/Pokemon';
+import { Pokemon } from 'src/app/interfaces/pokemon';
 
 @Component({
   selector: 'app-pokemon',
@@ -12,25 +11,29 @@ import { Observable, switchMap } from 'rxjs';
   styleUrls: ['./pokemon.component.css']
 })
 
-
+//passes through a name of a pokemon from the pokedex component to get detailed information about the
+//pokemon based on the button that you pushed.
 export class PokemonComponent implements OnInit {
+  isLoading: boolean = false;
+  @Input() pokemonName2: string = '';
+  currentPokemon: any = 0;
   pokemonName: string = '';
   pokemonImgUrl: string = '';
-  //pokemonId!: Observable<Pokemon>;
-  constructor(private pokemonService: PokemonService, private route: ActivatedRoute) { }
+
+  tableColumns: string[] = ["name", "url"]
+  constructor(private pokemonService: PokemonService, private route: ActivatedRoute) {
+    this.runPokemon();
+   }
   
   ngOnInit(): void {
-    // this.pokemonId$ = 
-    //   this.pokemonService.getPokemon(this.route.id).subscribe(res => {
-
-    //   }));
   }
 
-  getPokemon(id: string) {
-    this.pokemonService.getPokemonById(id).subscribe(res => {
-      console.log(res);
-      this.pokemonName = res.results.name;
+  runPokemon(): void {
+    this.pokemonName = this.route.snapshot.params['pokeNumber'];
+    this.pokemonService.getPokemonById(this.pokemonName).subscribe((res: any) => {
+      this.isLoading = true;
+      this.currentPokemon = res;
+      this.isLoading = false;
     });
   }
-
 }
