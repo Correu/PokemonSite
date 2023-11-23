@@ -10,6 +10,8 @@ import { Pokemon } from '../interfaces/pokemon';
 
 export class PokemonService {
 
+  //get pokemon by id
+  
   pokemonIds: PokeIds[] = [];
   pokedex: Pokemon[] = [];
 
