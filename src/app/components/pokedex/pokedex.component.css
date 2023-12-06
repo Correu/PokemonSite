@@ -1,0 +1,7 @@
+.pokedexSection {
+    min-height: 100vh;
+}
+
+.pokemonListSection {
+    overflow-y: auto;
+}

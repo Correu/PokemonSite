@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { PokedexList } from 'src/app/interfaces/pokedexList';
+import { Observable } from 'rxjs';
+import { Pokedex } from 'src/app/interfaces/pokedex';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +11,14 @@ export class PokedexService {
 
   constructor(private http:HttpClient) { }
 
-  //get pokedex based on type selection
+  //get list of pokedexs
+  public getPokedexList(): Observable<PokedexList> {
+    let url = 'https://pokeapi.co/api/v2/pokedex/';
+    return this.http.get<PokedexList>(url);
+  }
 
-  
+  public getIndividualPokdex(pokedex:string): Observable<Pokedex> {
+    let url = 'https://pokeapi.co/api/v2/pokemon/' + pokedex;
+    return this.http.get<Pokedex>(url);
+  }
 }

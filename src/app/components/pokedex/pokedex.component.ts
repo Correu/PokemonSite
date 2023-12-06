@@ -1,6 +1,8 @@
-import { Component, Injectable, OnInit, Output } from '@angular/core';
+import { Component, Injectable, OnInit, Output, Input } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
+import { PokedexList } from 'src/app/interfaces/pokedexList';
+import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
 
 @Component({
   selector: 'app-pokedex',
@@ -9,22 +11,41 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 })
 
 @Injectable()
-export class PokedexComponent implements OnInit{
+export class PokedexComponent implements OnInit {
+
+  //pass these values through to the next level on the page
+  //selected pokedex variable
+  @Input() selectedPokedex: string = '';
+  //selected pokemon variable
+  @Input() selectedPokemon: string = '';
 
   //more information about the pokemon in the pages.
   @Output() pokemonName: string = '';
   pokemon: any[] = [];
   pokemonList: PokeIds[] = [];
   pokedex: Pokemon[] = [];
-  pokemonList2: PokeIds[] = [];
+  
+  isLoading: boolean = true;
+  pokedexList!: PokedexList;
 
-  constructor(public pokemonService: PokemonService) { }
+  constructor(public pokemonService: PokemonService, public pokedexService: PokedexService) { }
 
-  ngOnInit(): void {
-    //methods to initialize
+  ngOnInit(): void {    
+    this.getPokedexList();
+    this.getPokemonList();
+  }
+
+  getPokedexList(): void {
+    this.pokedexService.getPokedexList().subscribe((res: any) => {
+      this.isLoading = true;
+      this.pokedexList = res;
+      this.isLoading = false;
+    })
+  }
+
+  getPokemonList(): void {
     this.pokemonService.getPokedex().subscribe((res:any) =>{
-      console.log(res);
-      this.pokemonList = res.results
+      this.pokemonList = res.results;
     });
     this.pokedex = this.pokemonService.pokedex;
   }

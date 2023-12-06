@@ -1,19 +1,38 @@
-<mat-grid-list cols="2" rowHeight="2:1">
-    <mat-grid-tile *ngFor="let pokemon of pokemonList">
-        <mat-card class="pokemonCard">
-            <mat-card-header>{{pokemon.name}}</mat-card-header>
-            <button mat-button [routerLink]="['pokemon', pokemon.name]">View Details</button>
-        </mat-card>
-    </mat-grid-tile>
-</mat-grid-list>
-<!-- <table mat-table [dataSource]="pokemonList" class="mat-elevation-z8">
-    <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
-        <td mat-cell *matCellDef="let element">{{element.name}}</td>
-    </ng-container>
-    <ng-container matColumnDef="url">
-        <th mat-header-cell *matHeaderCellDef>Url</th>
-        <td mat-cell *matCellDef="let element">{{element.url}}</td>
-      </ng-container>
-</table> -->
-<!-- <pokemonCard [pokemonName] = "{{pokemon.name}}"></pokemonCard> -->
+<!-- <div layout="row">
+    <div flex="">
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
+        </mat-list>
+    </div>
+    <div flex="">
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
+        </mat-list>
+    </div>
+    <div flex="">
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
+        </mat-list>
+    </div>
+</div> -->
+<div layout="row">
+    <mat-grid-list cols="3" rowHeight="100%" class="pokedexSection">
+        <mat-grid-tile>
+            <mat-list role="list">
+                <mat-list-item *ngFor="let pokedex of pokedexList.results"><button
+                        mat-button>{{pokedex.name}}</button></mat-list-item>
+            </mat-list>
+        </mat-grid-tile>
+        <mat-grid-tile class="pokemonListSection">
+            <mat-list role="list">
+                <mat-list-item *ngFor="let pokemon of pokemonList">{{pokemon.name}}</mat-list-item>
+            </mat-list>
+        </mat-grid-tile>
+        <mat-grid-tile>
+            <mat-list role="list">
+                <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
+            </mat-list>
+        </mat-grid-tile>
+    </mat-grid-list>
+</div>
+<p>{{selectedPokedex}}</p>

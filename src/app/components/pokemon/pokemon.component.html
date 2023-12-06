@@ -1,4 +1,6 @@
 <div *ngIf="!isLoading">
-    <h1>test</h1>
     <h1>{{currentPokemon.name}}</h1>
+    <img src="{{currentPokemon.sprites.front_default}}">
+    <p *ngFor="let ability of currentPokemon.abilities">{{ability.ability.name}}</p>
+    <button routerLink="" mat-button>Return to Pokedex</button>
 </div>

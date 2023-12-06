@@ -4,6 +4,8 @@ import { PokemonService } from 'src/app/services/pokemon.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable, switchMap } from 'rxjs';
 import { Pokemon } from 'src/app/interfaces/pokemon';
+import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
+import { PokedexList } from 'src/app/interfaces/pokedexList';
 
 @Component({
   selector: 'app-pokemon',
@@ -20,13 +22,17 @@ export class PokemonComponent implements OnInit {
   pokemonName: string = '';
   pokemonImgUrl: string = '';
 
+  pokedexList: PokedexList[] = [];
+
   tableColumns: string[] = ["name", "url"]
-  constructor(private pokemonService: PokemonService, private route: ActivatedRoute) {
+  constructor(private pokemonService: PokemonService, private pokedexService: PokedexService, private route: ActivatedRoute) {
     this.runPokemon();
    }
   
   ngOnInit(): void {
   }
+
+  
 
   runPokemon(): void {
     this.pokemonName = this.route.snapshot.params['pokeNumber'];
