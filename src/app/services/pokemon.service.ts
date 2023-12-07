@@ -28,7 +28,7 @@ export class PokemonService {
   }
 
   public getPokedex(): Observable<PokeIds[]> {
-    let url = 'https://pokeapi.co/api/v2/pokemon/?limit=100';
+    let url = 'https://pokeapi.co/api/v2/pokemon/?limit=151';
     return this.http.get<PokeIds[]>(url);
   }
 

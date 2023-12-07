@@ -1,0 +1,5 @@
+.mat-divider-vertical{
+    height: 100%;
+    width: 0px !important;
+    position: inherit !important;
+  }

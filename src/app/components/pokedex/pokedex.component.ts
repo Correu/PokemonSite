@@ -1,4 +1,4 @@
-import { Component, Injectable, OnInit, Output, Input } from '@angular/core';
+import { Component, Injectable, OnInit, Output, Input, ViewEncapsulation } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { PokedexList } from 'src/app/interfaces/pokedexList';
@@ -8,6 +8,7 @@ import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
   selector: 'app-pokedex',
   templateUrl: './pokedex.component.html',
   styleUrls: ['./pokedex.component.css'],
+  // encapsulation: ViewEncapsulation.None
 })
 
 @Injectable()

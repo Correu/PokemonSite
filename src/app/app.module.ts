@@ -10,6 +10,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatListModule } from '@angular/material/list';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import {MatDividerModule} from '@angular/material/divider';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -46,7 +47,8 @@ import { BattleComponent } from './components/battle/battle.component';
     MatTabsModule,
     MatTableModule,
     MatListModule,
-    ScrollingModule
+    ScrollingModule,
+    MatDividerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

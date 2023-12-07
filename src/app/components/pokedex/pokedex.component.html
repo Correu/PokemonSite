@@ -1,38 +1,33 @@
 <!-- <div layout="row">
-    <div flex="">
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokedex of pokemonList">{{pokedex.name}}</mat-list-item>
+        </mat-list>
         <mat-list role="list">
             <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
         </mat-list>
-    </div>
-    <div flex="">
         <mat-list role="list">
             <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
         </mat-list>
-    </div>
-    <div flex="">
-        <mat-list role="list">
-            <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
-        </mat-list>
-    </div>
 </div> -->
-<div layout="row">
-    <mat-grid-list cols="3" rowHeight="100%" class="pokedexSection">
-        <mat-grid-tile>
-            <mat-list role="list">
-                <mat-list-item *ngFor="let pokedex of pokedexList.results"><button
-                        mat-button>{{pokedex.name}}</button></mat-list-item>
-            </mat-list>
-        </mat-grid-tile>
-        <mat-grid-tile class="pokemonListSection">
-            <mat-list role="list">
-                <mat-list-item *ngFor="let pokemon of pokemonList">{{pokemon.name}}</mat-list-item>
-            </mat-list>
-        </mat-grid-tile>
-        <mat-grid-tile>
-            <mat-list role="list">
-                <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
-            </mat-list>
-        </mat-grid-tile>
-    </mat-grid-list>
+<mat-divider ></mat-divider>
+<div style="display: block;">
+<mat-grid-list cols="3" rowHeight="100%" gutterSize="100px">
+    <mat-grid-tile class="nonBootyDivider pokedexSection">
+        <mat-list role="list" >
+            <mat-list-item *ngFor="let pokedex of pokedexList.results"><button
+                    mat-button>{{pokedex.name}}</button></mat-list-item>
+        </mat-list>
+    </mat-grid-tile>
+    <mat-grid-tile rowspan="1" class="pokemonListSection nonBootyDivider">
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokemon of pokemonList">{{pokemon.name}}</mat-list-item>
+        </mat-list>
+    </mat-grid-tile>
+    <mat-grid-tile>
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokedex of pokedexList.results">{{pokedex.name}}</mat-list-item>
+        </mat-list>
+    </mat-grid-tile>
+</mat-grid-list>
 </div>
 <p>{{selectedPokedex}}</p>
