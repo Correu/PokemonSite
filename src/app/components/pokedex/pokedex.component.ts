@@ -31,6 +31,7 @@ export class PokedexComponent implements OnInit {
 
   constructor(public pokemonService: PokemonService, public pokedexService: PokedexService) { }
 
+  //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {    
     this.getPokedexList();
     this.getPokemonList();
@@ -49,6 +50,13 @@ export class PokedexComponent implements OnInit {
       this.pokemonList = res.results;
     });
     this.pokedex = this.pokemonService.pokedex;
+  }
+
+  getSpecificPokedex(specificPokedex: string): void {
+    this.pokedexService.getIndividualPokdex(specificPokedex).subscribe((res: any) => {
+      this.pokedexList = res.results;
+      this.pokemonList = res;
+    });
   }
 
   updateViewingPokemon(pokemonName: string) {

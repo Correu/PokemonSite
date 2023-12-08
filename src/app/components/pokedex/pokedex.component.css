@@ -2,24 +2,24 @@
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
-    /* display: none; */
+    display: none;
   }
 
-  ::-webkit-scrollbar-track {
+  /* ::-webkit-scrollbar-track {
     background: blue; 
-    /* display: none; */
+    display: none;
   }
 
   ::-webkit-scrollbar-thumb {
     background: red; 
     border-radius: 5px;
-    /* display: none; */
+    display: none;
   }
 
   ::-webkit-scrollbar-thumb:hover {
     background: green; 
-    /* display: none; */
-  }
+    display: none;
+  } */
 
 .pokedexSection {
     min-height: 100vh;

@@ -18,7 +18,7 @@ export class PokedexService {
   }
 
   public getIndividualPokdex(pokedex:string): Observable<Pokedex> {
-    let url = 'https://pokeapi.co/api/v2/pokemon/' + pokedex;
+    let url = 'https://pokeapi.co/api/v2/pokedex/' + pokedex;
     return this.http.get<Pokedex>(url);
   }
 }
