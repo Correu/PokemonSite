@@ -3,6 +3,7 @@ import { PokemonService } from 'src/app/services/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { PokedexList } from 'src/app/interfaces/pokedexList';
 import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
+import { PokemonEntry } from 'src/app/interfaces/pokedex';
 
 @Component({
   selector: 'app-pokedex',
@@ -17,17 +18,21 @@ export class PokedexComponent implements OnInit {
   //pass these values through to the next level on the page
   //selected pokedex variable
   @Input() selectedPokedex: string = '';
-  //selected pokemon variable
-  @Input() selectedPokemon: string = '';
 
   //more information about the pokemon in the pages.
-  @Output() pokemonName: string = '';
+  @Output() pokemonName: string = 'test';
   pokemon: any[] = [];
   pokemonList: PokeIds[] = [];
   pokedex: Pokemon[] = [];
   
   isLoading: boolean = true;
   pokedexList!: PokedexList;
+
+  isPostClick: boolean = false;
+  selectedPokemonList: PokemonEntry[] = [];
+  selectedPokemon: any = this.pokemonService.getPokemonById('bulbasaur').subscribe((res: any) => {
+    this.selectedPokemon = res;  
+  });
 
   constructor(public pokemonService: PokemonService, public pokedexService: PokedexService) { }
 
@@ -53,14 +58,19 @@ export class PokedexComponent implements OnInit {
   }
 
   getSpecificPokedex(specificPokedex: string): void {
+    this.isPostClick = true;
     this.pokedexService.getIndividualPokdex(specificPokedex).subscribe((res: any) => {
-      this.pokedexList = res.results;
-      this.pokemonList = res;
+      //this.pokedexList = res.results;
+      console.log(res.pokemon_entries);
+      this.selectedPokemonList = res.pokemon_entries;
     });
   }
 
   updateViewingPokemon(pokemonName: string) {
-    this.pokemonName = pokemonName;
+    this.pokemonService.getPokemonById(pokemonName).subscribe((res: any) => {
+      this.selectedPokemon = res;
+    })
+    //this.pokemonName = pokemonName;
   }
 }
 type PokeIds = {

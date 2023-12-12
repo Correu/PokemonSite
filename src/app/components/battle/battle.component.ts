@@ -1,5 +1,6 @@
 import { Component, Injectable, OnInit } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon.service';
+import { Pokemon } from 'src/app/interfaces/pokemon';
 
 @Component({
   selector: 'app-battle',
@@ -25,34 +26,14 @@ export class BattleComponent implements OnInit {
 
   ngOnInit(): void {
     //methods to initialize
-    //this.buildTeam();
+    this.buildTeam();
   }
 
   //hit a random 6 pokemon between 1-151
   //assign them to each team
-  
-}
-
-
-type Team = {
-  pokemon: Pokemon;   
-}
-
-type Pokemon = {
-  pokemonId: number;
-  pokemonName: string;
-  pokemonUrl: string;
-  pokemonImageUrl: string;
-  pokemonStats: {name: string, url: string};
-}
-
-type Stats = {
-  baseStat: number;
-  effort: number;
-  stat: Array<Stat>;
-}
-
-type Stat = {
-  statName: string;
-  statUrl: string;
+  private buildTeam(): void {
+    this.pokemonService.getPokemonById(Math.floor(Math.random() * 1253).toString()).subscribe((res: any)=> {
+      this.playerTeam.push(res);
+    });
+  }
 }

@@ -17,10 +17,6 @@ export class PokemonService {
 
   constructor(private http:HttpClient) {   }
 
-  async getPokemon(name:string): Promise<Observable<Pokemon>> {
-    return this.http.get<Pokemon>(name);
-  }
-
   public getPokemonById(id: string): Observable<Pokemon> {
     let url = 'https://pokeapi.co/api/v2/pokemon/' + id;
     //console.log(url);

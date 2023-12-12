@@ -4,10 +4,10 @@
 <mat-grid-list cols="2" rowHeight="2:1">
     <mat-grid-tile *ngFor="let poke of playerTeam">
         <mat-card>
-            <mat-card-header>{{poke.pokemonName}}</mat-card-header>
-            <img src="{{poke.pokemonImageUrl}}">
+            <mat-card-header>{{poke.name}}</mat-card-header>
+            <img src="{{poke.sprites.front_default}}" width="50px" height="50px">
             <mat-card-content>
-                <h1>{{poke.pokemonStats}}</h1>
+                <h1 *ngFor="let stat of poke.stats">{{stat.stat.name}}</h1>
             </mat-card-content>
         </mat-card>
     </mat-grid-tile>

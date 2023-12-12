@@ -31,8 +31,9 @@
     min-height: 100vh;
 }
 
-.mat-grid-tile-content {
-    display: block !important;
+.pokemonSection {
+  overflow-y: auto;
+  min-height: 100vh;
 }
 
 .nonBootyDivider {

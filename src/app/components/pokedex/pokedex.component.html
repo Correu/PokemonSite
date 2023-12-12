@@ -1,21 +1,25 @@
-<mat-divider></mat-divider>
 <div>
     <mat-grid-list cols="3" rowHeight="100%">
         <mat-grid-tile class="pokedexSection nonBootyDivider">
             <mat-list role="list">
                 <mat-list-item *ngFor="let pokedex of pokedexList.results"><button
-                        mat-button (click)="getSpecificPokedex(pokedex.name);">{{pokedex.name}}</button></mat-list-item>
+                        mat-button (click)="getSpecificPokedex(pokedex.name)">{{pokedex.name}}</button></mat-list-item>
             </mat-list>
         </mat-grid-tile>
-        <mat-grid-tile class="pokemonListSection nonBootyDivider">
+        <mat-grid-tile class="pokemonListSection nonBootyDivider" *ngIf="!isPostClick">
             <mat-list role="list">
-                <mat-list-item *ngFor="let pokemon of pokemonList">{{pokemon.name}}</mat-list-item>
+                <mat-list-item *ngFor="let pokemon of pokemonList" (click)="updateViewingPokemon(pokemon.name)">{{pokemon.name}}</mat-list-item>
             </mat-list>
         </mat-grid-tile>
-        <mat-grid-tile class="pokemonListSection nonBootyDivider">
+        <mat-grid-tile class="pokemonListSection nonBootyDivider" *ngIf="isPostClick">
             <mat-list role="list">
-                <mat-list-item *ngFor="let pokedex of pokemonList">{{pokedex.name}}</mat-list-item>
+                <mat-list-item *ngFor="let pokemon of selectedPokemonList" (click)="updateViewingPokemon(pokemon.pokemon_species.name)">{{pokemon.pokemon_species.name}}</mat-list-item>
             </mat-list>
+        </mat-grid-tile>
+        <mat-grid-tile class="pokemonSection nonBootyDivider">
+            <img src="{{selectedPokemon.sprites.front_default}}">
+            <p>{{selectedPokemon.name}}</p>
+            <p *ngFor="let ability of selectedPokemon.abilities">{{ability.ability.name}}</p>
         </mat-grid-tile>
     </mat-grid-list>
 </div>
