@@ -17,7 +17,7 @@ export class BattleComponent implements OnInit {
   //turn based
 
   playerTeam: Pokemon[] = [];
-  opponentTeam: Pokemon[] = [];
+  enemyTeam: Pokemon[] = [];
   //pokeIds: PokeIds[] = [];
 
 
@@ -26,14 +26,25 @@ export class BattleComponent implements OnInit {
 
   ngOnInit(): void {
     //methods to initialize
-    this.buildTeam();
+    this.buildPlayerTeam();
+    this.buildEnemyTeam();
   }
 
   //hit a random 6 pokemon between 1-151
   //assign them to each team
-  private buildTeam(): void {
-    this.pokemonService.getPokemonById(Math.floor(Math.random() * 1253).toString()).subscribe((res: any)=> {
-      this.playerTeam.push(res);
-    });
+  private buildPlayerTeam(): void {
+    for (let i = 0; i < 6; i++) {
+      this.pokemonService.getPokemonById(Math.floor(Math.random() * 1010).toString()).subscribe((res: any) => {
+        this.playerTeam.push(res);
+      });
+    }
+  }
+
+  private buildEnemyTeam(): void {
+    for(let i = 0; i < 6; i++) {
+      this.pokemonService.getPokemonById(Math.floor(Math.random() * 1010).toString()).subscribe((res: any) => {
+        this.enemyTeam.push(res);
+      });
+    }
   }
 }

@@ -1,5 +1,13 @@
-.mat-divider-vertical{
-    height: 100%;
-    width: 0px !important;
-    position: inherit !important;
-  }
+.mat-divider-vertical {
+  height: 100%;
+  width: 0px !important;
+  position: inherit !important;
+}
+
+.circle-outline {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
+}
