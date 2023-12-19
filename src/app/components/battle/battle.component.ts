@@ -18,7 +18,6 @@ export class BattleComponent implements OnInit {
 
   playerTeam: Pokemon[] = [];
   enemyTeam: Pokemon[] = [];
-  //pokeIds: PokeIds[] = [];
 
 
 
@@ -30,8 +29,7 @@ export class BattleComponent implements OnInit {
     this.buildEnemyTeam();
   }
 
-  //hit a random 6 pokemon between 1-151
-  //assign them to each team
+  //assign them to playerteam
   private buildPlayerTeam(): void {
     for (let i = 0; i < 6; i++) {
       this.pokemonService.getPokemonById(Math.floor(Math.random() * 1010).toString()).subscribe((res: any) => {
@@ -40,6 +38,7 @@ export class BattleComponent implements OnInit {
     }
   }
 
+  //assigns the enemyteam
   private buildEnemyTeam(): void {
     for(let i = 0; i < 6; i++) {
       this.pokemonService.getPokemonById(Math.floor(Math.random() * 1010).toString()).subscribe((res: any) => {
@@ -47,4 +46,7 @@ export class BattleComponent implements OnInit {
       });
     }
   }
+
+  //gen 1 & 2 hp calculation
+  //hp = [(((Base + DV) * 2 + [sqrt(statexp)/4]) * level)/100] + Level + 10
 }

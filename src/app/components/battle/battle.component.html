@@ -2,6 +2,12 @@
     <h1 style="text-align: center;">Pokemon Battle</h1>
 </div>
 <p>PLAYER TEAM</p>
+<mat-grid-list cols="2" rowHeight="25px">
+    <mat-grid-tile>Fight</mat-grid-tile>
+    <mat-grid-tile>Pokemon</mat-grid-tile>
+    <mat-grid-tile>Bag</mat-grid-tile>
+    <mat-grid-tile>Run</mat-grid-tile>
+</mat-grid-list>
 <mat-icon *ngFor="let pokeball of playerTeam" fontIcon="circle"></mat-icon>
 <mat-grid-list cols="2" rowHeight="2:1">
     <mat-grid-tile *ngFor="let poke of playerTeam">
@@ -9,7 +15,6 @@
             <mat-card-header>
                 <mat-card-title>{{poke.name}}</mat-card-title>
             </mat-card-header>
-            <mat-icon class="circle-outline" fontIcon="circle"></mat-icon>
             <img src="{{poke.sprites.front_default}}" width="75px" height="75px">
             <mat-card-content>
                 <h1 *ngFor="let stat of poke.stats">{{stat.stat.name}} {{stat.base_stat}}</h1>
@@ -27,7 +32,6 @@
             </mat-card-header>
             <img src="{{poke.sprites.front_default}}" width="75px" height="75px">
             <mat-card-content>
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png">
                 <h1 *ngFor="let stat of poke.stats">{{stat.stat.name}} {{stat.base_stat}}</h1>
             </mat-card-content>
         </mat-card>
