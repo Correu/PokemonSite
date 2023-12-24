@@ -1,44 +1,33 @@
-
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-    display: none;
-  }
-
-  /* ::-webkit-scrollbar-track {
-    background: blue; 
-    display: none;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: red; 
-    border-radius: 5px;
-    display: none;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: green; 
-    display: none;
-  } */
+  width: 10px;
+  height: 10px;
+  display: none;
+}
 
 .pokedexSection {
-    min-height: 100vh;
-    overflow-y: auto;
+  min-height: 100vh;
+  overflow-y: auto;
 }
 
 .pokemonListSection {
-    overflow-y: auto;
-    min-height: 100vh;
+  overflow-y: auto;
+  min-height: 100vh;
 }
 
 .pokemonSection {
   overflow-y: auto;
   min-height: 100vh;
+  text-align: center;
 }
 
 .nonBootyDivider {
-    border-right-width: 2px;
-    border-right-color: black;
-    border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: black;
+  border-right-style: solid;
 }
 
+.header-style {
+  font-size: large;
+  font-weight: bold;
+  text-align: center;
+}
