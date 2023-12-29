@@ -18,14 +18,31 @@
             <p class="header-style">Pokemon Selection</p>
             <mat-list role="list">
                 <mat-list-item *ngFor="let pokemon of selectedPokemonList"><button mat-button
-                    (click)="updateViewingPokemon(pokemon.pokemon_species.name)">{{pokemon.pokemon_species.name}}</button></mat-list-item>
+                        (click)="updateViewingPokemon(pokemon.pokemon_species.name)">{{pokemon.pokemon_species.name}}</button></mat-list-item>
             </mat-list>
         </mat-grid-tile>
         <mat-grid-tile class="pokemonSection nonBootyDivider">
             <p class="header-style">Pokemon Details</p>
             <img src="{{selectedPokemon.sprites.front_default}}">
             <p>{{selectedPokemon.name}}</p>
-            <p *ngFor="let ability of selectedPokemon.abilities">{{ability.ability.name}}</p>
+            <mat-grid-list cols="2">
+                <mat-grid-tile class="pokeDetailSection">
+                    <p class="header-style">Abilities</p>
+                    <mat-list *ngFor="let ability of selectedPokemon.abilities">{{ability.ability.name}}</mat-list>
+                </mat-grid-tile>
+                <mat-grid-tile class="pokeDetailSection">
+                    <p class="header-style">Moves</p>
+                    <mat-list *ngFor="let move of selectedPokemon.moves">{{move.move.name}}</mat-list>
+                </mat-grid-tile>
+                <mat-grid-tile class="pokeDetailSection">
+                    <p class="header-style">Stats</p>
+                    <p *ngFor="let stat of selectedPokemon.stats">{{stat.stat.name}} {{stat.base_stat}}</p>
+                </mat-grid-tile>
+                <mat-grid-tile class="pokeDetailSection">
+                    <p class="header-style">Types</p>
+                    <p *ngFor="let type of selectedPokemon.types">{{type.type.name}}</p>
+                </mat-grid-tile>
+            </mat-grid-list>
         </mat-grid-tile>
     </mat-grid-list>
 </div>
