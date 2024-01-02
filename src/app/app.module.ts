@@ -23,6 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { BattleComponent } from './components/battle/battle.component';
+import { EncounterComponent } from './components/encounter/encounter.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { BattleComponent } from './components/battle/battle.component';
     PokemonComponent,
     PokedexComponent,
     NavigationComponent,
-    BattleComponent
+    BattleComponent,
+    EncounterComponent
   ],
   imports: [
     BrowserModule,

@@ -1,9 +1,9 @@
 import { Component, Injectable, OnInit, Output, Input, ViewEncapsulation } from '@angular/core';
-import { PokemonService } from 'src/app/services/pokemon.service';
+import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
-import { PokedexList } from 'src/app/interfaces/pokedexList';
 import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
 import { PokemonEntry } from 'src/app/interfaces/pokedex';
+import { DefaultList } from 'src/app/interfaces/defaultList';
 
 @Component({
   selector: 'app-pokedex',
@@ -26,7 +26,7 @@ export class PokedexComponent implements OnInit {
   pokedex: Pokemon[] = [];
   
   isLoading: boolean = true;
-  pokedexList!: PokedexList;
+  pokedexList!: DefaultList;
 
   isPostClick: boolean = false;
   selectedPokemonList: PokemonEntry[] = [];
