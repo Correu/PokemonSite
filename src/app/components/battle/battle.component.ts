@@ -11,6 +11,10 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 @Injectable()
 export class BattleComponent implements OnInit {
 
+  //boolean temporarily to hold state
+  //NgRx or NGXS for state management?
+  initLoad! : boolean;
+
   //two random teams of 6 pokemon
   //each pokemon has a level and a 
   //each pokemon has 4 moves random up to the current level they are at
@@ -21,13 +25,20 @@ export class BattleComponent implements OnInit {
 
 
 
-  constructor(private pokemonService: PokemonService) { }
+  constructor(private pokemonService: PokemonService) {
+    
+  }
 
   ngOnInit(): void {
-    //methods to initialize
-    this.buildPlayerTeam();
-    this.buildEnemyTeam();
+    if(!this.initLoad) {
+      this.buildPlayerTeam();
+      this.buildEnemyTeam();
+    }    
   }
+
+  //attack the opponent
+  //open a bag
+  //change pokemon
 
   //assign them to playerteam
   private buildPlayerTeam(): void {
@@ -36,11 +47,12 @@ export class BattleComponent implements OnInit {
         this.playerTeam.push(res);
       });
     }
+    this.initLoad = true;
   }
 
   //assigns the enemyteam
   private buildEnemyTeam(): void {
-    for(let i = 0; i < 6; i++) {
+    for (let i = 0; i < 6; i++) {
       this.pokemonService.getPokemonById(Math.floor(Math.random() * 1010).toString()).subscribe((res: any) => {
         this.enemyTeam.push(res);
       });

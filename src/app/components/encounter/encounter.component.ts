@@ -12,7 +12,7 @@ import { EncounterService } from 'src/app/services/encounter/encounter.service';
 export class EncounterComponent implements OnInit {
 
   locations!: DefaultList;
-  locationAreas!: LocationArea;
+  locationAreas!: DefaultList;
 
   constructor(public encounterService: EncounterService) {
 
@@ -20,6 +20,7 @@ export class EncounterComponent implements OnInit {
 
   ngOnInit(): void {
     this.getLocations();
+    this.getLocationAreas();
   }
 
   getLocations(): void {
