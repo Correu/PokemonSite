@@ -11,9 +11,13 @@ import { Pokemon } from '../../interfaces/pokemon';
 export class PokemonService {
 
   //get pokemon by id
+  battleLoad!: boolean;
   
   pokemonIds: PokeIds[] = [];
   pokedex: Pokemon[] = [];
+
+  playerTeam: Pokemon[] = [];
+  enemyTeam: Pokemon[] = [];
 
   constructor(private http:HttpClient) {   }
 

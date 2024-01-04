@@ -11,52 +11,47 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 @Injectable()
 export class BattleComponent implements OnInit {
 
-  //boolean temporarily to hold state
-  //NgRx or NGXS for state management?
-  initLoad! : boolean;
 
-  //two random teams of 6 pokemon
-  //each pokemon has a level and a 
-  //each pokemon has 4 moves random up to the current level they are at
-  //turn based
-
-  playerTeam: Pokemon[] = [];
-  enemyTeam: Pokemon[] = [];
-
-
+  //assign the values to display, carried from the service.
+  playerTeam: Pokemon[] = this.pokemonService.playerTeam;
+  enemyTeam: Pokemon[] = this.pokemonService.enemyTeam;
 
   constructor(private pokemonService: PokemonService) {
-    
+      
   }
 
   ngOnInit(): void {
-    if(!this.initLoad) {
+    if(!this.pokemonService.battleLoad) {
       this.buildPlayerTeam();
       this.buildEnemyTeam();
     }    
   }
 
-  //attack the opponent
-  //open a bag
-  //change pokemon
-
   //assign them to playerteam
   private buildPlayerTeam(): void {
     for (let i = 0; i < 6; i++) {
       this.pokemonService.getPokemonById(Math.floor(Math.random() * 1010).toString()).subscribe((res: any) => {
-        this.playerTeam.push(res);
+        this.pokemonService.playerTeam.push(res);
       });
     }
-    this.initLoad = true;
+
+    //remove moves to get only 4 within a specific level
+    this.pokemonService.playerTeam.at(0)?.moves.at(0)
+
+    this.pokemonService.battleLoad = true;
   }
 
   //assigns the enemyteam
   private buildEnemyTeam(): void {
     for (let i = 0; i < 6; i++) {
       this.pokemonService.getPokemonById(Math.floor(Math.random() * 1010).toString()).subscribe((res: any) => {
-        this.enemyTeam.push(res);
+        this.pokemonService.enemyTeam.push(res);
       });
     }
+  }
+
+  private changeMoveset(pokemon: Pokemon[] ): void {
+    //pokemon.filter()
   }
 
   //gen 1 & 2 hp calculation
