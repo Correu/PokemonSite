@@ -11,6 +11,10 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 @Injectable()
 export class BattleComponent implements OnInit {
 
+  //implement a bag of items to select from to heal statuses in battle
+  //implement change pokemon out functionality
+  //implement level select to start the match
+  //
 
   //assign the values to display, carried from the service.
   playerTeam: Pokemon[] = this.pokemonService.playerTeam;
@@ -35,10 +39,13 @@ export class BattleComponent implements OnInit {
       });
     }
 
+    console.log(this.pokemonService.playerTeam.at(1)?.moves.length);
     //remove moves to get only 4 within a specific level
-    this.pokemonService.playerTeam.at(0)?.moves.at(0)
-
+    this.changeMoveset(this.pokemonService.playerTeam);
+    console.log(this.pokemonService.playerTeam.at(1)?.moves.length);
     this.pokemonService.battleLoad = true;
+
+    this.playerTeam = this.pokemonService.playerTeam;
   }
 
   //assigns the enemyteam
@@ -51,7 +58,7 @@ export class BattleComponent implements OnInit {
   }
 
   private changeMoveset(pokemon: Pokemon[] ): void {
-    //pokemon.filter()
+    this.pokemonService.playerTeam.at(0)?.moves.filter((move) => move.version_group_details.at(0)!.level_learned_at > 50);
   }
 
   //gen 1 & 2 hp calculation

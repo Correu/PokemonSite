@@ -21,9 +21,20 @@ export class PokemonService {
 
   constructor(private http:HttpClient) {   }
 
+  //returns original data from the endpoints
   public getPokemonById(id: string): Observable<Pokemon> {
     let url = 'https://pokeapi.co/api/v2/pokemon/' + id;
     //console.log(url);
+    return this.http.get<Pokemon>(url);
+  }
+
+  //get the pokemon and return an array to of pokemon adjusted to handle a battle
+  //i.e. changes stats based on level and randomly selects 4 moves within a range selected.
+  public getPokemonForBattle(id: string): Observable<Pokemon> {
+    //remove all but 4 moves
+    //calculate skills based on a selected level
+    //add pp to the moves for limits.
+    let url = 'https://pokeapi.co/api/v2/pokemon/' + id;
     return this.http.get<Pokemon>(url);
   }
 
