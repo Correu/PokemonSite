@@ -1,6 +1,8 @@
 import { Component, Injectable, OnInit } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
+import { MatDialog } from '@angular/material/dialog';
+import { BattleDialogComponent } from '../battle-dialog/battle-dialog.component';
 
 @Component({
   selector: 'app-battle',
@@ -20,15 +22,24 @@ export class BattleComponent implements OnInit {
   playerTeam: Pokemon[] = this.pokemonService.playerTeam;
   enemyTeam: Pokemon[] = this.pokemonService.enemyTeam;
 
-  constructor(private pokemonService: PokemonService) {
+  constructor(private pokemonService: PokemonService, private dialog: MatDialog) {
       
   }
 
   ngOnInit(): void {
     if(!this.pokemonService.battleLoad) {
+      this.intialDialog();
       this.buildPlayerTeam();
       this.buildEnemyTeam();
     }    
+  }
+
+  private intialDialog() {
+    const dialogRef = this.dialog.open(BattleDialogComponent);
+
+    dialogRef.afterClosed().subscribe( result => {
+      console.log('close result: ${result}');
+    });
   }
 
   //assign them to playerteam

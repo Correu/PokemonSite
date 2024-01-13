@@ -13,7 +13,7 @@ export class PokemonService {
   //get pokemon by id
   battleLoad!: boolean;
   
-  pokemonIds: PokeIds[] = [];
+  pokemonIds: PokeIds[] = []; 
   pokedex: Pokemon[] = [];
 
   playerTeam: Pokemon[] = [];

@@ -10,8 +10,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatListModule } from '@angular/material/list';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatIconModule} from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -24,6 +25,7 @@ import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { BattleComponent } from './components/battle/battle.component';
 import { EncounterComponent } from './components/encounter/encounter.component';
+import { BattleDialogComponent } from './components/battle-dialog/battle-dialog.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +34,8 @@ import { EncounterComponent } from './components/encounter/encounter.component';
     PokedexComponent,
     NavigationComponent,
     BattleComponent,
-    EncounterComponent
+    EncounterComponent,
+    BattleDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -52,7 +55,8 @@ import { EncounterComponent } from './components/encounter/encounter.component';
     MatListModule,
     ScrollingModule,
     MatDividerModule,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [AppComponent]
