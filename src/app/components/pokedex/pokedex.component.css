@@ -7,6 +7,15 @@
 .pokedexSection {
   min-height: 100vh;
   overflow-y: auto;
+  background-image: url('src\assets\images\kanto.jpg');
+  /* background-color: blue; */
+}
+
+.pokedexSection2 {
+  min-height: 100vh;
+  overflow-y: auto;
+  background-image: url('src\assets\images\hoenn.jpg');
+  /* background-color: blue; */
 }
 
 .pokemonListSection {
@@ -20,7 +29,15 @@
   text-align: center;
 }
 
-.nonBootyDivider {
+.pokedexHeaderStyle {
+  font-size:xx-large;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  border: blueviolet;
+}
+
+.customSectionDivider {
   border-right-width: 2px;
   border-right-color: black;
   border-right-style: solid;

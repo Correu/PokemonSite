@@ -15,6 +15,10 @@ import { DefaultList } from 'src/app/interfaces/defaultList';
 @Injectable()
 export class PokedexComponent implements OnInit {
 
+  background: string = "kanto";
+
+  isHoveringPokemon: boolean = false;
+
   //pass these values through to the next level on the page
   //selected pokedex variable
   @Input() selectedPokedex: string = '';
@@ -40,6 +44,10 @@ export class PokedexComponent implements OnInit {
   ngOnInit(): void {    
     this.getPokedexList();
     this.getPokemonList();
+  }
+
+  setBackground(): void {
+    this.isHoveringPokemon = !this.isHoveringPokemon
   }
 
   getPokedexList(): void {

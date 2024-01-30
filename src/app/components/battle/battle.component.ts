@@ -16,12 +16,12 @@ export class BattleComponent implements OnInit {
   //implement a bag of items to select from to heal statuses in battle
   //implement change pokemon out functionality
   //implement level select to start the match
-  //
+  
 
   //assign the values to display, carried from the service.
   playerTeam: Pokemon[] = this.pokemonService.playerTeam;
   enemyTeam: Pokemon[] = this.pokemonService.enemyTeam;
-
+  
   constructor(private pokemonService: PokemonService, private dialog: MatDialog) {
       
   }
@@ -50,10 +50,10 @@ export class BattleComponent implements OnInit {
       });
     }
 
-    console.log(this.pokemonService.playerTeam.at(1)?.moves.length);
+    console.log(this.pokemonService.playerTeam.at(1)?.moves);
     //remove moves to get only 4 within a specific level
     this.changeMoveset(this.pokemonService.playerTeam);
-    console.log(this.pokemonService.playerTeam.at(1)?.moves.length);
+    console.log(this.pokemonService.playerTeam.at(1)?.moves);
     this.pokemonService.battleLoad = true;
 
     this.playerTeam = this.pokemonService.playerTeam;
