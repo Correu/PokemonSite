@@ -9,6 +9,11 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: PokemonSite
+  AZURE_WEBAPP_PACKAGE_PATH: 'src'
+  NODE_VERSION: '18.x'
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
