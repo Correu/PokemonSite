@@ -11,7 +11,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: pokedexdemo
-  AZURE_WEBAPP_PACKAGE_PATH: 'dist/pokemon-site'
+  AZURE_WEBAPP_PACKAGE_PATH: '/src'
   NODE_VERSION: '18.x'
  
 jobs:
@@ -63,5 +63,5 @@ jobs:
         with:
           app-name: 'pokedexdemo'
           slot-name: 'Production'
-          package: .
+          package: ${{ secrets.AZURE_WEBAPP_PACKAGE_PATH}}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3BF9D8DA9E614671A740682D926156E0 }}
