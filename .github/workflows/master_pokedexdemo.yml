@@ -1,66 +1,43 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+name: Angular App CI/CD
 
-name: Build and deploy Node.js app to Azure Web App - pokedexdemo
+trigger:
+- main
 
-on:
-  push:
-    branches:
-      - master
-  workflow_dispatch:
+pool:
+  vmImage: 'ubuntu-latest'
 
-env:
-  AZURE_WEBAPP_NAME: pokedexdemo
-  AZURE_WEBAPP_PACKAGE_PATH: 'dist/pokemon-site'
-  NODE_VERSION: '18.x'
- 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.x'
+  displayName: 'Install Node.js'
 
-    steps:
-      - uses: actions/checkout@v4
+- script: |
+    npm install -g @angular/cli
+    npm ci
+  displayName: 'Install Angular CLI and dependencies'
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
+- script: |
+    npm run build -- --configuration=production
+  displayName: 'Build Angular App'
 
-      - name: npm install, build, and test
-        run: |
-          npm ci --force
-          npm run build --if-present
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/dist/pokemon-site'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  displayName: 'Copy built files to staging directory'
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'angular-app'
+  displayName: 'Publish Artifact'
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: node-app
-          path: release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'pokedexdemo'
-          slot-name: 'Production'
-          package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3BF9D8DA9E614671A740682D926156E0 }}
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '<AzureSubscription>'
+    appName: '<YourWebAppName>'
+    package: '$(Build.ArtifactStagingDirectory)/angular-app'
+    deploymentMethod: 'zipDeploy'
+    enableCustomDeployment: true
+  displayName: 'Deploy to Azure Web App'
