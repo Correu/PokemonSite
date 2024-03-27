@@ -63,5 +63,5 @@ jobs:
         with:
           app-name: 'pokedexdemo'
           slot-name: 'Production'
-          package: ${{ secrets.AZURE_WEBAPP_PACKAGE_PATH}}
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3BF9D8DA9E614671A740682D926156E0 }}
