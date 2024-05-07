@@ -38,7 +38,7 @@ export class BattleComponent implements OnInit {
     const dialogRef = this.dialog.open(BattleDialogComponent);
 
     dialogRef.afterClosed().subscribe( result => {
-      console.log('close result: ${result}');
+      console.log(result);
     });
   }
 

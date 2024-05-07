@@ -10,6 +10,10 @@ export class BattleDialogComponent {
     form: FormGroup = new FormGroup({
       level: new FormControl(new Level(0)),
     });
+
+    Submit() {
+      console.log('test');
+    }
 }
 
 export class Level {
