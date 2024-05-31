@@ -26,6 +26,7 @@ import { NavigationComponent } from './components/navigation/navigation.componen
 import { BattleComponent } from './components/battle/battle.component';
 import { EncounterComponent } from './components/encounter/encounter.component';
 import { BattleDialogComponent } from './components/battle-dialog/battle-dialog.component';
+import { MoveDialogComponent } from './components/move-dialog/move-dialog.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { BattleDialogComponent } from './components/battle-dialog/battle-dialog.
     NavigationComponent,
     BattleComponent,
     EncounterComponent,
-    BattleDialogComponent
+    BattleDialogComponent,
+    MoveDialogComponent
   ],
   imports: [
     BrowserModule,
