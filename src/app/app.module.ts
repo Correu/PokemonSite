@@ -25,8 +25,9 @@ import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { BattleComponent } from './components/battle/battle.component';
 import { EncounterComponent } from './components/encounter/encounter.component';
-import { BattleDialogComponent } from './components/battle-dialog/battle-dialog.component';
-import { MoveDialogComponent } from './components/move-dialog/move-dialog.component';
+import { BattleDialogComponent } from './dialogs/battle-dialog/battle-dialog.component';
+import { MoveDialogComponent } from './dialogs/move-dialog/move-dialog.component';
+import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { MoveDialogComponent } from './components/move-dialog/move-dialog.compon
     BattleComponent,
     EncounterComponent,
     BattleDialogComponent,
-    MoveDialogComponent
+    MoveDialogComponent,
+    PokedexInstructionDialogComponent
   ],
   imports: [
     BrowserModule,

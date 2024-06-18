@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Pokemon } from '../../interfaces/pokemon';
+import { Move } from '../../interfaces/move';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,10 @@ import { Pokemon } from '../../interfaces/pokemon';
 
 export class PokemonService {
 
-  //get pokemon by id
+  //battle page boolean
   battleLoad!: boolean;
+  //pokedex page boolean
+  pokedexLoad!: boolean;
   
   pokemonIds: PokeIds[] = []; 
   pokedex: Pokemon[] = [];
@@ -49,6 +52,11 @@ export class PokemonService {
 
   public getPokeIdList() {
     return this.pokemonIds;
+  }
+
+  public getMove(name: string): Observable<Move> {
+    let url = 'https://pokeapi.co/api/v2/move/' + name;
+    return this.http.get<Move>(url);
   }
 }
 

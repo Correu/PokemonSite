@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MoveDialogComponent } from '../move-dialog/move-dialog.component';
+import { MoveDialogComponent } from '../../dialogs/move-dialog/move-dialog.component';
 
 @Component({
   selector: 'app-pokemon',
@@ -21,7 +21,9 @@ export class PokemonComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  private loadMoveDialog() {
-    const movedialog = this.dialog.open(MoveDialogComponent);
+  loadMoveDialog(name: string) {
+    this.dialog.open(MoveDialogComponent, {
+      data: { name }
+    });
   }
 }

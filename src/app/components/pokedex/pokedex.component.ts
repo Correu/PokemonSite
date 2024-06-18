@@ -4,6 +4,8 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
 import { PokemonEntry } from 'src/app/interfaces/pokedex';
 import { DefaultList } from 'src/app/interfaces/defaultList';
+import { PokedexInstructionDialogComponent } from 'src/app/dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-pokedex',
@@ -15,9 +17,12 @@ import { DefaultList } from 'src/app/interfaces/defaultList';
 @Injectable()
 export class PokedexComponent implements OnInit {
 
+  //page controll variables
+  isHoveringPokemon: boolean = false;
+  isLoading: boolean = true;
+
   background: string = "kanto";
 
-  isHoveringPokemon: boolean = false;
 
   //pass these values through to the next level on the page
   //selected pokedex variable
@@ -28,22 +33,29 @@ export class PokedexComponent implements OnInit {
   pokemon: any[] = [];
   pokemonList: PokeIds[] = [];
   pokedex: Pokemon[] = [];
-  
-  isLoading: boolean = true;
+
   pokedexList!: DefaultList;
 
   isPostClick: boolean = false;
   selectedPokemonList: PokemonEntry[] = [];
   selectedPokemon: any = this.pokemonService.getPokemonById('bulbasaur').subscribe((res: any) => {
-    this.selectedPokemon = res;  
+    this.selectedPokemon = res;
   });
 
-  constructor(public pokemonService: PokemonService, public pokedexService: PokedexService) { }
+  constructor(public pokemonService: PokemonService, public pokedexService: PokedexService, public dialog: MatDialog) { }
 
   //initially load the page to the first pokedex (national dex)
-  ngOnInit(): void {    
+  ngOnInit(): void {
+    if (!this.pokemonService.pokedexLoad) {
+      this.instructionDialog();
+    }
     this.getPokedexList();
     this.getPokemonList();
+  }
+
+  private instructionDialog() {
+    const dialogRef = this.dialog.open(PokedexInstructionDialogComponent);
+    this.pokemonService.pokedexLoad = true;
   }
 
   setBackground(): void {
@@ -59,7 +71,7 @@ export class PokedexComponent implements OnInit {
   }
 
   getPokemonList(): void {
-    this.pokemonService.getPokedex().subscribe((res:any) =>{
+    this.pokemonService.getPokedex().subscribe((res: any) => {
       this.pokemonList = res.results;
     });
     this.pokedex = this.pokemonService.pokedex;

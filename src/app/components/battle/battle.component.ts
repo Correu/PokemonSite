@@ -2,7 +2,7 @@ import { Component, Injectable, OnInit } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { MatDialog } from '@angular/material/dialog';
-import { BattleDialogComponent } from '../battle-dialog/battle-dialog.component';
+import { BattleDialogComponent } from '../../dialogs/battle-dialog/battle-dialog.component';
 
 @Component({
   selector: 'app-battle',
