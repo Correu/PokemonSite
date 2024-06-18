@@ -1,0 +1,11 @@
+<mat-dialog-content>
+    <h2>Pick a Starting Level for the Pokemon</h2>
+    <form class="battle-form" #battleForm = ngForm (ngSubmit)="Submit()">
+        <mat-form-field appearance="outline">
+            <mat-label>Starting Level</mat-label>
+            <input matInput placeholder="Pokemon Level">
+            <mat-hint>Enter a Whole Number (1-100)</mat-hint>
+        </mat-form-field>
+        <button mat-stroked-button color="warn" [mat-dialog-close]>Start Battle</button>
+    </form>
+</mat-dialog-content>
