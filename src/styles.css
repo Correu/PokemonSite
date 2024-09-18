@@ -5,3 +5,15 @@
 .mat-grid-tile-content {
     display: block !important;
 }
+/* 
+app-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+} */
+
+/* override to display router content/navbar to the full page. */
+body {
+    display:contents;
+}

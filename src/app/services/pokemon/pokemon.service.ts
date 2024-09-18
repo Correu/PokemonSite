@@ -27,7 +27,6 @@ export class PokemonService {
   //returns original data from the endpoints
   public getPokemonById(id: string): Observable<Pokemon> {
     let url = 'https://pokeapi.co/api/v2/pokemon/' + id;
-    //console.log(url);
     return this.http.get<Pokemon>(url);
   }
 
@@ -41,6 +40,18 @@ export class PokemonService {
     return this.http.get<Pokemon>(url);
   }
 
+  public buildTeam(): Pokemon[] {
+    const team: Pokemon[] = [];
+    for(let i = 0; i < 6; i++){
+      this.getPokemonById(Math.floor(Math.random() * 1025).toString()).subscribe((res: Pokemon) => {
+        this.changeMoveset(res);
+        team.push(res);
+      });
+    }
+    return team;
+  }
+
+  //initially loads to kanto pokedex
   public getPokedex(): Observable<PokeIds[]> {
     let url = 'https://pokeapi.co/api/v2/pokemon/?limit=151';
     return this.http.get<PokeIds[]>(url);
@@ -57,6 +68,10 @@ export class PokemonService {
   public getMove(name: string): Observable<Move> {
     let url = 'https://pokeapi.co/api/v2/move/' + name;
     return this.http.get<Move>(url);
+  }
+
+  private changeMoveset(pokemon: Pokemon): void {
+    pokemon.moves.filter((move) => move.version_group_details.at(0)!.level_learned_at > 50);
   }
 }
 

@@ -1,28 +1,41 @@
-<div>
-    <mat-grid-list cols="3" rowHeight="100%">
-        <mat-grid-tile [ngClass]="{'pokedexSection2' : isHoveringPokemon}" class="pokedexSection customSectionDivider">
-            <p class="pokedexHeaderStyle">Pokedex Selection</p>
-            <mat-list role="list">
-                <mat-list-item *ngFor="let pokedex of pokedexList.results"><button mat-raised-button color="warn" (mouseenter)="setBackground()" (mouseleave)="setBackground()"
-                        (click)="getSpecificPokedex(pokedex.name)">{{pokedex.name}}</button></mat-list-item>
-            </mat-list>
-        </mat-grid-tile>
-        <mat-grid-tile class="pokemonListSection customSectionDivider" *ngIf="!isPostClick">
-            <p class="header-style">Pokemon Selection</p>
-            <mat-list role="list">
-                <mat-list-item *ngFor="let pokemon of pokemonList"><button mat-button
-                        (click)="updateViewingPokemon(pokemon.name)">{{pokemon.name}}</button></mat-list-item>
-            </mat-list>
-        </mat-grid-tile>
-        <mat-grid-tile class="pokemonListSection customSectionDivider" *ngIf="isPostClick">
-            <p class="header-style">Pokemon Selection</p>
-            <mat-list role="list">
-                <mat-list-item *ngFor="let pokemon of selectedPokemonList"><button mat-button
-                        (click)="updateViewingPokemon(pokemon.pokemon_species.name)">{{pokemon.pokemon_species.name}}</button></mat-list-item>
-            </mat-list>
-        </mat-grid-tile>
-        <mat-grid-tile class="pokemonSection customSectionDivider">
-            <app-pokemon [selectedPokemon]="selectedPokemon"></app-pokemon>
-        </mat-grid-tile>
-    </mat-grid-list>
-</div>
+<mat-grid-list cols="3" rowHeight="100%">
+    <mat-grid-tile [ngClass]="{'pokedexSection2' : isHoveringPokemon}" class="pokedexSection customSectionDivider">
+        <p class="pokedexHeaderStyle">Pokedex Selection</p>
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokedex of pokedexList.results"><button mat-raised-button color="warn"
+                    (mouseenter)="setBackground()" (mouseleave)="setBackground()"
+                    (click)="getSpecificPokedex(pokedex.name)">{{pokedex.name}}</button></mat-list-item>
+        </mat-list>
+    </mat-grid-tile>
+    <mat-grid-tile class="pokemonListSection customSectionDivider">
+        <p class="header-style">Pokemon Selection</p>
+        <form [formGroup]="pokeForm" (ngSubmit)="updateViewingPokemon(pokeForm.value)">
+            <mat-form-field>
+                <mat-label>Search For Pokemon</mat-label>
+                <input matInput [formControl]="searchedPokemon" name="searchedPokemon" ngModel
+                    (keydown.enter)="updateViewingPokemon(pokeForm.value)">
+            </mat-form-field>
+        </form>
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokemon of filteredList"><button mat-button
+                    (click)="updateViewingPokemon(pokemon.name)">{{pokemon.name}}</button></mat-list-item>
+        </mat-list>
+    </mat-grid-tile>
+    <!-- <mat-grid-tile class="pokemonListSection customSectionDivider" *ngIf="isPostClick">
+        <p class="header-style">Pokemon Selection</p>
+        <form [formGroup]="pokeForm" (ngSubmit)="updateViewingPokemon(pokeForm.value.searchedPokemon)">
+            <mat-form-field>
+                <mat-label>Search For Pokemon</mat-label>
+                <input matInput [formControl]="searchedPokemon" name="searchPokemon" ngModel
+                    (keydown.enter)="updateViewingPokemon(pokeForm.value)">
+            </mat-form-field>
+        </form>
+        <mat-list role="list">
+            <mat-list-item *ngFor="let pokemon of filteredList"><button mat-button
+                    (click)="updateViewingPokemon(pokemon.name)">{{pokemon.name}}</button></mat-list-item>
+        </mat-list>
+    </mat-grid-tile> -->
+    <mat-grid-tile class="pokemonSection customSectionDivider">
+        <app-pokemon [selectedPokemon]="selectedPokemon"></app-pokemon>
+    </mat-grid-tile>
+</mat-grid-list>

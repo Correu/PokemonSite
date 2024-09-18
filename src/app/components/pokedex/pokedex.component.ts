@@ -1,4 +1,4 @@
-import { Component, Injectable, OnInit, Output, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Injectable, OnInit, Output, Input, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
@@ -6,6 +6,9 @@ import { PokemonEntry } from 'src/app/interfaces/pokedex';
 import { DefaultList } from 'src/app/interfaces/defaultList';
 import { PokedexInstructionDialogComponent } from 'src/app/dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-pokedex',
@@ -15,7 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
 })
 
 @Injectable()
-export class PokedexComponent implements OnInit {
+export class PokedexComponent implements OnInit, OnDestroy {
 
   //page controll variables
   isHoveringPokemon: boolean = false;
@@ -28,6 +31,7 @@ export class PokedexComponent implements OnInit {
   //selected pokedex variable
   @Input() selectedPokedex: string = '';
 
+  //used to control whether to go by the search bar or the standard method
   //more information about the pokemon in the pages.
   @Output() pokemonName: string = 'test';
   pokemon: any[] = [];
@@ -42,6 +46,12 @@ export class PokedexComponent implements OnInit {
     this.selectedPokemon = res;
   });
 
+  //subscription for event listener on search button
+  private searchSubscription!: Subscription;
+  searchedPokemon = new FormControl('');
+  filteredList: PokeIds[] = [];
+  pokeForm!: FormGroup;
+
   constructor(public pokemonService: PokemonService, public pokedexService: PokedexService, public dialog: MatDialog) { }
 
   //initially load the page to the first pokedex (national dex)
@@ -51,6 +61,29 @@ export class PokedexComponent implements OnInit {
     }
     this.getPokedexList();
     this.getPokemonList();
+
+    this.searchSubscription = this.searchedPokemon.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map(searchedPoke => this.filterPokemon(searchedPoke)))
+      .subscribe(
+        filteredList => {
+          this.filteredList = filteredList; 
+        });
+  }
+
+  ngOnDestroy(): void {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+  }
+
+  private filterPokemon(searchPokemon: any): PokeIds[] {
+    if (!searchPokemon || searchPokemon == '' || searchPokemon == null) {
+      return this.pokemonList;
+    }
+    return this.pokemonList.filter(item => item.name.includes(searchPokemon));
   }
 
   private instructionDialog() {
@@ -78,7 +111,7 @@ export class PokedexComponent implements OnInit {
   }
 
   getSpecificPokedex(specificPokedex: string): void {
-    this.isPostClick = true;
+    //this.isPostClick = true;
     this.pokedexService.getIndividualPokdex(specificPokedex).subscribe((res: any) => {
       //this.pokedexList = res.results;
       console.log(res.pokemon_entries);
@@ -90,7 +123,6 @@ export class PokedexComponent implements OnInit {
     this.pokemonService.getPokemonById(pokemonName).subscribe((res: any) => {
       this.selectedPokemon = res;
     })
-    //this.pokemonName = pokemonName;
   }
 }
 type PokeIds = {
