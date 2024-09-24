@@ -1,27 +1,10 @@
 # PokemonSite
 
+## Hosted on an AWS Amplify Instance
+
 PokeAPI used for the project, open-source.
 
 https://pokeapi.co/docs/v2
-
-## TODO
-### Pokedex updates
-- [ ] update interface to use parent => child flow
-- [ ] change endpoints to use pokedex enpoints instead of pokemon
-- [ ] refactor the pokedex to show more information on the pokemon.
-- [ ] fix delay on pokedex.
-
-### Pokemon updates
-- [ ] update the amount of content displayed for selecting a single pokemon
-- [ ] 
-
-### Battle updates
-- [ ] add display of two teams on battle
-- [ ] add turn based functionality to battle
-- [ ] add health functionality to the battle
-- [ ] add move qtys to battle
-- [ ] add random opponent pokemon values to battle
-- [ ] add a pokemon bag for the user to access.
 
 ## Angular Information
 
