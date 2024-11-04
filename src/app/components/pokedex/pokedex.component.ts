@@ -1,4 +1,11 @@
-import { Component, Injectable, OnInit, Output, Input, ViewEncapsulation, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Injectable,
+  OnInit,
+  Output,
+  Input,
+  OnDestroy,
+} from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
@@ -16,16 +23,13 @@ import { FormControl, FormGroup } from '@angular/forms';
   styleUrls: ['./pokedex.component.css'],
   // encapsulation: ViewEncapsulation.None
 })
-
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
-
   //page controll variables
   isHoveringPokemon: boolean = false;
   isLoading: boolean = true;
 
-  background: string = "kanto";
-
+  background: string = 'kanto';
 
   //pass these values through to the next level on the page
   //selected pokedex variable
@@ -42,9 +46,11 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
   isPostClick: boolean = false;
   selectedPokemonList: PokemonEntry[] = [];
-  selectedPokemon: any = this.pokemonService.getPokemonById('bulbasaur').subscribe((res: any) => {
-    this.selectedPokemon = res;
-  });
+  selectedPokemon: any = this.pokemonService
+    .getPokemonById('bulbasaur')
+    .subscribe((res: any) => {
+      this.selectedPokemon = res;
+    });
 
   //subscription for event listener on search button
   private searchSubscription!: Subscription;
@@ -52,7 +58,11 @@ export class PokedexComponent implements OnInit, OnDestroy {
   filteredList: PokeIds[] = [];
   pokeForm!: FormGroup;
 
-  constructor(public pokemonService: PokemonService, public pokedexService: PokedexService, public dialog: MatDialog) { }
+  constructor(
+    public pokemonService: PokemonService,
+    public pokedexService: PokedexService,
+    public dialog: MatDialog
+  ) {}
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -66,11 +76,11 @@ export class PokedexComponent implements OnInit, OnDestroy {
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        map(searchedPoke => this.filterPokemon(searchedPoke)))
-      .subscribe(
-        filteredList => {
-          this.filteredList = filteredList; 
-        });
+        map((searchedPoke) => this.filterPokemon(searchedPoke))
+      )
+      .subscribe((filteredList) => {
+        this.filteredList = filteredList;
+      });
   }
 
   ngOnDestroy(): void {
@@ -83,7 +93,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     if (!searchPokemon || searchPokemon == '' || searchPokemon == null) {
       return this.pokemonList;
     }
-    return this.pokemonList.filter(item => item.name.includes(searchPokemon));
+    return this.pokemonList.filter((item) => item.name.includes(searchPokemon));
   }
 
   private instructionDialog() {
@@ -92,7 +102,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
   }
 
   setBackground(): void {
-    this.isHoveringPokemon = !this.isHoveringPokemon
+    this.isHoveringPokemon = !this.isHoveringPokemon;
   }
 
   getPokedexList(): void {
@@ -100,7 +110,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       this.pokedexList = res;
       this.isLoading = false;
-    })
+    });
   }
 
   getPokemonList(): void {
@@ -112,20 +122,22 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
   getSpecificPokedex(specificPokedex: string): void {
     //this.isPostClick = true;
-    this.pokedexService.getIndividualPokdex(specificPokedex).subscribe((res: any) => {
-      //this.pokedexList = res.results;
-      console.log(res.pokemon_entries);
-      this.selectedPokemonList = res.pokemon_entries;
-    });
+    this.pokedexService
+      .getIndividualPokdex(specificPokedex)
+      .subscribe((res: any) => {
+        //this.pokedexList = res.results;
+        console.log(res.pokemon_entries);
+        this.selectedPokemonList = res.pokemon_entries;
+      });
   }
 
   updateViewingPokemon(pokemonName: string) {
     this.pokemonService.getPokemonById(pokemonName).subscribe((res: any) => {
       this.selectedPokemon = res;
-    })
+    });
   }
 }
 type PokeIds = {
-  name: string,
+  name: string;
   url: string;
-}
+};

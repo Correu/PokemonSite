@@ -1,43 +1,56 @@
 <!-- replace with buttons to add functionality -->
 <mat-grid-list cols="2" rowHeight="25px">
-    <mat-grid-tile>Fight</mat-grid-tile>
-    <mat-grid-tile>Pokemon</mat-grid-tile>
-    <mat-grid-tile>Bag</mat-grid-tile>
-    <mat-grid-tile>Run</mat-grid-tile>
+  <mat-grid-tile>Fight</mat-grid-tile>
+  <mat-grid-tile>Pokemon</mat-grid-tile>
+  <mat-grid-tile>Bag</mat-grid-tile>
+  <mat-grid-tile>Run</mat-grid-tile>
 </mat-grid-list>
 <mat-icon *ngFor="let pokeball of playerTeam" fontIcon="circle"></mat-icon>
 <mat-grid-list cols="2">
-    <mat-grid-tile *ngFor="let poke of playerTeam">
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>{{poke.name}}</mat-card-title>
-            </mat-card-header>
-            <img src="{{poke.sprites.front_default}}" width="75px" height="75px">
-            <mat-card-content>
-                <mat-grid-list cols="2">
-                    <mat-grid-tile class="pokeDetailSection">
-                        <h1 *ngFor="let stat of poke.stats">{{stat.stat.name}} {{stat.base_stat}}</h1>
-                    </mat-grid-tile>
-                    <mat-grid-tile class="pokeDetailSection">
-                        <h1 *ngFor="let move of poke.moves">{{move.move.name}} {{move.move.url}} {{move.version_group_details.at(0)?.level_learned_at}}</h1>
-                    </mat-grid-tile>
-                </mat-grid-list>
-            </mat-card-content>
-        </mat-card>
-    </mat-grid-tile>
+  <mat-grid-tile *ngFor="let poke of playerTeam">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ poke.name }}</mat-card-title>
+      </mat-card-header>
+      <img src="{{ poke.sprites.front_default }}" width="75px" height="75px" />
+      <mat-card-content>
+        <mat-grid-list cols="2">
+          <mat-grid-tile class="pokeDetailSection">
+            <h1 *ngFor="let stat of poke.stats">
+              {{ stat.stat.name }} {{ stat.base_stat }}
+            </h1>
+          </mat-grid-tile>
+          <mat-grid-tile class="pokeDetailSection">
+            <h1 *ngFor="let move of poke.moves">
+              {{ move.move.name }} {{ move.move.url }}
+              {{ move.version_group_details.at(0)?.level_learned_at }}
+            </h1>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
 </mat-grid-list>
 <p>ENEMY TEAM</p>
 <mat-icon *ngFor="let pokeball of enemyTeam" fontIcon="circle"></mat-icon>
 <mat-grid-list cols="2" rowHeight="2:1">
-    <mat-grid-tile *ngFor="let poke of enemyTeam">
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>{{poke.name}}</mat-card-title>
-            </mat-card-header>
-            <img src="{{poke.sprites.front_default}}" width="75px" height="75px">
-            <mat-card-content>
-                <h1 *ngFor="let stat of poke.stats">{{stat.stat.name}} {{stat.base_stat}}</h1>
-            </mat-card-content>
-        </mat-card>
-    </mat-grid-tile>
+  <mat-grid-tile *ngFor="let poke of enemyTeam">
+    <mat-card>
+      <mat-card-content>
+        <mat-grid-list cols="2">
+          <mat-grid-tile class="pokeDetailSection">
+            <h1 *ngFor="let stat of poke.stats">
+              {{ stat.stat.name }} {{ stat.base_stat }}
+            </h1>
+          </mat-grid-tile>
+          <mat-grid-tile class="pokeDetailSection">
+            <h1 *ngFor="let move of poke.moves">
+              {{ move.move.name }} {{ move.move.url }}
+              {{ move.version_group_details.at(0)?.level_learned_at }}
+            </h1>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
 </mat-grid-list>

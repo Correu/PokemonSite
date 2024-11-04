@@ -1,19 +1,30 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-battle-dialog',
   templateUrl: './battle-dialog.component.html',
-  styleUrls: ['./battle-dialog.component.css']
+  styleUrls: ['./battle-dialog.component.css'],
 })
 export class BattleDialogComponent {
-    form: FormGroup = new FormGroup({
-      level: new FormControl(new Level(0)),
-    });
+  inputLevel: number = 0;
+  form: FormGroup = new FormGroup({
+    level: new FormControl(new Level(this.inputLevel)),
+  });
 
-    Submit() {
-      console.log('test');
-    }
+  constructor(
+    private dialogRef: MatDialogRef<BattleDialogComponent>,
+    private fb: FormBuilder
+  ) {
+    this.form = this.fb.group({
+      inputLevel: [''],
+    });
+  }
+
+  Submit(): void {
+    this.dialogRef.close(this.form.value.inputLevel);
+  }
 }
 
 export class Level {

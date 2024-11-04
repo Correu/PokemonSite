@@ -6,23 +6,21 @@ import { Pokemon } from '../../interfaces/pokemon';
 import { Move } from '../../interfaces/move';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class PokemonService {
-
   //battle page boolean
   battleLoad!: boolean;
   //pokedex page boolean
   pokedexLoad!: boolean;
-  
-  pokemonIds: PokeIds[] = []; 
+
+  pokemonIds: PokeIds[] = [];
   pokedex: Pokemon[] = [];
 
   playerTeam: Pokemon[] = [];
   enemyTeam: Pokemon[] = [];
 
-  constructor(private http:HttpClient) {   }
+  constructor(private http: HttpClient) {}
 
   //returns original data from the endpoints
   public getPokemonById(id: string): Observable<Pokemon> {
@@ -40,14 +38,17 @@ export class PokemonService {
     return this.http.get<Pokemon>(url);
   }
 
-  public buildTeam(): Pokemon[] {
+  public buildTeam(selectedLevel: number): Pokemon[] {
     const team: Pokemon[] = [];
-    for(let i = 0; i < 6; i++){
-      this.getPokemonById(Math.floor(Math.random() * 1025).toString()).subscribe((res: Pokemon) => {
-        this.changeMoveset(res);
+    for (let i = 0; i < 6; i++) {
+      this.getPokemonById(
+        Math.floor(Math.random() * 1025).toString()
+      ).subscribe((res: Pokemon) => {
+        this.changeMoveset(res, selectedLevel);
         team.push(res);
       });
     }
+    console.log(team);
     return team;
   }
 
@@ -70,13 +71,29 @@ export class PokemonService {
     return this.http.get<Move>(url);
   }
 
-  private changeMoveset(pokemon: Pokemon): void {
-    pokemon.moves.filter((move) => move.version_group_details.at(0)!.level_learned_at > 50);
+  //gets the current move list and limits it based on the users selected level range
+  private changeMoveset(pokemon: Pokemon, selectedLevel: number): void {
+    pokemon.moves = pokemon.moves.filter(
+      (move) =>
+        move.version_group_details.at(0)!.level_learned_at < selectedLevel
+    );
+  }
+
+  //need to reassign stats to the object field after calculations
+  private calculateStats(pokemon: Pokemon): void {
+    //health stat calculation
+    const baseStat = 0;
+    const dv = 0;
+    const statEXP = 0;
+    const level = 0;
+    const health =
+      ((baseStat + dv) * 2 + (statEXP / 4) * level) / 100 + level + 10;
+    //other stat calculation
+    const stat = ((baseStat + dv) * 2 + (statEXP / 4) * level) / 100 + 5;
   }
 }
 
 type PokeIds = {
-  name: string,
+  name: string;
   url: string;
-}
-
+};

@@ -14,6 +14,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -40,7 +41,7 @@ import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction
     EncounterComponent,
     BattleDialogComponent,
     MoveDialogComponent,
-    PokedexInstructionDialogComponent
+    PokedexInstructionDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -63,9 +64,10 @@ import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction
     MatIconModule,
     MatDialogModule,
     MatSelectModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatChipsModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
