@@ -3,7 +3,7 @@
 
 /* Ugly override to ge the lists to not overflow on the pokedex page, list was starting off the top of the page. */
 .mat-grid-tile-content {
-    display: block !important;
+  display: block !important;
 }
 /* 
 app-root {
@@ -15,5 +15,5 @@ app-root {
 
 /* override to display router content/navbar to the full page. */
 body {
-    display:contents;
+  display: contents;
 }

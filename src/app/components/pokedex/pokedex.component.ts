@@ -25,6 +25,18 @@ import { FormControl, FormGroup } from '@angular/forms';
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
+  generations = [
+    { name: 'Generation 1', quantity: 151 },
+    { name: 'Generation 2', quantity: 100 },
+    { name: 'Generation 3', quantity: 135 },
+    { name: 'Generation 4', quantity: 107 },
+    { name: 'Generation 5', quantity: 156 },
+    { name: 'Generation 6', quantity: 72 },
+    { name: 'Generation 7', quantity: 88 },
+    { name: 'Generation 8', quantity: 96 },
+    { name: 'Generation 9', quantity: 120 },
+  ];
+
   //page controll variables
   isHoveringPokemon: boolean = false;
   isLoading: boolean = true;
