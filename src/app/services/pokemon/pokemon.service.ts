@@ -1,20 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { map, Observable } from 'rxjs';
 import { Pokemon } from '../../interfaces/pokemon';
 import { Move } from '../../interfaces/move';
+import { DefaultList } from 'src/app/interfaces/defaultList';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PokemonService {
-  //battle page boolean
-  battleLoad!: boolean;
-  //pokedex page boolean
-  pokedexLoad!: boolean;
+  private jsonFile = 'assets/data/pokemon_removed.json';
 
-  pokemonIds: PokeIds[] = [];
+  battleLoad!: boolean;
+  pokedexLoad!: boolean;
   pokedex: Pokemon[] = [];
 
   playerTeam: Pokemon[] = [];
@@ -22,10 +20,52 @@ export class PokemonService {
 
   constructor(private http: HttpClient) {}
 
-  //returns original data from the endpoints
-  public getPokemonById(id: string): Observable<Pokemon> {
-    let url = 'https://pokeapi.co/api/v2/pokemon/' + id;
-    return this.http.get<Pokemon>(url);
+  getPokedex(): Observable<Pokemon[]> {
+    return this.http.get<Pokemon[]>(this.jsonFile);
+  }
+
+  getPokemon(id: string): Observable<Pokemon | undefined> {
+    return this.http
+      .get<Pokemon[]>(this.jsonFile)
+      .pipe(
+        map((pokemons: Pokemon[]) =>
+          pokemons.find((pokemon) => pokemon.id === id)
+        )
+      );
+  }
+
+  getPokemonByName(name: string): Observable<Pokemon | undefined> {
+    console.log(name);
+    return this.http
+      .get<Pokemon[]>(this.jsonFile)
+      .pipe(
+        map((pokemons: Pokemon[]) =>
+          pokemons.find((pokemon) => pokemon.name.toLowerCase() === name)
+        )
+      );
+  }
+
+  getPokemonSpecies(speciesUrl: string): Observable<any> {
+    return this.http.get(speciesUrl);
+  }
+
+  getPokemonById(id: any): Observable<Pokemon> {
+    return this.http.get<Pokemon>(id);
+  }
+
+  getPokedexList() {
+    return this.pokedex;
+  }
+
+  getMoves(): Observable<DefaultList> {
+    return this.http.get<DefaultList>(
+      'https://pokeapi.co/api/v2/move/?limit=937'
+    );
+  }
+
+  getMove(name: string): Observable<Move> {
+    let url = 'https://pokeapi.co/api/v2/move/' + name;
+    return this.http.get<Move>(url);
   }
 
   //get the pokemon and return an array to of pokemon adjusted to handle a battle
@@ -52,25 +92,6 @@ export class PokemonService {
     return team;
   }
 
-  //initially loads to kanto pokedex
-  public getPokedex(): Observable<PokeIds[]> {
-    let url = 'https://pokeapi.co/api/v2/pokemon/?limit=151';
-    return this.http.get<PokeIds[]>(url);
-  }
-
-  public getPokedexList() {
-    return this.pokedex;
-  }
-
-  public getPokeIdList() {
-    return this.pokemonIds;
-  }
-
-  public getMove(name: string): Observable<Move> {
-    let url = 'https://pokeapi.co/api/v2/move/' + name;
-    return this.http.get<Move>(url);
-  }
-
   //gets the current move list and limits it based on the users selected level range
   private changeMoveset(pokemon: Pokemon, selectedLevel: number): void {
     pokemon.moves = pokemon.moves.filter(
@@ -92,8 +113,3 @@ export class PokemonService {
     const stat = ((baseStat + dv) * 2 + (statEXP / 4) * level) / 100 + 5;
   }
 }
-
-type PokeIds = {
-  name: string;
-  url: string;
-};

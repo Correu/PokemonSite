@@ -37,8 +37,9 @@ export class BattleComponent implements OnInit {
     dialogRef.afterClosed().subscribe((data) => {
       this.selectedLevel = data;
       console.log(this.selectedLevel + ' ' + data);
-      this.playerTeam = this.pokemonService.buildTeam(this.selectedLevel);
-      this.enemyTeam = this.pokemonService.buildTeam(this.selectedLevel);
+      //need to correct endpoints for this to function properly
+      //this.playerTeam = this.pokemonService.buildTeam(this.selectedLevel);
+      //this.enemyTeam = this.pokemonService.buildTeam(this.selectedLevel);
     });
   }
 }

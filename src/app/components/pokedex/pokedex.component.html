@@ -1,5 +1,5 @@
 <div class="card-container">
-  <mat-card class="test-style card-style">
+  <mat-card class="card-style">
     <mat-grid-list cols="3" rowHeight="100%">
       <mat-grid-tile class="pokedexSection customSectionDivider">
         <mat-list role="list">
@@ -12,22 +12,25 @@
         <p class="header-style">Pokemon Selection</p>
         <form
           [formGroup]="pokeForm"
-          (ngSubmit)="updateViewingPokemon(pokeForm.value)"
+          (ngSubmit)="
+            updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
+          "
         >
           <mat-form-field>
             <mat-label>Search For Pokemon</mat-label>
             <input
               matInput
-              [formControl]="searchedPokemon"
+              formControlName="searchedPokemon"
               name="searchedPokemon"
-              ngModel
-              (keydown.enter)="updateViewingPokemon(pokeForm.value)"
+              (keydown.enter)="
+                updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
+              "
             />
           </mat-form-field>
         </form>
         <mat-list role="list">
           <mat-list-item *ngFor="let pokemon of filteredList"
-            ><button mat-button (click)="updateViewingPokemon(pokemon.name)">
+            ><button mat-button (click)="updateDetailsById(pokemon.id)">
               {{ pokemon.name }}
             </button></mat-list-item
           >

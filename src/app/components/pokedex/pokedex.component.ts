@@ -11,37 +11,33 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
 import { PokemonEntry } from 'src/app/interfaces/pokedex';
 import { DefaultList } from 'src/app/interfaces/defaultList';
-import { PokedexInstructionDialogComponent } from 'src/app/dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-pokedex',
   templateUrl: './pokedex.component.html',
   styleUrls: ['./pokedex.component.css'],
-  // encapsulation: ViewEncapsulation.None
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
   generations = [
-    { name: 'Generation 1', quantity: 151 },
-    { name: 'Generation 2', quantity: 100 },
-    { name: 'Generation 3', quantity: 135 },
-    { name: 'Generation 4', quantity: 107 },
-    { name: 'Generation 5', quantity: 156 },
-    { name: 'Generation 6', quantity: 72 },
-    { name: 'Generation 7', quantity: 88 },
-    { name: 'Generation 8', quantity: 96 },
-    { name: 'Generation 9', quantity: 120 },
+    { name: 'Generation 1', quantity: 151, start: 1 },
+    { name: 'Generation 2', quantity: 100, start: 152 },
+    { name: 'Generation 3', quantity: 135, start: 252 },
+    { name: 'Generation 4', quantity: 107, start: 387 },
+    { name: 'Generation 5', quantity: 156, start: 494 },
+    { name: 'Generation 6', quantity: 72, start: 650 },
+    { name: 'Generation 7', quantity: 88, start: 723 },
+    { name: 'Generation 8', quantity: 96, start: 810 },
+    { name: 'Generation 9', quantity: 120, start: 907 },
   ];
 
   //page controll variables
   isHoveringPokemon: boolean = false;
   isLoading: boolean = true;
-
-  background: string = 'kanto';
 
   //pass these values through to the next level on the page
   //selected pokedex variable
@@ -51,39 +47,33 @@ export class PokedexComponent implements OnInit, OnDestroy {
   //more information about the pokemon in the pages.
   @Output() pokemonName: string = 'test';
   pokemon: any[] = [];
-  pokemonList: PokeIds[] = [];
   pokedex: Pokemon[] = [];
 
   pokedexList!: DefaultList;
 
   isPostClick: boolean = false;
   selectedPokemonList: PokemonEntry[] = [];
-  selectedPokemon: any = this.pokemonService
-    .getPokemonById('bulbasaur')
-    .subscribe((res: any) => {
-      this.selectedPokemon = res;
-    });
+  selectedPokemon?: Pokemon;
 
   //subscription for event listener on search button
   private searchSubscription!: Subscription;
   searchedPokemon = new FormControl('');
-  filteredList: PokeIds[] = [];
+  filteredList: Pokemon[] = [];
   pokeForm!: FormGroup;
 
   constructor(
     public pokemonService: PokemonService,
     public pokedexService: PokedexService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private fp: FormBuilder
   ) {}
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
-    if (!this.pokemonService.pokedexLoad) {
-      this.instructionDialog();
-    }
-    this.getPokedexList();
-    this.getPokemonList();
-
+    this.pokeForm = this.fp.group({
+      searchedPokemon: this.searchedPokemon,
+    });
+    this.fetchStartingList();
     this.searchSubscription = this.searchedPokemon.valueChanges
       .pipe(
         debounceTime(300),
@@ -91,7 +81,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
         map((searchedPoke) => this.filterPokemon(searchedPoke))
       )
       .subscribe((filteredList) => {
-        this.filteredList = filteredList;
+        //this.filteredList = filteredList;
       });
   }
 
@@ -101,55 +91,32 @@ export class PokedexComponent implements OnInit, OnDestroy {
     }
   }
 
-  private filterPokemon(searchPokemon: any): PokeIds[] {
+  private filterPokemon(searchPokemon: any): Pokemon[] {
     if (!searchPokemon || searchPokemon == '' || searchPokemon == null) {
-      return this.pokemonList;
+      return this.filteredList;
     }
-    return this.pokemonList.filter((item) => item.name.includes(searchPokemon));
+    return this.filteredList.filter((item) =>
+      item.name.includes(searchPokemon)
+    );
   }
 
-  private instructionDialog() {
-    const dialogRef = this.dialog.open(PokedexInstructionDialogComponent);
-    this.pokemonService.pokedexLoad = true;
-  }
-
-  setBackground(): void {
-    this.isHoveringPokemon = !this.isHoveringPokemon;
-  }
-
-  getPokedexList(): void {
-    this.pokedexService.getPokedexList().subscribe((res: any) => {
-      this.isLoading = true;
-      this.pokedexList = res;
-      this.isLoading = false;
+  fetchStartingList(): void {
+    this.pokemonService.getPokedex().subscribe((pokemonList: Pokemon[]) => {
+      this.filteredList = pokemonList;
+      this.selectedPokemon = this.filteredList[0];
     });
   }
 
-  getPokemonList(): void {
-    this.pokemonService.getPokedex().subscribe((res: any) => {
-      this.pokemonList = res.results;
-    });
-    this.pokedex = this.pokemonService.pokedex;
-  }
-
-  getSpecificPokedex(specificPokedex: string): void {
-    //this.isPostClick = true;
-    this.pokedexService
-      .getIndividualPokdex(specificPokedex)
-      .subscribe((res: any) => {
-        //this.pokedexList = res.results;
-        console.log(res.pokemon_entries);
-        this.selectedPokemonList = res.pokemon_entries;
-      });
-  }
-
-  updateViewingPokemon(pokemonName: string) {
-    this.pokemonService.getPokemonById(pokemonName).subscribe((res: any) => {
+  updateDetailsById(pokemonName: string) {
+    this.pokemonService.getPokemon(pokemonName).subscribe((res: any) => {
       this.selectedPokemon = res;
     });
   }
+
+  updateDetailsByName(pokemonName: string) {
+    this.pokemonService.getPokemonByName(pokemonName).subscribe((res: any) => {
+      this.selectedPokemon = res;
+      console.log(res);
+    });
+  }
 }
-type PokeIds = {
-  name: string;
-  url: string;
-};

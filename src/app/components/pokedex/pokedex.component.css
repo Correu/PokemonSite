@@ -5,9 +5,11 @@
 }
 
 .card-container {
+  display: flex;
   justify-content: center; /* Centers horizontally */
   align-items: center; /* Centers vertically */
   height: 100vh; /* Full viewport height to center in the page */
+  background-image: url("src/assets/images/pokeball_background.jpg");
 }
 
 .pokedexSection {
