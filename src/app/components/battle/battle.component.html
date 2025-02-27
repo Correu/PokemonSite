@@ -1,56 +1,46 @@
-<!-- replace with buttons to add functionality -->
-<mat-grid-list cols="2" rowHeight="25px">
-  <mat-grid-tile>Fight</mat-grid-tile>
-  <mat-grid-tile>Pokemon</mat-grid-tile>
-  <mat-grid-tile>Bag</mat-grid-tile>
-  <mat-grid-tile>Run</mat-grid-tile>
-</mat-grid-list>
-<mat-icon *ngFor="let pokeball of playerTeam" fontIcon="circle"></mat-icon>
-<mat-grid-list cols="2">
-  <mat-grid-tile *ngFor="let poke of playerTeam">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>{{ poke.name }}</mat-card-title>
-      </mat-card-header>
-      <img src="{{ poke.sprites.front_default }}" width="75px" height="75px" />
-      <mat-card-content>
-        <mat-grid-list cols="2">
-          <mat-grid-tile class="pokeDetailSection">
-            <h1 *ngFor="let stat of poke.stats">
-              {{ stat.stat.name }} {{ stat.base_stat }}
-            </h1>
-          </mat-grid-tile>
-          <mat-grid-tile class="pokeDetailSection">
-            <h1 *ngFor="let move of poke.moves">
-              {{ move.move.name }} {{ move.move.url }}
-              {{ move.version_group_details.at(0)?.level_learned_at }}
-            </h1>
-          </mat-grid-tile>
-        </mat-grid-list>
-      </mat-card-content>
+<div class="battle-container">
+  <!-- Enemy Pokémon (Top Right) -->
+  <div class="enemy-container">
+    <mat-card class="enemy-card">
+      <div class="pokemon-details">
+        <span class="pokemon-name">Pidgey</span>
+        <span class="level">Lv. 17</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="30"></mat-progress-bar>
     </mat-card>
-  </mat-grid-tile>
-</mat-grid-list>
-<p>ENEMY TEAM</p>
-<mat-icon *ngFor="let pokeball of enemyTeam" fontIcon="circle"></mat-icon>
-<mat-grid-list cols="2" rowHeight="2:1">
-  <mat-grid-tile *ngFor="let poke of enemyTeam">
-    <mat-card>
-      <mat-card-content>
-        <mat-grid-list cols="2">
-          <mat-grid-tile class="pokeDetailSection">
-            <h1 *ngFor="let stat of poke.stats">
-              {{ stat.stat.name }} {{ stat.base_stat }}
-            </h1>
-          </mat-grid-tile>
-          <mat-grid-tile class="pokeDetailSection">
-            <h1 *ngFor="let move of poke.moves">
-              {{ move.move.name }} {{ move.move.url }}
-              {{ move.version_group_details.at(0)?.level_learned_at }}
-            </h1>
-          </mat-grid-tile>
-        </mat-grid-list>
-      </mat-card-content>
+    <img
+      class="enemy-sprite"
+      src="assets/images/pokeball_background.jpg"
+      alt="Enemy Pokémon"
+    />
+  </div>
+
+  <!-- Player Pokémon (Bottom Left) -->
+  <div class="player-container">
+    <img
+      class="player-sprite"
+      src="assets/images/alola.webp"
+      alt="Player Pokémon"
+    />
+    <mat-card class="player-card">
+      <div class="pokemon-details">
+        <span class="pokemon-name">Pikachu</span>
+        <span class="level">Lv. 42</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="100"></mat-progress-bar>
     </mat-card>
-  </mat-grid-tile>
-</mat-grid-list>
+  </div>
+
+  <!-- Battle Action Box (Bottom) -->
+  <div class="battle-actions">
+    <mat-card>
+      <div class="action-text">What will Pikachu do?</div>
+      <div class="buttons">
+        <button mat-button color="warn">FIGHT</button>
+        <button mat-button color="primary">BAG</button>
+        <button mat-button color="accent">POKÉMON</button>
+        <button mat-button color="primary">RUN</button>
+      </div>
+    </mat-card>
+  </div>
+</div>

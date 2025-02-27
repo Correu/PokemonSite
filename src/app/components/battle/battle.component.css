@@ -5,13 +5,72 @@
 }
 
 .circle-outline {
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
 .pokeDetailSection {
   overflow-y: auto;
+}
+.battle-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("src/assets/images/fight_background.jpg");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Enemy Pokémon */
+.enemy-container {
+  position: absolute;
+  top: 10%;
+  right: 15%;
+  text-align: center;
+}
+
+.enemy-card {
+  width: 200px;
+  margin-bottom: 10px;
+}
+
+.enemy-sprite {
+  width: 150px;
+  height: auto;
+}
+
+/* Player Pokémon */
+.player-container {
+  position: absolute;
+  bottom: 35%;
+  left: 10%;
+  text-align: center;
+}
+
+.player-card {
+  width: 200px;
+  margin-top: 10px;
+}
+
+.player-sprite {
+  width: 180px;
+  height: auto;
+}
+
+/* Battle Action Box */
+.battle-actions {
+  position: absolute;
+  bottom: 5%;
+  width: 80%;
+  text-align: center;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
 }

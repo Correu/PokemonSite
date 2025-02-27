@@ -30,6 +30,7 @@ import { EncounterComponent } from './components/encounter/encounter.component';
 import { BattleDialogComponent } from './dialogs/battle-dialog/battle-dialog.component';
 import { MoveDialogComponent } from './dialogs/move-dialog/move-dialog.component';
 import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [
@@ -66,6 +67,7 @@ import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction
     MatSelectModule,
     ReactiveFormsModule,
     MatChipsModule,
+    MatProgressBarModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
