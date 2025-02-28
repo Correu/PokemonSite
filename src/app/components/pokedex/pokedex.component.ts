@@ -119,4 +119,15 @@ export class PokedexComponent implements OnInit, OnDestroy {
       console.log(res);
     });
   }
+
+  updatePokemon(pokemon: any) {
+    this.selectedPokemon = pokemon;
+  }
+
+  selectRange(start: number, end: number): typeof this.filteredList {
+    if(start < 0 || end >= this.filteredList.length || start > end) {
+      throw new Error("Invalid range specified");
+    }
+    return this.filteredList.slice(start, end + 1);
+  }
 }

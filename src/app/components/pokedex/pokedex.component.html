@@ -30,7 +30,7 @@
         </form>
         <mat-list role="list">
           <mat-list-item *ngFor="let pokemon of filteredList"
-            ><button mat-button (click)="updateDetailsById(pokemon.id)">
+            ><button mat-button (mouseover)="updateDetailsById(pokemon.id)">
               {{ pokemon.name }}
             </button></mat-list-item
           >
@@ -41,4 +41,31 @@
       </mat-grid-tile>
     </mat-grid-list>
   </mat-card>
+</div>
+
+<div class="pokedex-container">
+  <!-- POKEDEX HEADER -->
+  <mat-card class="pokedex-header">POKÉDEX</mat-card>
+
+  <div class="pokedex-body">
+    <!-- SCROLLABLE LIST IN THE CENTER -->
+    <mat-card class="pokemon-list">
+      <mat-list>
+        <mat-list-item *ngFor="let pokemon of filteredList" (mouseover)="updatePokemon(pokemon)">
+          <span class="pokemon-name">{{ pokemon.name }}</span>
+        </mat-list-item>
+      </mat-list>
+    </mat-card>
+
+    <!-- POKEMON IMAGE DISPLAY (Right Side) -->
+    <mat-card class="pokemon-display">
+      <img [src]="selectedPokemon?.sprites?.front_default" [alt]="selectedPokemon?.name" class="pokemon-img">
+    </mat-card>
+  </div>
+
+  <!-- BUTTONS AT THE BOTTOM -->
+  <div class="pokedex-buttons">
+    <button mat-button color="primary">MENU</button>
+    <button mat-button color="accent">SEARCH</button>
+  </div>
 </div>
