@@ -1,37 +1,60 @@
 <div class="card-container">
   <mat-card class="card-style">
     <mat-grid-list cols="3" rowHeight="100%">
-      <mat-grid-tile>
+      <mat-grid-tile class="generation-list">
         <mat-list role="list">
-          <p *ngFor="let generation of pokemonService.generations">
+          <button
+            style="width: 100%"
+            mat-button
+            *ngFor="let generation of pokemonService.generations"
+            (click)="selectRange(generation.start, generation.quantity)"
+          >
             {{ generation.name }} - {{ generation.quantity }}
-          </p>
+          </button>
         </mat-list>
       </mat-grid-tile>
       <mat-grid-tile>
         <mat-card class="pokemon-box">
-          <app-pokemon [selectedPokemon]="selectedPokemon"></app-pokemon>
+          <img
+            src="{{ selectedPokemon?.sprites?.front_default }}"
+            style="width: 150px; height: auto; scale: 2.5"
+          />
         </mat-card>
       </mat-grid-tile>
-      <mat-grid-tile class="pokemon-list">
-        <p class="header-style">Pokemon Selection</p>
-        <form [formGroup]="pokeForm" (ngSubmit)="
-            updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-          ">
-          <mat-form-field>
-            <mat-label>Search For Pokemon</mat-label>
-            <input matInput formControlName="searchedPokemon" name="searchedPokemon" (keydown.enter)="
-                updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-              " />
-          </mat-form-field>
-        </form>
-        <mat-list role="list">
-          <mat-list-item *ngFor="let pokemon of filteredList"><button mat-button
-              (mouseover)="updateDetailsById(pokemon.id)">
-              {{ pokemon.name }}
-            </button></mat-list-item>
-        </mat-list>
-      </mat-grid-tile>
+      <div class="right-section">
+        <mat-grid-tile>
+          <p class="header-style">Pokemon Selection</p>
+          <form
+            [formGroup]="pokeForm"
+            (ngSubmit)="
+              updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
+            "
+          >
+            <div class="search-container">
+              <mat-form-field>
+                <mat-label>Search For Pokemon</mat-label>
+                <input
+                  matInput
+                  formControlName="searchedPokemon"
+                  name="searchedPokemon"
+                  (keydown.enter)="
+                    updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
+                  "
+                />
+              </mat-form-field>
+            </div>
+          </form>
+          <div class="scrollable-list">
+            <mat-list role="list">
+              <mat-list-item *ngFor="let pokemon of filteredList"
+                ><button mat-button (mouseover)="updateDetailsById(pokemon.id)">
+                  {{ pokemon.name }}
+                </button></mat-list-item
+              >
+            </mat-list>
+          </div>
+        </mat-grid-tile>
+      </div>
     </mat-grid-list>
   </mat-card>
 </div>

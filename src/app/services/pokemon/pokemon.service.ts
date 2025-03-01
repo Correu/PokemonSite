@@ -19,18 +19,19 @@ export class PokemonService {
   enemyTeam: Pokemon[] = [];
 
   generations = [
-    { name: 'Generation 1', quantity: 151, start: 1 },
-    { name: 'Generation 2', quantity: 100, start: 152 },
-    { name: 'Generation 3', quantity: 135, start: 252 },
-    { name: 'Generation 4', quantity: 107, start: 387 },
-    { name: 'Generation 5', quantity: 156, start: 494 },
-    { name: 'Generation 6', quantity: 72, start: 650 },
-    { name: 'Generation 7', quantity: 88, start: 723 },
-    { name: 'Generation 8', quantity: 96, start: 810 },
-    { name: 'Generation 9', quantity: 120, start: 907 },
+    { name: 'Generation 1', quantity: 151, start: 0 },
+    { name: 'Generation 2', quantity: 100, start: 151 },
+    { name: 'Generation 3', quantity: 135, start: 251 },
+    { name: 'Generation 4', quantity: 107, start: 386 },
+    { name: 'Generation 5', quantity: 156, start: 493 },
+    { name: 'Generation 6', quantity: 72, start: 649 },
+    { name: 'Generation 7', quantity: 88, start: 722 },
+    { name: 'Generation 8', quantity: 96, start: 809 },
+    { name: 'Generation 9', quantity: 120, start: 906 },
+    { name: 'All', quantity: 1027, start: 0 },
   ];
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getPokedex(): Observable<Pokemon[]> {
     return this.http.get<Pokemon[]>(this.jsonFile);
@@ -61,7 +62,7 @@ export class PokemonService {
     return this.http.get(speciesUrl);
   }
 
-  //get pokemon by ID based on the 
+  //get pokemon by ID based on the
   getPokemonById(id: any): Observable<Pokemon> {
     return this.http.get<Pokemon>(id);
   }

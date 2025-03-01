@@ -22,28 +22,15 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
-
   //page controll variables
   isHoveringPokemon: boolean = false;
   isLoading: boolean = true;
 
-  //pass these values through to the next level on the page
-  //selected pokedex variable
-  @Input() selectedPokedex: string = '';
-
-  //used to control whether to go by the search bar or the standard method
-  //more information about the pokemon in the pages.
-  @Output() pokemonName: string = 'test';
-  pokemon: any[] = [];
-  pokedex: Pokemon[] = [];
-
   pokedexList!: DefaultList;
 
   isPostClick: boolean = false;
-  selectedPokemonList: PokemonEntry[] = [];
   selectedPokemon?: Pokemon;
 
-  //subscription for event listener on search button
   private searchSubscription!: Subscription;
   searchedPokemon = new FormControl('');
   completeList: Pokemon[] = [];
@@ -54,7 +41,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     public pokemonService: PokemonService,
     public dialog: MatDialog,
     private fp: FormBuilder
-  ) { }
+  ) {}
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -113,10 +100,20 @@ export class PokedexComponent implements OnInit, OnDestroy {
     this.selectedPokemon = pokemon;
   }
 
-  selectRange(start: number, end: number): typeof this.filteredList {
-    if (start < 0 || end >= this.filteredList.length || start > end) {
-      throw new Error("Invalid range specified");
+  // selectRange(start: number, end: number): typeof this.filteredList {
+  //   if (start < 0 || end >= this.filteredList.length || start > end) {
+  //     throw new Error('Invalid range specified');
+  //   }
+  //   return this.filteredList.slice(start, end + 1);
+  // }
+
+  selectRange(start: number, count: number): void {
+    if (start < 0 || count < 1 || start >= this.completeList.length) {
+      throw new Error('Invalid range specified');
     }
-    return this.filteredList.slice(start, end + 1);
+
+    const end = Math.min(start + count, this.completeList.length); // Ensure it doesn't exceed the list length
+    this.filteredList = this.completeList.slice(start, end);
+    this.selectedPokemon = this.filteredList[0];
   }
 }
