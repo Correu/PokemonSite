@@ -1,71 +1,37 @@
 <div class="card-container">
   <mat-card class="card-style">
     <mat-grid-list cols="3" rowHeight="100%">
-      <mat-grid-tile class="pokedexSection customSectionDivider">
+      <mat-grid-tile>
         <mat-list role="list">
-          <p *ngFor="let generation of generations">
+          <p *ngFor="let generation of pokemonService.generations">
             {{ generation.name }} - {{ generation.quantity }}
           </p>
         </mat-list>
       </mat-grid-tile>
-      <mat-grid-tile class="pokemonListSection customSectionDivider">
+      <mat-grid-tile>
+        <mat-card class="pokemon-box">
+          <app-pokemon [selectedPokemon]="selectedPokemon"></app-pokemon>
+        </mat-card>
+      </mat-grid-tile>
+      <mat-grid-tile class="pokemon-list">
         <p class="header-style">Pokemon Selection</p>
-        <form
-          [formGroup]="pokeForm"
-          (ngSubmit)="
+        <form [formGroup]="pokeForm" (ngSubmit)="
             updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-          "
-        >
+          ">
           <mat-form-field>
             <mat-label>Search For Pokemon</mat-label>
-            <input
-              matInput
-              formControlName="searchedPokemon"
-              name="searchedPokemon"
-              (keydown.enter)="
+            <input matInput formControlName="searchedPokemon" name="searchedPokemon" (keydown.enter)="
                 updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-              "
-            />
+              " />
           </mat-form-field>
         </form>
         <mat-list role="list">
-          <mat-list-item *ngFor="let pokemon of filteredList"
-            ><button mat-button (mouseover)="updateDetailsById(pokemon.id)">
+          <mat-list-item *ngFor="let pokemon of filteredList"><button mat-button
+              (mouseover)="updateDetailsById(pokemon.id)">
               {{ pokemon.name }}
-            </button></mat-list-item
-          >
+            </button></mat-list-item>
         </mat-list>
-      </mat-grid-tile>
-      <mat-grid-tile class="pokemonSection customSectionDivider">
-        <app-pokemon [selectedPokemon]="selectedPokemon"></app-pokemon>
       </mat-grid-tile>
     </mat-grid-list>
   </mat-card>
-</div>
-
-<div class="pokedex-container">
-  <!-- POKEDEX HEADER -->
-  <mat-card class="pokedex-header">POKÉDEX</mat-card>
-
-  <div class="pokedex-body">
-    <!-- SCROLLABLE LIST IN THE CENTER -->
-    <mat-card class="pokemon-list">
-      <mat-list>
-        <mat-list-item *ngFor="let pokemon of filteredList" (mouseover)="updatePokemon(pokemon)">
-          <span class="pokemon-name">{{ pokemon.name }}</span>
-        </mat-list-item>
-      </mat-list>
-    </mat-card>
-
-    <!-- POKEMON IMAGE DISPLAY (Right Side) -->
-    <mat-card class="pokemon-display">
-      <img [src]="selectedPokemon?.sprites?.front_default" [alt]="selectedPokemon?.name" class="pokemon-img">
-    </mat-card>
-  </div>
-
-  <!-- BUTTONS AT THE BOTTOM -->
-  <div class="pokedex-buttons">
-    <button mat-button color="primary">MENU</button>
-    <button mat-button color="accent">SEARCH</button>
-  </div>
 </div>

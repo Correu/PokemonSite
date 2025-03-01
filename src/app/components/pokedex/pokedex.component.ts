@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
-import { PokedexService } from 'src/app/services/pokedex/pokedex.service';
 import { PokemonEntry } from 'src/app/interfaces/pokedex';
 import { DefaultList } from 'src/app/interfaces/defaultList';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,17 +22,6 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
-  generations = [
-    { name: 'Generation 1', quantity: 151, start: 1 },
-    { name: 'Generation 2', quantity: 100, start: 152 },
-    { name: 'Generation 3', quantity: 135, start: 252 },
-    { name: 'Generation 4', quantity: 107, start: 387 },
-    { name: 'Generation 5', quantity: 156, start: 494 },
-    { name: 'Generation 6', quantity: 72, start: 650 },
-    { name: 'Generation 7', quantity: 88, start: 723 },
-    { name: 'Generation 8', quantity: 96, start: 810 },
-    { name: 'Generation 9', quantity: 120, start: 907 },
-  ];
 
   //page controll variables
   isHoveringPokemon: boolean = false;
@@ -58,15 +46,15 @@ export class PokedexComponent implements OnInit, OnDestroy {
   //subscription for event listener on search button
   private searchSubscription!: Subscription;
   searchedPokemon = new FormControl('');
+  completeList: Pokemon[] = [];
   filteredList: Pokemon[] = [];
   pokeForm!: FormGroup;
 
   constructor(
     public pokemonService: PokemonService,
-    public pokedexService: PokedexService,
     public dialog: MatDialog,
     private fp: FormBuilder
-  ) {}
+  ) { }
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -102,7 +90,8 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
   fetchStartingList(): void {
     this.pokemonService.getPokedex().subscribe((pokemonList: Pokemon[]) => {
-      this.filteredList = pokemonList;
+      this.completeList = pokemonList;
+      this.filteredList = this.completeList;
       this.selectedPokemon = this.filteredList[0];
     });
   }
@@ -125,7 +114,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
   }
 
   selectRange(start: number, end: number): typeof this.filteredList {
-    if(start < 0 || end >= this.filteredList.length || start > end) {
+    if (start < 0 || end >= this.filteredList.length || start > end) {
       throw new Error("Invalid range specified");
     }
     return this.filteredList.slice(start, end + 1);
