@@ -1,0 +1,4 @@
+<p class="header-style">Pokemon Details</p>
+<p>{{ data.pokemon.name }}</p>
+<img src="{{ data.pokemon.sprites.front_default }}" />
+<p *ngFor="let types of data.pokemon.types">{{ types.type.name }}</p>

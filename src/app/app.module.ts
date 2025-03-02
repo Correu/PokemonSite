@@ -18,7 +18,6 @@ import { MatChipsModule } from '@angular/material/chips';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { PokemonComponent } from './components/pokemon/pokemon.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -31,11 +30,11 @@ import { BattleDialogComponent } from './dialogs/battle-dialog/battle-dialog.com
 import { MoveDialogComponent } from './dialogs/move-dialog/move-dialog.component';
 import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    PokemonComponent,
     PokedexComponent,
     NavigationComponent,
     BattleComponent,
@@ -43,6 +42,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     BattleDialogComponent,
     MoveDialogComponent,
     PokedexInstructionDialogComponent,
+    PokemonDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -72,4 +72,4 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
   providers: [],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

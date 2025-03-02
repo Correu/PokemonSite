@@ -14,6 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { PokemonDialogComponent } from 'src/app/dialogs/pokemon-dialog/pokemon-dialog.component';
 
 @Component({
   selector: 'app-pokedex',
@@ -41,7 +42,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     public pokemonService: PokemonService,
     public dialog: MatDialog,
     private fp: FormBuilder
-  ) {}
+  ) { }
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -115,5 +116,12 @@ export class PokedexComponent implements OnInit, OnDestroy {
     const end = Math.min(start + count, this.completeList.length); // Ensure it doesn't exceed the list length
     this.filteredList = this.completeList.slice(start, end);
     this.selectedPokemon = this.filteredList[0];
+  }
+
+  openDialog() {
+    this.dialog.open(PokemonDialogComponent, {
+      width: '500px',
+      data: { pokemon: this.selectedPokemon }
+    })
   }
 }
