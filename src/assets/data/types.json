@@ -1,0 +1,74 @@
+[
+    {
+        "types": [
+            {
+                "name": "normal",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/1.png"
+            },
+            {
+                "name": "fire",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/10.png"
+            },
+            {
+                "name": "water",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/11.png"
+            },
+            {
+                "name": "grass",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/12.png"
+            },
+            {
+                "name": "electric",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/13.png"
+            },
+            {
+                "name": "psychic",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/14.png"
+            },
+            {
+                "name": "ice",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/15.png"
+            },
+            {
+                "name": "dragon",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/16.png"
+            },
+            {
+                "name": "dark",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/17.png"
+            },
+            {
+                "name": "fighting",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/2.png"
+            },
+            {
+                "name": "flying",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/3.png"
+            },
+            {
+                "name": "poison",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/4.png"
+            },
+            {
+                "name": "ground",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/5.png"
+            },
+            {
+                "name": "rock",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/6.png"
+            },
+            {
+                "name": "bug",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/7.png"
+            },
+            {
+                "name": "ghost",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/8.png"
+            },
+            {
+                "name": "steel",
+                "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-iii/emerald/9.png"
+            }
+        ]
+    }
+]

@@ -2,13 +2,10 @@ import {
   Component,
   Injectable,
   OnInit,
-  Output,
-  Input,
   OnDestroy,
 } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
-import { PokemonEntry } from 'src/app/interfaces/pokedex';
 import { DefaultList } from 'src/app/interfaces/defaultList';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
@@ -93,20 +90,12 @@ export class PokedexComponent implements OnInit, OnDestroy {
   updateDetailsByName(pokemonName: string) {
     this.pokemonService.getPokemonByName(pokemonName).subscribe((res: any) => {
       this.selectedPokemon = res;
-      console.log(res);
     });
   }
 
   updatePokemon(pokemon: any) {
     this.selectedPokemon = pokemon;
   }
-
-  // selectRange(start: number, end: number): typeof this.filteredList {
-  //   if (start < 0 || end >= this.filteredList.length || start > end) {
-  //     throw new Error('Invalid range specified');
-  //   }
-  //   return this.filteredList.slice(start, end + 1);
-  // }
 
   selectRange(start: number, count: number): void {
     if (start < 0 || count < 1 || start >= this.completeList.length) {
@@ -120,7 +109,10 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
   openDialog() {
     this.dialog.open(PokemonDialogComponent, {
-      width: '500px',
+      width: 'auto',
+      height: 'auto',
+      maxHeight: '90vh',
+      panelClass: 'custom-dialog-container',
       data: { pokemon: this.selectedPokemon }
     })
   }

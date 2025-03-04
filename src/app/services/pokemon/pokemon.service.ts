@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { Pokemon } from '../../interfaces/pokemon';
 import { Move } from '../../interfaces/move';
 import { DefaultList } from 'src/app/interfaces/defaultList';
@@ -9,7 +9,8 @@ import { DefaultList } from 'src/app/interfaces/defaultList';
   providedIn: 'root',
 })
 export class PokemonService {
-  private jsonFile = 'assets/data/pokemon_removed.json';
+  private pokemonJson = 'assets/data/pokemon.json';
+  private typeJson = 'assets/data/types.json';
 
   battleLoad!: boolean;
   pokedexLoad!: boolean;
@@ -31,15 +32,15 @@ export class PokemonService {
     { name: 'All', quantity: 1027, start: 0 },
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getPokedex(): Observable<Pokemon[]> {
-    return this.http.get<Pokemon[]>(this.jsonFile);
+    return this.http.get<Pokemon[]>(this.pokemonJson);
   }
 
   getPokemon(id: string): Observable<Pokemon | undefined> {
     return this.http
-      .get<Pokemon[]>(this.jsonFile)
+      .get<Pokemon[]>(this.pokemonJson)
       .pipe(
         map((pokemons: Pokemon[]) =>
           pokemons.find((pokemon) => pokemon.id === id)
@@ -50,12 +51,29 @@ export class PokemonService {
   getPokemonByName(name: string): Observable<Pokemon | undefined> {
     console.log(name);
     return this.http
-      .get<Pokemon[]>(this.jsonFile)
+      .get<Pokemon[]>(this.pokemonJson)
       .pipe(
         map((pokemons: Pokemon[]) =>
           pokemons.find((pokemon) => pokemon.name.toLowerCase() === name)
         )
       );
+  }
+
+  getTypes(typeNames: string[]): Observable<any[]> {
+    return this.http.get<any[]>(this.typeJson).pipe(
+      tap(data => console.log('Fetched Types Data:', data)), // Debugging log
+      map(response => {
+        // Extract the types array from the first object in the response
+        const typesList = response.length > 0 ? response[0].types : [];
+
+        if (!Array.isArray(typesList)) {
+          throw new Error('Expected "types" to be an array.');
+        }
+
+        // Filter types based on the provided type names
+        return typesList.filter(type => typeNames.includes(type.name));
+      })
+    );
   }
 
   getPokemonSpecies(speciesUrl: string): Observable<any> {
