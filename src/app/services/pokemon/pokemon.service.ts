@@ -32,12 +32,15 @@ export class PokemonService {
     { name: 'All', quantity: 1027, start: 0 },
   ];
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
+  //returns pokedex from local json
   getPokedex(): Observable<Pokemon[]> {
     return this.http.get<Pokemon[]>(this.pokemonJson);
   }
 
+  //gets pokemon based on id from local json
+  //update to differentiate between local json and api requests?
   getPokemon(id: string): Observable<Pokemon | undefined> {
     return this.http
       .get<Pokemon[]>(this.pokemonJson)
@@ -48,6 +51,8 @@ export class PokemonService {
       );
   }
 
+  //gets pokemon based on name from local json
+  //update to differentiate between local json and api requests?
   getPokemonByName(name: string): Observable<Pokemon | undefined> {
     console.log(name);
     return this.http
@@ -59,19 +64,18 @@ export class PokemonService {
       );
   }
 
+  //gets types for the pokemon dialog based on the selected pokemons type list.
   getTypes(typeNames: string[]): Observable<any[]> {
     return this.http.get<any[]>(this.typeJson).pipe(
-      tap(data => console.log('Fetched Types Data:', data)), // Debugging log
-      map(response => {
-        // Extract the types array from the first object in the response
+      tap((data) => console.log('Fetched Types Data:', data)),
+      map((response) => {
         const typesList = response.length > 0 ? response[0].types : [];
 
         if (!Array.isArray(typesList)) {
           throw new Error('Expected "types" to be an array.');
         }
 
-        // Filter types based on the provided type names
-        return typesList.filter(type => typeNames.includes(type.name));
+        return typesList.filter((type) => typeNames.includes(type.name));
       })
     );
   }
