@@ -2,11 +2,13 @@
 
 ## Hosted on an AWS Amplify Instance
 
-PokeAPI used for the project, open-source.
+Webpage that used the PokeAPI to acquire pokemon information from an api and saved locally.
 
-https://pokeapi.co/docs/v2
+-[PokeAPI Docs](https://pokeapi.co/docs/v2)
+-[Angular Docs](https://angular.dev/)
+-[Material Angular Docs](https://material.angular.io/)
 
-## Angular Information
+## Angular Information/Running the Application
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.1.3.
 
