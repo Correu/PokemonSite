@@ -4,9 +4,9 @@
 
 Webpage that used the PokeAPI to acquire pokemon information from an api and saved locally.
 
--[PokeAPI Docs](https://pokeapi.co/docs/v2)
--[Angular Docs](https://angular.dev/)
--[Material Angular Docs](https://material.angular.io/)
+- [PokeAPI Docs](https://pokeapi.co/docs/v2)
+- [Angular Docs](https://angular.dev/)
+- [Material Angular Docs](https://material.angular.io/)
 
 ## Angular Information/Running the Application
 
