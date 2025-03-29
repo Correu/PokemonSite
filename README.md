@@ -2,7 +2,8 @@
 
 ## Hosted on an AWS Amplify Instance
 
-Webpage that used the PokeAPI to acquire pokemon information from an api and saved locally.
+Webpage written in the angular framework with the PokeAPI web facing API acting as the backend.
+Material Angular was used on the front end for basic styling.
 
 - [PokeAPI Docs](https://pokeapi.co/docs/v2)
 - [Angular Docs](https://angular.dev/)
