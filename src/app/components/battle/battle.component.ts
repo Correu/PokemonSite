@@ -3,6 +3,8 @@ import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { MatDialog } from '@angular/material/dialog';
 import { BattleDialogComponent } from '../../dialogs/battle-dialog/battle-dialog.component';
+import { BattleService } from 'src/app/services/battle/battle.service';
+import { TemplateLiteral } from '@angular/compiler';
 
 @Component({
   selector: 'app-battle',
@@ -20,14 +22,25 @@ export class BattleComponent implements OnInit {
   enemyTeam: Pokemon[] = this.pokemonService.enemyTeam;
   selectedLevel: number = 0;
 
+  teamA: Pokemon[] = [];
+  teamB: Pokemon[] = [];
+
   constructor(
     private pokemonService: PokemonService,
+    private battleService: BattleService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (!this.pokemonService.battleLoad) {
       this.intialDialog();
+      this.battleService.getRandomTeams().subscribe(({ teamA, teamB }) => {
+        this.teamA = teamA;
+        this.teamB = teamB;
+      })
+
+      console.log(this.teamA);
+      console.log(this.teamB);
     }
   }
 
@@ -37,9 +50,6 @@ export class BattleComponent implements OnInit {
     dialogRef.afterClosed().subscribe((data) => {
       this.selectedLevel = data;
       console.log(this.selectedLevel + ' ' + data);
-      //need to correct endpoints for this to function properly
-      //this.playerTeam = this.pokemonService.buildTeam(this.selectedLevel);
-      //this.enemyTeam = this.pokemonService.buildTeam(this.selectedLevel);
     });
   }
 }
