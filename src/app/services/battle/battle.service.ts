@@ -1,31 +1,26 @@
 import { Injectable } from '@angular/core';
 import { PokemonService } from '../pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon'; // Ensure you have a proper model
-import { Observable, map } from 'rxjs';
+import { Observable, map, firstValueFrom } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BattleService {
+  constructor(private pokemonService: PokemonService) {}
 
-  constructor(private pokemonService: PokemonService) { }
+  async getRandomTeams(): Promise<{ teamA: Pokemon[]; teamB: Pokemon[] }> {
+    const pokedex = await firstValueFrom(this.pokemonService.getPokedex());
+    const shuffled = this.shuffleArray([...pokedex]);
+    const teamA = shuffled.slice(0, 6);
+    const teamB = shuffled.slice(6, 12);
 
-  getRandomTeams(): Observable<{ teamA: Pokemon[]; teamB: Pokemon[] }> {
-    return this.pokemonService.getPokedex().pipe(
-      map((pokedex: Pokemon[]) => {
-        const shuffled = this.shuffleArray([...pokedex]);
-        const teamA = shuffled.slice(0, 6);
-        const teamB = shuffled.slice(6, 12);
-
-        return { teamA, teamB };
-      })
-    )
+    return { teamA, teamB };
   }
 
   private shuffleArray(array: Pokemon[]): Pokemon[] {
     return array.sort(() => Math.random() - 0.5);
   }
-
 
   /** Helper Functions */
   //gets the current move list and limits it based on the users selected level range

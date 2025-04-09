@@ -1,45 +1,157 @@
 <div class="battle-container">
-  <!-- Enemy Pokémon (Top Right) -->
+  <!-- Enemy Team (Top Right) -->
   <div class="enemy-container">
     <mat-card class="enemy-card">
       <div class="pokemon-details">
-        <span class="pokemon-name">Pidgey</span>
+        <span class="pokemon-name">{{
+          teamB[0]?.name || "Enemy Pokemon"
+        }}</span>
         <span class="level">Lv. 17</span>
       </div>
       <mat-progress-bar mode="determinate" [value]="30"></mat-progress-bar>
     </mat-card>
     <img
       class="enemy-sprite"
-      src="assets/images/pokeball_background.jpg"
+      [src]="
+        teamB[0]?.sprites?.front_default ||
+        'assets/images/pokeball_background.jpg'
+      "
       alt="Enemy Pokémon"
     />
+    <!-- Enemy Team Dots -->
+    <div class="team-dots enemy-dots">
+      <div class="dot" *ngFor="let pokemon of teamB" [class.active]="pokemon">
+        <span class="dot-inner"></span>
+      </div>
+    </div>
   </div>
 
-  <!-- Player Pokémon (Bottom Left) -->
+  <!-- Player Team (Bottom Left) -->
   <div class="player-container">
     <img
       class="player-sprite"
-      src="assets/images/alola.webp"
+      [src]="
+        teamA[currentPokemonIndex]?.sprites?.front_default ||
+        'assets/images/alola.webp'
+      "
       alt="Player Pokémon"
     />
     <mat-card class="player-card">
       <div class="pokemon-details">
-        <span class="pokemon-name">Pikachu</span>
+        <span class="pokemon-name">{{
+          teamA[currentPokemonIndex]?.name || "Player Pokemon"
+        }}</span>
         <span class="level">Lv. 42</span>
       </div>
       <mat-progress-bar mode="determinate" [value]="100"></mat-progress-bar>
     </mat-card>
+    <!-- Player Team Dots -->
+    <div class="team-dots player-dots">
+      <div
+        class="dot"
+        *ngFor="let pokemon of teamA; let i = index"
+        [class.active]="pokemon"
+        [class.selected]="i === currentPokemonIndex"
+      >
+        <span class="dot-inner"></span>
+      </div>
+    </div>
   </div>
 
   <!-- Battle Action Box (Bottom) -->
   <div class="battle-actions">
     <mat-card>
-      <div class="action-text">What will Pikachu do?</div>
-      <div class="buttons">
-        <button mat-button color="warn">FIGHT</button>
-        <button mat-button color="primary">BAG</button>
-        <button mat-button color="accent">POKÉMON</button>
+      <div
+        class="action-text"
+        *ngIf="!showPokemonStats && !showPokemonSelect && !showItemSelect"
+      >
+        What will {{ teamA[currentPokemonIndex]?.name || "your Pokemon" }} do?
+      </div>
+      <div
+        class="buttons"
+        *ngIf="!showPokemonStats && !showPokemonSelect && !showItemSelect"
+      >
+        <button mat-button color="warn" (click)="showStats()">FIGHT</button>
+        <button mat-button color="primary" (click)="showItems()">BAG</button>
+        <button mat-button color="accent" (click)="showPokemonSelect = true">
+          POKÉMON
+        </button>
         <button mat-button color="primary">RUN</button>
+      </div>
+
+      <!-- Stats Display -->
+      <div class="stats-display" *ngIf="showPokemonStats">
+        <h3>{{ teamA[currentPokemonIndex]?.name }}'s Stats</h3>
+        <div class="stats-grid">
+          <div
+            class="stat-item"
+            *ngFor="let stat of teamA[currentPokemonIndex]?.stats"
+          >
+            <span class="stat-name">{{ stat.stat.name | titlecase }}</span>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="(stat.base_stat / 255) * 100"
+            ></mat-progress-bar>
+            <span class="stat-value">{{ stat.base_stat }}</span>
+          </div>
+        </div>
+        <button mat-button color="primary" (click)="hideStats()">Back</button>
+      </div>
+
+      <!-- Pokemon Selection Display -->
+      <div class="pokemon-select" *ngIf="showPokemonSelect">
+        <h3>Choose a Pokemon</h3>
+        <div class="pokemon-grid">
+          <div
+            class="pokemon-option"
+            *ngFor="let pokemon of teamA; let i = index"
+            (click)="selectPokemon(i)"
+          >
+            <img
+              [src]="pokemon?.sprites?.front_default"
+              [alt]="pokemon?.name"
+              class="pokemon-select-sprite"
+            />
+            <span class="pokemon-select-name">{{ pokemon?.name }}</span>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="100"
+              class="pokemon-select-hp"
+            ></mat-progress-bar>
+          </div>
+        </div>
+        <button mat-button color="primary" (click)="showPokemonSelect = false">
+          Back
+        </button>
+      </div>
+
+      <!-- Item Selection Display -->
+      <div class="item-select" *ngIf="showItemSelect">
+        <h3>Select an Item</h3>
+        <div class="item-grid">
+          <div
+            class="item-option"
+            *ngFor="let item of playerItems"
+            (click)="useItem(item)"
+          >
+            <div class="item-icon">
+              <img
+                [src]="item.sprites.default"
+                [alt]="item.name"
+                class="item-sprite"
+              />
+            </div>
+            <div class="item-details">
+              <span class="item-name">{{ item.name }}</span>
+              <div class="item-tooltip">
+                <span class="item-description">{{
+                  getItemDescription(item)
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button mat-button color="primary" (click)="hideItems()">Back</button>
       </div>
     </mat-card>
   </div>
