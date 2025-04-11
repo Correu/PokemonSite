@@ -8,6 +8,7 @@ Material Angular was used on the front end for basic styling.
 - [PokeAPI Docs](https://pokeapi.co/docs/v2)
 - [Angular Docs](https://angular.dev/)
 - [Material Angular Docs](https://material.angular.io/)
+- [Socket.io docccs](https://socket.io/docs/v4/)
 
 ## Angular Information/Running the Application
 
