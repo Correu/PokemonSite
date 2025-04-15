@@ -1,3 +1,22 @@
+<div class="container">
+  <button mat-button (click)="this.pushButton()">Send Message</button>
+  <button mat-button (click)="this.createGame()">Create Game</button>
+  <form>
+    <mat-form-field>
+      <mat-label>Room Id</mat-label>
+      <input matInput [formControl]="roomIdFormControl" placeholder="Room Id" />
+    </mat-form-field>
+    <button mat-button (click)="this.joinRoom()" type="submit">
+      Join Room
+    </button>
+  </form>
+  <h2>Players in Room</h2>
+  <ul>
+    <li *ngFor="let player of players">
+      {{ player }}
+    </li>
+  </ul>
+</div>
 <div class="battle-container">
   <!-- Enemy Team (Top Right) -->
   <div class="enemy-container">
