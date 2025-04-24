@@ -37,8 +37,24 @@ export class SocketService {
     this.socket.on('playerJoined', callback);
   }
 
-  sendMessage(message: string) {
-    this.socket.emit('test', message);
+  sendMessage(roomKey: string, message: string) {
+    // Send a message
+    this.socket.emit("sendMessage", { roomKey: roomKey, message: message }, (response: any) => {
+      if (response.success) {
+        console.log("Message sent!");
+      } else {
+        console.error(response.error);
+      }
+    });
+
+  }
+
+  onRecievedMessage(callback: (payload: any) => void) {
+
+    // Listen for messages
+    this.socket.on("receiveMessage", (payload) => {
+      console.log("📨 New message received:", payload);
+    });
   }
 
   getSocketId(): string | undefined {
