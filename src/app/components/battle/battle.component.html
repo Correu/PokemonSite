@@ -1,4 +1,4 @@
-<div class="container">
+<div>
   <button mat-button (click)="this.createGame()">Create Game</button>
   <form>
     <mat-form-field class="example-full-width">
@@ -6,8 +6,6 @@
       <textarea matInput formControlName="message" placeholder="Ex. It makes me feel..."></textarea>
     </mat-form-field>
     <mat-form-field>
-
-      <button mat-button (click)="this.pushButton()">Send Message</button>
       <mat-label>Room Id</mat-label>
       <input matInput [formControl]="roomIdFormControl" placeholder="Room Id" />
     </mat-form-field>
