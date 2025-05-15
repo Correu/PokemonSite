@@ -7,7 +7,12 @@ import { BattleService } from 'src/app/services/battle/battle.service';
 import { ItemService } from 'src/app/services/items/item.service';
 import { Item } from 'src/app/interfaces/item';
 import { SocketService } from 'src/app/services/socket/socket.service';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-battle',
@@ -39,7 +44,6 @@ export class BattleComponent implements OnInit {
   roomIdFormControl = new FormControl('', [Validators.required]);
 
   messageForm: FormGroup;
-
 
   constructor(
     private pokemonService: PokemonService,
@@ -73,15 +77,18 @@ export class BattleComponent implements OnInit {
     //   damage: 15,
     // });
 
-    this.socketService.sendMessage(this.messageForm.value.message, 'this is a test hit to the server');
+    this.socketService.sendMessage(
+      this.messageForm.value.message,
+      'this is a test hit to the server'
+    );
   }
 
   joinRoom() {
     this.socketService.joinRoom(this.roomIdFormControl.value);
   }
 
-  createGame() {
-    this.roomId = this.socketService.createGame();
+  async createGame() {
+    this.roomId = await this.socketService.createGame();
     console.log(this.roomId);
   }
 
