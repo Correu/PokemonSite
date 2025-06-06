@@ -1,16 +1,15 @@
 # PokemonSite
 
-## Hosted on an AWS Amplify Instance
+## About the Project
 
-Webpage written in the angular framework with the PokeAPI web facing API acting as the backend.
-Material Angular was used on the front end for basic styling.
+Webpage written in the angular framework with the PokeAPI acting as the data providing API and socket.io objects to interact with websockets to handle the peer-to-peer battle interacctions. (source code at https://github.com/Correu/PokemonSiteServer)
 
+## Docs
 - [PokeAPI Docs](https://pokeapi.co/docs/v2)
 - [Angular Docs](https://angular.dev/)
 - [Material Angular Docs](https://material.angular.io/)
-- [Socket.io docs](https://socket.io/docs/v4/)
 
-## Angular Information/Running the Application
+## Running the Application.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.1.3.
 
