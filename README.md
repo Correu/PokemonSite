@@ -9,6 +9,10 @@ Webpage written in the angular framework with the PokeAPI acting as the data pro
 - [Angular Docs](https://angular.dev/)
 - [Material Angular Docs](https://material.angular.io/)
 
+## Current Build
+v1 - single battle instance
+v2 - user auth for multiple instance battles
+
 ## Running the Application.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.1.3.
