@@ -6,6 +6,13 @@ import { BattleDialogComponent } from '../../dialogs/battle-dialog/battle-dialog
 import { BattleService } from 'src/app/services/battle/battle.service';
 import { ItemService } from 'src/app/services/items/item.service';
 import { Item } from 'src/app/interfaces/item';
+import { SocketService } from 'src/app/services/socket/socket.service';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-battle',
@@ -31,12 +38,25 @@ export class BattleComponent implements OnInit {
   showItemSelect: boolean = false;
   currentPokemonIndex: number = 0;
 
+  roomId: string = '';
+  players: string[] = [];
+
+  roomIdFormControl = new FormControl('', [Validators.required]);
+
+  messageForm: FormGroup;
+
   constructor(
     private pokemonService: PokemonService,
     private battleService: BattleService,
     private itemService: ItemService,
-    private dialog: MatDialog
-  ) {}
+    private socketService: SocketService,
+    private dialog: MatDialog,
+    private fb: FormBuilder
+  ) {
+    this.messageForm = this.fb.group({
+      message: [''],
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     if (!this.pokemonService.battleLoad) {
@@ -49,6 +69,27 @@ export class BattleComponent implements OnInit {
       // Fetch random items for both players
       this.loadItems();
     }
+  }
+
+  pushButton() {
+    // this.socketService.sendGameEvent(this.roomId, {
+    //   move: 'attack',
+    //   damage: 15,
+    // });
+
+    this.socketService.sendMessage(
+      this.messageForm.value.message,
+      'this is a test hit to the server'
+    );
+  }
+
+  joinRoom() {
+    this.socketService.joinRoom(this.roomIdFormControl.value);
+  }
+
+  async createGame() {
+    this.roomId = await this.socketService.createGame();
+    console.log(this.roomId);
   }
 
   private loadItems(): void {

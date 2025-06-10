@@ -1,3 +1,25 @@
+<div>
+  <button mat-button (click)="this.createGame()">Create Game</button>
+  <form>
+    <mat-form-field class="example-full-width">
+      <mat-label>Type a Message</mat-label>
+      <textarea matInput formControlName="message" placeholder="Ex. It makes me feel..."></textarea>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Room Id</mat-label>
+      <input matInput [formControl]="roomIdFormControl" placeholder="Room Id" />
+    </mat-form-field>
+    <button mat-button (click)="this.joinRoom()" type="submit">
+      Join Room
+    </button>
+  </form>
+  <h2>Players in Room</h2>
+  <ul>
+    <li *ngFor="let player of players">
+      {{ player }}
+    </li>
+  </ul>
+</div>
 <div class="battle-container">
   <!-- Enemy Team (Top Right) -->
   <div class="enemy-container">
@@ -5,19 +27,15 @@
       <div class="pokemon-details">
         <span class="pokemon-name">{{
           teamB[0]?.name || "Enemy Pokemon"
-        }}</span>
+          }}</span>
         <span class="level">Lv. 17</span>
       </div>
       <mat-progress-bar mode="determinate" [value]="30"></mat-progress-bar>
     </mat-card>
-    <img
-      class="enemy-sprite"
-      [src]="
+    <img class="enemy-sprite" [src]="
         teamB[0]?.sprites?.front_default ||
         'assets/images/pokeball_background.jpg'
-      "
-      alt="Enemy Pokémon"
-    />
+      " alt="Enemy Pokémon" />
     <!-- Enemy Team Dots -->
     <div class="team-dots enemy-dots">
       <div class="dot" *ngFor="let pokemon of teamB" [class.active]="pokemon">
@@ -28,31 +46,23 @@
 
   <!-- Player Team (Bottom Left) -->
   <div class="player-container">
-    <img
-      class="player-sprite"
-      [src]="
+    <img class="player-sprite" [src]="
         teamA[currentPokemonIndex]?.sprites?.front_default ||
         'assets/images/alola.webp'
-      "
-      alt="Player Pokémon"
-    />
+      " alt="Player Pokémon" />
     <mat-card class="player-card">
       <div class="pokemon-details">
         <span class="pokemon-name">{{
           teamA[currentPokemonIndex]?.name || "Player Pokemon"
-        }}</span>
+          }}</span>
         <span class="level">Lv. 42</span>
       </div>
       <mat-progress-bar mode="determinate" [value]="100"></mat-progress-bar>
     </mat-card>
     <!-- Player Team Dots -->
     <div class="team-dots player-dots">
-      <div
-        class="dot"
-        *ngFor="let pokemon of teamA; let i = index"
-        [class.active]="pokemon"
-        [class.selected]="i === currentPokemonIndex"
-      >
+      <div class="dot" *ngFor="let pokemon of teamA; let i = index" [class.active]="pokemon"
+        [class.selected]="i === currentPokemonIndex">
         <span class="dot-inner"></span>
       </div>
     </div>
@@ -61,16 +71,10 @@
   <!-- Battle Action Box (Bottom) -->
   <div class="battle-actions">
     <mat-card>
-      <div
-        class="action-text"
-        *ngIf="!showPokemonStats && !showPokemonSelect && !showItemSelect"
-      >
+      <div class="action-text" *ngIf="!showPokemonStats && !showPokemonSelect && !showItemSelect">
         What will {{ teamA[currentPokemonIndex]?.name || "your Pokemon" }} do?
       </div>
-      <div
-        class="buttons"
-        *ngIf="!showPokemonStats && !showPokemonSelect && !showItemSelect"
-      >
+      <div class="buttons" *ngIf="!showPokemonStats && !showPokemonSelect && !showItemSelect">
         <button mat-button color="warn" (click)="showStats()">FIGHT</button>
         <button mat-button color="primary" (click)="showItems()">BAG</button>
         <button mat-button color="accent" (click)="showPokemonSelect = true">
@@ -83,15 +87,9 @@
       <div class="stats-display" *ngIf="showPokemonStats">
         <h3>{{ teamA[currentPokemonIndex]?.name }}'s Stats</h3>
         <div class="stats-grid">
-          <div
-            class="stat-item"
-            *ngFor="let stat of teamA[currentPokemonIndex]?.stats"
-          >
+          <div class="stat-item" *ngFor="let stat of teamA[currentPokemonIndex]?.stats">
             <span class="stat-name">{{ stat.stat.name | titlecase }}</span>
-            <mat-progress-bar
-              mode="determinate"
-              [value]="(stat.base_stat / 255) * 100"
-            ></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="(stat.base_stat / 255) * 100"></mat-progress-bar>
             <span class="stat-value">{{ stat.base_stat }}</span>
           </div>
         </div>
@@ -102,22 +100,10 @@
       <div class="pokemon-select" *ngIf="showPokemonSelect">
         <h3>Choose a Pokemon</h3>
         <div class="pokemon-grid">
-          <div
-            class="pokemon-option"
-            *ngFor="let pokemon of teamA; let i = index"
-            (click)="selectPokemon(i)"
-          >
-            <img
-              [src]="pokemon?.sprites?.front_default"
-              [alt]="pokemon?.name"
-              class="pokemon-select-sprite"
-            />
+          <div class="pokemon-option" *ngFor="let pokemon of teamA; let i = index" (click)="selectPokemon(i)">
+            <img [src]="pokemon?.sprites?.front_default" [alt]="pokemon?.name" class="pokemon-select-sprite" />
             <span class="pokemon-select-name">{{ pokemon?.name }}</span>
-            <mat-progress-bar
-              mode="determinate"
-              [value]="100"
-              class="pokemon-select-hp"
-            ></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="100" class="pokemon-select-hp"></mat-progress-bar>
           </div>
         </div>
         <button mat-button color="primary" (click)="showPokemonSelect = false">
@@ -129,24 +115,16 @@
       <div class="item-select" *ngIf="showItemSelect">
         <h3>Select an Item</h3>
         <div class="item-grid">
-          <div
-            class="item-option"
-            *ngFor="let item of playerItems"
-            (click)="useItem(item)"
-          >
+          <div class="item-option" *ngFor="let item of playerItems" (click)="useItem(item)">
             <div class="item-icon">
-              <img
-                [src]="item.sprites.default"
-                [alt]="item.name"
-                class="item-sprite"
-              />
+              <img [src]="item.sprites.default" [alt]="item.name" class="item-sprite" />
             </div>
             <div class="item-details">
               <span class="item-name">{{ item.name }}</span>
               <div class="item-tooltip">
                 <span class="item-description">{{
                   getItemDescription(item)
-                }}</span>
+                  }}</span>
               </div>
             </div>
           </div>
