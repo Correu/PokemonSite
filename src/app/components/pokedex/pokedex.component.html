@@ -1,3 +1,11 @@
+<mat-expansion-panel *ngFor="let generation of pokemonService.generations" *ngIf="generation.name === 'All'">
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      {{ generation.name }}
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+</mat-expansion-panel>
+
 <div class="card-container">
   <mat-card class="card-style">
     <mat-grid-list cols="3" rowHeight="100%">
