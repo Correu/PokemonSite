@@ -29,10 +29,9 @@ export class PokemonService {
     { name: 'Generation 7', quantity: 88, start: 722 },
     { name: 'Generation 8', quantity: 96, start: 809 },
     { name: 'Generation 9', quantity: 120, start: 906 },
-    { name: 'All', quantity: 1027, start: 0 },
   ];
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   //returns pokedex from local json
   getPokedex(): Observable<Pokemon[]> {

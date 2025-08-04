@@ -1,9 +1,4 @@
-import {
-  Component,
-  Injectable,
-  OnInit,
-  OnDestroy,
-} from '@angular/core';
+import { Component, Injectable, OnInit, OnDestroy } from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { DefaultList } from 'src/app/interfaces/defaultList';
@@ -39,7 +34,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     public pokemonService: PokemonService,
     public dialog: MatDialog,
     private fp: FormBuilder
-  ) { }
+  ) {}
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -107,13 +102,25 @@ export class PokedexComponent implements OnInit, OnDestroy {
     this.selectedPokemon = this.filteredList[0];
   }
 
+  getPokemonForGeneration(generation: any): Pokemon[] {
+    if (!this.completeList || this.completeList.length === 0) {
+      return [];
+    }
+
+    const start = generation.start;
+    const count = generation.quantity;
+    const end = Math.min(start + count, this.completeList.length);
+
+    return this.completeList.slice(start, end);
+  }
+
   openDialog() {
     this.dialog.open(PokemonDialogComponent, {
       width: 'auto',
       height: 'auto',
       maxHeight: '90vh',
       panelClass: 'custom-dialog-container',
-      data: { pokemon: this.selectedPokemon }
-    })
+      data: { pokemon: this.selectedPokemon },
+    });
   }
 }

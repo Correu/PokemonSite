@@ -106,3 +106,43 @@
   justify-content: center;
   align-items: center;
 }
+
+.generation-pokemon-list {
+  max-height: 300px;
+  overflow-y: auto;
+  width: 100%;
+  padding: 10px;
+}
+
+.generation-pokemon-list mat-list {
+  padding: 0;
+}
+
+.generation-pokemon-list mat-list-item {
+  padding: 2px 0;
+  min-height: 32px;
+}
+
+.pokemon-button {
+  width: 100%;
+  text-align: left;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.pokemon-button:hover {
+  background-color: #e3f2fd;
+}
+
+mat-expansion-panel {
+  margin-bottom: 8px;
+}
+
+mat-expansion-panel-header {
+  background-color: #f5f5f5;
+}
+
+mat-expansion-panel-header:hover {
+  background-color: #e0e0e0;
+}
