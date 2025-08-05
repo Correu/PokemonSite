@@ -83,20 +83,24 @@
 .right-section {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Ensure it takes full height */
+  height: 100%;
+  /* Ensure it takes full height */
 }
 
 .search-container {
   position: sticky;
   top: 0;
-  background: white; /* Ensure background is visible */
+  background: white;
+  /* Ensure background is visible */
   padding: 10px;
-  z-index: 10; /* Keeps it above scrolling content */
+  z-index: 10;
+  /* Keeps it above scrolling content */
 }
 
 .scrollable-list {
   flex-grow: 1;
-  overflow-y: auto; /* Adjust this as needed */
+  overflow-y: auto;
+  /* Adjust this as needed */
   height: 100%;
 }
 
@@ -145,4 +149,76 @@ mat-expansion-panel-header {
 
 mat-expansion-panel-header:hover {
   background-color: #e0e0e0;
+}
+
+/* Add for card grid layout */
+.pokemon-card-grid {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pokemon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s, box-shadow 0.15s;
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 12px 0 8px 0;
+}
+
+.pokemon-card:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  background: #e3f2fd;
+}
+
+.pokemon-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  width: 100%;
+}
+
+.pokemon-image {
+  max-width: 80px;
+  max-height: 80px;
+  margin: 0 auto;
+  display: block;
+}
+
+.pokemon-name {
+  text-align: center;
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-top: 8px;
+  color: #333;
+  word-break: break-word;
+}
+
+/* Responsive grid for smaller screens */
+@media (max-width: 1200px) {
+  .pokemon-card-grid mat-grid-list {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .pokemon-card-grid mat-grid-list {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .pokemon-card-grid mat-grid-list {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
 }

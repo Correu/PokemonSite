@@ -1,89 +1,28 @@
-<mat-expansion-panel *ngFor="let generation of pokemonService.generations">
-  <mat-expansion-panel-header>
-    <mat-panel-title>
-      {{ generation.name }}
-    </mat-panel-title>
-  </mat-expansion-panel-header>
-
-  <div class="generation-pokemon-list">
-    <mat-list role="list">
-      <mat-list-item
-        *ngFor="let pokemon of getPokemonForGeneration(generation)"
-      >
-        <button
-          mat-button
-          (mouseover)="updateDetailsById(pokemon.id)"
-          (click)="openDialog()"
-          class="pokemon-button"
-        >
-          #{{ pokemon.id }} - {{ pokemon.name | titlecase }}
-        </button>
-      </mat-list-item>
-    </mat-list>
-  </div>
-</mat-expansion-panel>
-
 <div class="card-container">
   <mat-card class="card-style">
-    <mat-grid-list cols="3" rowHeight="100%">
-      <mat-grid-tile class="generation-list">
-        <mat-list role="list">
-          <button
-            style="width: 100%"
-            mat-button
-            *ngFor="let generation of pokemonService.generations"
-            (click)="selectRange(generation.start, generation.quantity)"
-          >
-            {{ generation.name }} - {{ generation.quantity }}
-          </button>
-        </mat-list>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <mat-card class="pokemon-box">
-          <img
-            src="{{ selectedPokemon?.sprites?.front_default }}"
-            style="width: 150px; height: auto; scale: 2.5"
-          />
-        </mat-card>
-      </mat-grid-tile>
-      <div class="right-section">
-        <mat-grid-tile>
-          <p class="header-style">Pokemon Selection</p>
-          <form
-            [formGroup]="pokeForm"
-            (ngSubmit)="
-              updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-            "
-          >
-            <div class="search-container">
-              <mat-form-field>
-                <mat-label>Search For Pokemon</mat-label>
-                <input
-                  matInput
-                  formControlName="searchedPokemon"
-                  name="searchedPokemon"
-                  (keydown.enter)="
-                    updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-                  "
-                />
-              </mat-form-field>
-            </div>
-          </form>
-          <div class="scrollable-list">
-            <mat-list role="list">
-              <mat-list-item *ngFor="let pokemon of filteredList"
-                ><button
-                  mat-button
-                  (mouseover)="updateDetailsById(pokemon.id)"
-                  (click)="openDialog()"
-                >
-                  {{ pokemon.name }}
-                </button></mat-list-item
-              >
-            </mat-list>
-          </div>
-        </mat-grid-tile>
+    <mat-expansion-panel *ngFor="let generation of pokemonService.generations">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ generation.name }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="pokemon-card-grid">
+        <mat-grid-list cols="6" rowHeight="1:1" gutterSize="16px">
+          <mat-grid-tile *ngFor="let pokemon of getPokemonForGeneration(generation)">
+            <mat-card class="pokemon-card" (click)="updatePokemon(pokemon); openDialog()">
+              <div class="pokemon-image-container">
+                <img
+                  [src]="pokemon.sprites?.front_default || pokemon.sprites?.other?.['official-artwork']?.front_default"
+                  alt="{{ pokemon.name }}" class="pokemon-image" />
+              </div>
+              <div class="pokemon-name">
+                {{ pokemon.name | titlecase }}
+              </div>
+            </mat-card>
+          </mat-grid-tile>
+        </mat-grid-list>
       </div>
-    </mat-grid-list>
+    </mat-expansion-panel>
   </mat-card>
 </div>
