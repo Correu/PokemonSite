@@ -30,11 +30,23 @@ export class PokedexComponent implements OnInit, OnDestroy {
   filteredList: Pokemon[] = [];
   pokeForm!: FormGroup;
 
+  // New filter properties
+  selectedTypes: string[] = [];
+  selectedGeneration: string = '';
+  searchTerm: string = '';
+  availableTypes: string[] = [];
+
+  // Pagination properties
+  displayedList: Pokemon[] = [];
+  itemsPerPage: number = 20;
+  currentPage: number = 1;
+  hasMoreItems: boolean = true;
+
   constructor(
     public pokemonService: PokemonService,
     public dialog: MatDialog,
     private fp: FormBuilder
-  ) {}
+  ) { }
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -73,7 +85,107 @@ export class PokedexComponent implements OnInit, OnDestroy {
       this.completeList = pokemonList;
       this.filteredList = this.completeList;
       this.selectedPokemon = this.filteredList[0];
+      this.extractAvailableTypes();
+      this.initializePagination();
     });
+  }
+
+  private extractAvailableTypes(): void {
+    const typesSet = new Set<string>();
+    this.completeList.forEach(pokemon => {
+      if (pokemon.types) {
+        pokemon.types.forEach(type => {
+          if (type.type && type.type.name) {
+            typesSet.add(type.type.name);
+          }
+        });
+      }
+    });
+    this.availableTypes = Array.from(typesSet).sort();
+  }
+
+  // New filter methods
+  onTypeChange(types: string[]): void {
+    this.selectedTypes = types;
+    this.applyFilters();
+  }
+
+  onGenerationChange(generation: string): void {
+    this.selectedGeneration = generation;
+    this.applyFilters();
+  }
+
+  onSearchChange(searchTerm: string): void {
+    this.searchTerm = searchTerm;
+    this.applyFilters();
+  }
+
+  private applyFilters(): void {
+    let filtered = [...this.completeList];
+
+    // Filter by generation
+    if (this.selectedGeneration) {
+      const generation = this.pokemonService.generations.find(g => g.name === this.selectedGeneration);
+      if (generation) {
+        const start = generation.start;
+        const end = Math.min(start + generation.quantity, this.completeList.length);
+        filtered = filtered.slice(start, end);
+      }
+    }
+
+    // Filter by type - Pokemon must have ALL selected types
+    if (this.selectedTypes.length > 0) {
+      filtered = filtered.filter(pokemon => {
+        if (!pokemon.types) return false;
+
+        // Get the Pokemon's type names
+        const pokemonTypeNames = pokemon.types
+          .map(type => type.type?.name)
+          .filter(name => name !== undefined) as string[];
+
+        // Check if Pokemon has ALL selected types
+        return this.selectedTypes.every(selectedType =>
+          pokemonTypeNames.includes(selectedType)
+        );
+      });
+    }
+
+    // Filter by search term
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(searchLower) ||
+        pokemon.id.toString().includes(searchLower)
+      );
+    }
+
+    this.filteredList = filtered;
+    this.initializePagination();
+  }
+
+  private initializePagination(): void {
+    this.currentPage = 1;
+    this.updateDisplayedList();
+  }
+
+  private updateDisplayedList(): void {
+    const startIndex = 0;
+    const endIndex = this.currentPage * this.itemsPerPage;
+    this.displayedList = this.filteredList.slice(startIndex, endIndex);
+    this.hasMoreItems = endIndex < this.filteredList.length;
+  }
+
+  loadMoreItems(): void {
+    this.currentPage++;
+    this.updateDisplayedList();
+  }
+
+  clearFilters(): void {
+    this.selectedTypes = [];
+    this.selectedGeneration = '';
+    this.searchTerm = '';
+    this.filteredList = [...this.completeList];
+    this.initializePagination();
   }
 
   updateDetailsById(pokemonName: string) {
