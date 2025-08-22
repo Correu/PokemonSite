@@ -1,44 +1,131 @@
-<div class="card-container">
-  <mat-card class="card-style">
-    <mat-grid-list cols="3" rowHeight="100%">
-      <mat-grid-tile class="generation-list">
-        <mat-list role="list">
-          <button style="width: 100%" mat-button *ngFor="let generation of pokemonService.generations"
-            (click)="selectRange(generation.start, generation.quantity)">
-            {{ generation.name }} - {{ generation.quantity }}
+<div class="pokedex-container">
+  <!-- Left Column - Filters -->
+  <div class="filters-column">
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <!-- Search Filter -->
+        <div class="filter-section">
+          <h3>Search Pokemon</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Search by name or ID</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange(searchTerm)"
+              placeholder="Enter pokemon name or ID"
+            />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Generation Filter -->
+        <div class="filter-section">
+          <h3>Generation</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Generation</mat-label>
+            <mat-select
+              [(ngModel)]="selectedGeneration"
+              (selectionChange)="onGenerationChange(selectedGeneration)"
+            >
+              <mat-option value="">All Generations</mat-option>
+              <mat-option
+                *ngFor="let generation of pokemonService.generations"
+                [value]="generation.name"
+              >
+                {{ generation.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Type Filter -->
+        <div class="filter-section">
+          <h3>Type</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Types</mat-label>
+            <mat-select
+              [(ngModel)]="selectedTypes"
+              (selectionChange)="onTypeChange(selectedTypes)"
+              multiple
+            >
+              <mat-option *ngFor="let type of availableTypes" [value]="type">
+                {{ type | titlecase }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <div class="filter-section">
+          <button
+            mat-raised-button
+            color="warn"
+            class="full-width"
+            (click)="clearFilters()"
+          >
+            Clear All Filters
           </button>
-        </mat-list>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <mat-card class="pokemon-box">
-          <img src="{{ selectedPokemon?.sprites?.front_default }}" style="width: 150px; height: auto; scale: 2.5" />
-        </mat-card>
-      </mat-grid-tile>
-      <div class="right-section">
-        <mat-grid-tile>
-          <p class="header-style">Pokemon Selection</p>
-          <form [formGroup]="pokeForm" (ngSubmit)="
-              updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-            ">
-            <div class="search-container">
-              <mat-form-field>
-                <mat-label>Search For Pokemon</mat-label>
-                <input matInput formControlName="searchedPokemon" name="searchedPokemon" (keydown.enter)="
-                    updateDetailsByName(pokeForm.get('searchedPokemon')?.value)
-                  " />
-              </mat-form-field>
+        </div>
+
+        <!-- Results Count -->
+        <div class="filter-section">
+          <p class="results-count">
+            Showing {{ displayedList.length }} of
+            {{ filteredList.length }} Pokemon
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Right Column - Pokemon List -->
+  <div class="pokemon-column">
+    <mat-card class="pokemon-list-card">
+      <mat-card-content class="pokemon-list-content">
+        <div class="pokemon-grid">
+          <div
+            *ngFor="let pokemon of displayedList"
+            class="pokemon-item"
+            (click)="updatePokemon(pokemon); openDialog()"
+          >
+            <div class="pokemon-image-container">
+              <img
+                [src]="pokemon.sprites?.front_default || pokemon.sprites?.other?.['official-artwork']?.front_default"
+                [alt]="pokemon.name"
+                class="pokemon-image"
+              />
             </div>
-          </form>
-          <div class="scrollable-list">
-            <mat-list role="list">
-              <mat-list-item *ngFor="let pokemon of filteredList"><button mat-button
-                  (mouseover)="updateDetailsById(pokemon.id)" (click)="openDialog()">
-                  {{ pokemon.name }}
-                </button></mat-list-item>
-            </mat-list>
+            <div class="pokemon-info">
+              <div class="pokemon-id">#{{ pokemon.id }}</div>
+              <div class="pokemon-name">{{ pokemon.name | titlecase }}</div>
+              <div class="pokemon-types">
+                <span
+                  *ngFor="let type of pokemon.types"
+                  class="type-badge"
+                  [class]="'type-' + type.type.name"
+                >
+                  {{ type.type.name | titlecase }}
+                </span>
+              </div>
+            </div>
           </div>
-        </mat-grid-tile>
-      </div>
-    </mat-grid-list>
-  </mat-card>
+
+          <!-- Load More Button - inside the scrollable grid -->
+          <div
+            class="load-more-grid-item"
+            *ngIf="hasMoreItems && displayedList.length > 0"
+          >
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="loadMoreItems()"
+              class="load-more-button"
+            >
+              Load More Pokemon
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
