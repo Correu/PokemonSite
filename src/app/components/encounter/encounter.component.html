@@ -1,5 +1,34 @@
-<p>encounter works!</p>
-<p>Locations</p>
-<p *ngFor="let location of locations.results">{{ location.name }}</p>
-<p>location areas</p>
-<p *ngFor="let areas of locationAreas.results">{{ areas.name }}</p>
+<div class="encounter-container">
+  <div class="encounter-card">
+    <div class="card-header">
+      <h2>Pokémon Encounters</h2>
+      <p>Explore locations and find Pokémon</p>
+    </div>
+
+    <div class="card-content">
+      <div class="section">
+        <h3>Locations</h3>
+        <div class="location-grid">
+          <div
+            class="location-item"
+            *ngFor="let location of locations?.results"
+          >
+            {{ location.name | titlecase }}
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Location Areas</h3>
+        <div class="location-grid">
+          <div
+            class="location-item"
+            *ngFor="let area of locationAreas?.results"
+          >
+            {{ area.name | titlecase }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

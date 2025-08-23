@@ -1,0 +1,187 @@
+[
+    {
+        "id": 1,
+        "name": "walk",
+        "english_name": "Walking in tall grass or a cave"
+    },
+    {
+        "id": 2,
+        "name": "old-rod",
+        "english_name": "Fishing with an Old Rod"
+    },
+    {
+        "id": 3,
+        "name": "good-rod",
+        "english_name": "Fishing with a Good Rod"
+    },
+    {
+        "id": 4,
+        "name": "super-rod",
+        "english_name": "Fishing with a Super Rod"
+    },
+    {
+        "id": 5,
+        "name": "surf",
+        "english_name": "Surfing"
+    },
+    {
+        "id": 6,
+        "name": "rock-smash",
+        "english_name": "Smashing rocks"
+    },
+    {
+        "id": 7,
+        "name": "headbutt",
+        "english_name": "Headbutting trees"
+    },
+    {
+        "id": 8,
+        "name": "dark-grass",
+        "english_name": "Walking in dark grass"
+    },
+    {
+        "id": 9,
+        "name": "grass-spots",
+        "english_name": "Walking in rustling grass"
+    },
+    {
+        "id": 10,
+        "name": "cave-spots",
+        "english_name": "Walking in dust clouds"
+    },
+    {
+        "id": 11,
+        "name": "bridge-spots",
+        "english_name": "Walking in bridge shadows"
+    },
+    {
+        "id": 12,
+        "name": "super-rod-spots",
+        "english_name": "Fishing in dark spots"
+    },
+    {
+        "id": 13,
+        "name": "surf-spots",
+        "english_name": "Surfing in dark spots"
+    },
+    {
+        "id": 14,
+        "name": "yellow-flowers",
+        "english_name": "Walking in yellow flowers"
+    },
+    {
+        "id": 15,
+        "name": "purple-flowers",
+        "english_name": "Walking in purple flowers"
+    },
+    {
+        "id": 16,
+        "name": "red-flowers",
+        "english_name": "Walking in red flowers"
+    },
+    {
+        "id": 17,
+        "name": "rough-terrain",
+        "english_name": "Walking on rough terrain"
+    },
+    {
+        "id": 18,
+        "name": "gift",
+        "english_name": "Receive as a gift"
+    },
+    {
+        "id": 19,
+        "name": "gift-egg",
+        "english_name": "Receive egg as a gift"
+    },
+    {
+        "id": 20,
+        "name": "only-one",
+        "english_name": "Static encounter, only one chance"
+    },
+    {
+        "id": 21,
+        "name": "pokeflute",
+        "english_name": "Playing Pokéflute"
+    },
+    {
+        "id": 22,
+        "name": "headbutt-low",
+        "english_name": "Headbutting a low encounter rate tree"
+    },
+    {
+        "id": 23,
+        "name": "headbutt-normal",
+        "english_name": "Headbutting a normal encounter rate tree"
+    },
+    {
+        "id": 24,
+        "name": "headbutt-high",
+        "english_name": "Headbutting a high encounter rate tree"
+    },
+    {
+        "id": 25,
+        "name": "squirt-bottle",
+        "english_name": "Using the Squirt Bottle on a Sudowoodo"
+    },
+    {
+        "id": 26,
+        "name": "wailmer-pail",
+        "english_name": "Using the Wailmer Pail on a Sudowoodo"
+    },
+    {
+        "id": 27,
+        "name": "seaweed",
+        "english_name": "Diving on seaweed"
+    },
+    {
+        "id": 28,
+        "name": "roaming-grass",
+        "english_name": "On any overworld patch of grass"
+    },
+    {
+        "id": 29,
+        "name": "roaming-water",
+        "english_name": "On any overworld water tile"
+    },
+    {
+        "id": 30,
+        "name": "devon-scope",
+        "english_name": "Using Devon Scope"
+    },
+    {
+        "id": 31,
+        "name": "feebas-tile-fishing",
+        "english_name": "Fishing in a Feebas Tile"
+    },
+    {
+        "id": 32,
+        "name": "island-scan",
+        "english_name": null
+    },
+    {
+        "id": 33,
+        "name": "sos-encounter",
+        "english_name": null
+    },
+    {
+        "id": 34,
+        "name": "bubbling-spots",
+        "english_name": null
+    },
+    {
+        "id": 35,
+        "name": "berry-piles",
+        "english_name": null
+    },
+    {
+        "id": 36,
+        "name": "npc-trade",
+        "english_name": null
+    },
+    {
+        "id": 37,
+        "name": "sos-from-bubbling-spot",
+        "english_name": null
+    }
+]
