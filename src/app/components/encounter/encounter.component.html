@@ -7,25 +7,33 @@
 
     <div class="card-content">
       <div class="section">
-        <h3>Locations</h3>
-        <div class="location-grid">
-          <div
-            class="location-item"
-            *ngFor="let location of locations?.results"
-          >
-            {{ location.name | titlecase }}
+        <div class="section-header" (click)="toggleRegions()">
+          <h3>Regions</h3>
+          <span class="collapse-icon" [class.collapsed]="regionsCollapsed">▼</span>
+        </div>
+        <div class="collapsible-content" [class.collapsed]="regionsCollapsed">
+          <div class="location-grid">
+            <div class="location-item region-item" *ngFor="let region of regions?.results"
+              (click)="onRegionSelected(region.name)" [class.selected]="selectedRegion === region.name">
+              {{ region.name | titlecase }}
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="section">
-        <h3>Location Areas</h3>
-        <div class="location-grid">
-          <div
-            class="location-item"
-            *ngFor="let area of locationAreas?.results"
-          >
-            {{ area.name | titlecase }}
+      <div class="section" *ngIf="selectedRegion">
+        <div class="section-header" (click)="toggleLocations()">
+          <h3>Locations in {{ selectedRegion | titlecase }}</h3>
+          <span class="collapse-icon" [class.collapsed]="locationsCollapsed">▼</span>
+        </div>
+        <div class="collapsible-content" [class.collapsed]="locationsCollapsed">
+          <div class="location-grid">
+            <div class="location-item" *ngFor="let location of filteredLocations">
+              {{ location.name | titlecase }}
+            </div>
+          </div>
+          <div *ngIf="filteredLocations.length === 0" class="no-results">
+            <p>No locations found for {{ selectedRegion | titlecase }}</p>
           </div>
         </div>
       </div>
