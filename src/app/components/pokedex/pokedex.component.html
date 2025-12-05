@@ -13,125 +13,140 @@
               [(ngModel)]="searchTerm"
               (input)="onSearchChange(searchTerm)"
               placeholder="Enter pokemon name or ID"
+            />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Generation Filter -->
+        <div class="filter-section">
+          <h3>Generation</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Generation</mat-label>
+            <mat-select
+              [(ngModel)]="selectedGeneration"
+              (selectionChange)="onGenerationChange(selectedGeneration)"
+            >
+              <mat-option value="">All Generations</mat-option>
+              @for (generation of pokemonService.generations; track generation)
+              {
+              <mat-option [value]="generation.name">
+                {{ generation.name }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Type Filter -->
+        <div class="filter-section">
+          <h3>Type</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Types</mat-label>
+            <mat-select
+              [(ngModel)]="selectedTypes"
+              (selectionChange)="onTypeChange(selectedTypes)"
+              multiple
+            >
+              @for (type of availableTypes; track type) {
+              <mat-option [value]="type">
+                {{ type | titlecase }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <div class="filter-section">
+          <button
+            mat-raised-button
+            color="warn"
+            class="full-width"
+            (click)="clearFilters()"
+          >
+            Clear All Filters
+          </button>
+        </div>
+
+        <!-- Results Count -->
+        <div class="filter-section">
+          <p class="results-count">
+            Showing {{ displayedList.length }} of
+            {{ filteredList.length }} Pokemon
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Right Column - Pokemon List -->
+  <div class="pokemon-column">
+    <mat-card class="pokemon-list-card">
+      <mat-card-content class="pokemon-list-content">
+        <div class="pokemon-grid">
+          @for (pokemon of displayedList; track pokemon) {
+          <div
+            class="pokemon-item"
+            (click)="updatePokemon(pokemon); openDialog()"
+          >
+            <div class="pokemon-image-container">
+              <img
+                [src]="pokemon.sprites.front_default"
+                [alt]="pokemon.name"
+                class="pokemon-image"
               />
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-          </div>
-
-          <!-- Generation Filter -->
-          <div class="filter-section">
-            <h3>Generation</h3>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Select Generation</mat-label>
-              <mat-select
-                [(ngModel)]="selectedGeneration"
-                (selectionChange)="onGenerationChange(selectedGeneration)"
-                >
-                <mat-option value="">All Generations</mat-option>
-                @for (generation of pokemonService.generations; track generation) {
-                  <mat-option
-                    [value]="generation.name"
-                    >
-                    {{ generation.name }}
-                  </mat-option>
+            </div>
+            <div class="pokemon-info">
+              <div class="pokemon-id">#{{ pokemon.id }}</div>
+              <div class="pokemon-name">{{ pokemon.name | titlecase }}</div>
+              <div class="pokemon-types">
+                @for (type of pokemon.types; track type) {
+                <span class="type-badge" [class]="'type-' + type.type.name">
+                  {{ type.type.name | titlecase }}
+                </span>
                 }
-              </mat-select>
-            </mat-form-field>
+              </div>
+            </div>
           </div>
+          }
 
-          <!-- Type Filter -->
-          <div class="filter-section">
-            <h3>Type</h3>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Select Types</mat-label>
-              <mat-select
-                [(ngModel)]="selectedTypes"
-                (selectionChange)="onTypeChange(selectedTypes)"
-                multiple
-                >
-                @for (type of availableTypes; track type) {
-                  <mat-option [value]="type">
-                    {{ type | titlecase }}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- Clear Filters Button -->
-          <div class="filter-section">
+          <!-- Load More Button - inside the scrollable grid -->
+          @if (hasMoreItems && displayedList.length > 0) {
+          <div class="load-more-grid-item">
             <button
               mat-raised-button
-              color="warn"
-              class="full-width"
-              (click)="clearFilters()"
-              >
-              Clear All Filters
+              color="primary"
+              (click)="loadMoreItems()"
+              class="load-more-button"
+            >
+              Load More Pokemon
             </button>
           </div>
-
-          <!-- Results Count -->
-          <div class="filter-section">
-            <p class="results-count">
-              Showing {{ displayedList.length }} of
-              {{ filteredList.length }} Pokemon
-            </p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-
-    <!-- Right Column - Pokemon List -->
-    <div class="pokemon-column">
-      <mat-card class="pokemon-list-card">
-        <mat-card-content class="pokemon-list-content">
-          <div class="pokemon-grid">
-            @for (pokemon of displayedList; track pokemon) {
-              <div
-                class="pokemon-item"
-                (click)="updatePokemon(pokemon); openDialog()"
-                >
-                <div class="pokemon-image-container">
-                  <img
-                    [src]="pokemon.sprites.front_default"
-                    [alt]="pokemon.name"
-                    class="pokemon-image"
-                    />
-                  </div>
-                  <div class="pokemon-info">
-                    <div class="pokemon-id">#{{ pokemon.id }}</div>
-                    <div class="pokemon-name">{{ pokemon.name | titlecase }}</div>
-                    <div class="pokemon-types">
-                      @for (type of pokemon.types; track type) {
-                        <span
-                          class="type-badge"
-                          [class]="'type-' + type.type.name"
-                          >
-                          {{ type.type.name | titlecase }}
-                        </span>
-                      }
-                    </div>
-                  </div>
-                </div>
-              }
-
-              <!-- Load More Button - inside the scrollable grid -->
-              @if (hasMoreItems && displayedList.length > 0) {
-                <div
-                  class="load-more-grid-item"
-                  >
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    (click)="loadMoreItems()"
-                    class="load-more-button"
-                    >
-                    Load More Pokemon
-                  </button>
-                </div>
-              }
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+<div class="scroll-container">
+  <div
+    class="card-scroll-container"
+    #scrollContainer
+    (mousedown)="onMouseDown($event)"
+    (mousemove)="onMouseMove($event)"
+    (mouseup)="onMouseUp()"
+    (mouseleave)="onMouseUp()"
+    [class.grabbing]="isDragging"
+  >
+    @for (pokemon of completeList; track pokemon) {
+    <mat-card class="card">
+      <mat-card-content
+        style="display: flex; justify-content: center; align-items: center"
+      >
+        <img [src]="pokemon.sprites.front_default" [alt]="pokemon.name" />
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+</div>

@@ -474,3 +474,55 @@
     font-size: 0.9rem;
   }
 }
+
+.scroll-container {
+  padding: 24px;
+  max-width: 100%;
+}
+
+h1 {
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.card-scroll-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px 0;
+  cursor: grab;
+  user-select: none;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for webkit browsers (Chrome, Safari, Edge) */
+.card-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.card-scroll-container.grabbing {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+.card {
+  min-width: 300px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card-scroll-container.grabbing .card:hover {
+  transform: none;
+}
+
+mat-card-content p {
+  margin: 16px 0;
+  color: #666;
+}

@@ -22,6 +22,127 @@ import { PokemonDialogComponent } from 'src/app/dialogs/pokemon-dialog/pokemon-d
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
+  isDragging = false;
+  startX = 0;
+  scrollLeft = 0;
+  velocityX = 0;
+  lastX = 0;
+  lastTime = 0;
+  momentumId: any;
+
+  cards = [
+    {
+      title: 'Card 1',
+      subtitle: 'First card',
+      content:
+        'This is the content of the first card. Click and drag to scroll through the cards.',
+    },
+    {
+      title: 'Card 2',
+      subtitle: 'Second card',
+      content:
+        'Another card with interesting content. The scroll is smooth and responsive.',
+    },
+    {
+      title: 'Card 3',
+      subtitle: 'Third card',
+      content: 'Keep scrolling to see more cards in this horizontal layout.',
+    },
+    {
+      title: 'Card 4',
+      subtitle: 'Fourth card',
+      content:
+        'Material Design cards look great with this dragging functionality.',
+    },
+    {
+      title: 'Card 5',
+      subtitle: 'Fifth card',
+      content:
+        'You can add as many cards as you need to this scrollable container.',
+    },
+    {
+      title: 'Card 6',
+      subtitle: 'Sixth card',
+      content: 'The drag-to-scroll feature works seamlessly across all cards.',
+    },
+    {
+      title: 'Card 7',
+      subtitle: 'Seventh card',
+      content: 'Almost at the end! This demonstrates the scrolling capability.',
+    },
+    {
+      title: 'Card 8',
+      subtitle: 'Eighth card',
+      content:
+        'Last card in the collection. You can easily scroll back to the beginning.',
+    },
+  ];
+
+  onMouseDown(e: MouseEvent) {
+    this.isDragging = true;
+    const container = e.currentTarget as HTMLElement;
+    this.startX = e.pageX - container.offsetLeft;
+    this.scrollLeft = container.scrollLeft;
+    this.lastX = e.pageX;
+    this.lastTime = Date.now();
+    this.velocityX = 0;
+
+    // Cancel any ongoing momentum
+    if (this.momentumId) {
+      cancelAnimationFrame(this.momentumId);
+    }
+  }
+
+  onMouseMove(e: MouseEvent) {
+    if (!this.isDragging) return;
+    e.preventDefault();
+    const container = e.currentTarget as HTMLElement;
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - this.startX) * 2;
+    container.scrollLeft = this.scrollLeft - walk;
+
+    // Calculate velocity for momentum
+    const currentTime = Date.now();
+    const timeDelta = currentTime - this.lastTime;
+    if (timeDelta > 0) {
+      this.velocityX = (e.pageX - this.lastX) / timeDelta;
+    }
+    this.lastX = e.pageX;
+    this.lastTime = currentTime;
+  }
+
+  onMouseUp() {
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.applyMomentum();
+    }
+  }
+
+  applyMomentum() {
+    const container = document.querySelector(
+      '.card-scroll-container'
+    ) as HTMLElement;
+    if (!container) return;
+
+    const friction = 0.99; // Friction coefficient (higher = longer scroll)
+    const minVelocity = 0.4; // Minimum velocity threshold
+
+    const animate = () => {
+      if (Math.abs(this.velocityX) > minVelocity) {
+        container.scrollLeft -= this.velocityX * 16; // 16ms frame time approximation
+        this.velocityX *= friction;
+        this.momentumId = requestAnimationFrame(animate);
+      } else {
+        this.velocityX = 0;
+      }
+    };
+
+    // Only apply momentum if there's significant velocity
+    if (Math.abs(this.velocityX) > minVelocity) {
+      this.momentumId = requestAnimationFrame(animate);
+    }
+  }
+
   //page controll variables
   isHoveringPokemon: boolean = false;
   isLoading: boolean = true;
