@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -16,10 +15,12 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,37 +34,42 @@ import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.component';
 
-@NgModule({ declarations: [
-        AppComponent,
-        PokedexComponent,
-        NavigationComponent,
-        BattleComponent,
-        EncounterComponent,
-        BattleDialogComponent,
-        MoveDialogComponent,
-        PokedexInstructionDialogComponent,
-        PokemonDialogComponent,
-    ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
-        AppRoutingModule,
-        MatFormFieldModule,
-        MatInputModule,
-        FormsModule,
-        MatCardModule,
-        MatButtonModule,
-        MatExpansionModule,
-        BrowserAnimationsModule,
-        MatGridListModule,
-        MatMenuModule,
-        MatTabsModule,
-        MatTableModule,
-        MatListModule,
-        ScrollingModule,
-        MatDividerModule,
-        MatIconModule,
-        MatDialogModule,
-        MatSelectModule,
-        ReactiveFormsModule,
-        MatChipsModule,
-        MatProgressBarModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
-export class AppModule { }
+@NgModule({
+  declarations: [
+    AppComponent,
+    PokedexComponent,
+    NavigationComponent,
+    BattleComponent,
+    EncounterComponent,
+    BattleDialogComponent,
+    MoveDialogComponent,
+    PokedexInstructionDialogComponent,
+    PokemonDialogComponent,
+  ],
+  bootstrap: [AppComponent],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatExpansionModule,
+    MatGridListModule,
+    MatMenuModule,
+    MatTabsModule,
+    MatTableModule,
+    MatListModule,
+    ScrollingModule,
+    MatDividerModule,
+    MatIconModule,
+    MatDialogModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+    MatChipsModule,
+    MatProgressBarModule,
+  ],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
+})
+export class AppModule {}

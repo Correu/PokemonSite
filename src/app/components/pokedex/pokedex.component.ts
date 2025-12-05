@@ -1,4 +1,10 @@
-import { Component, Injectable, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Injectable,
+  Inject,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { DefaultList } from 'src/app/interfaces/defaultList';
@@ -9,10 +15,10 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { PokemonDialogComponent } from 'src/app/dialogs/pokemon-dialog/pokemon-dialog.component';
 
 @Component({
-    selector: 'app-pokedex',
-    templateUrl: './pokedex.component.html',
-    styleUrls: ['./pokedex.component.css'],
-    standalone: false
+  selector: 'app-pokedex',
+  templateUrl: './pokedex.component.html',
+  styleUrls: ['./pokedex.component.css'],
+  standalone: false,
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
@@ -46,8 +52,8 @@ export class PokedexComponent implements OnInit, OnDestroy {
   constructor(
     public pokemonService: PokemonService,
     public dialog: MatDialog,
-    private fp: FormBuilder
-  ) { }
+    @Inject(FormBuilder) private fp: FormBuilder
+  ) {}
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -93,9 +99,9 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
   private extractAvailableTypes(): void {
     const typesSet = new Set<string>();
-    this.completeList.forEach(pokemon => {
+    this.completeList.forEach((pokemon) => {
       if (pokemon.types) {
-        pokemon.types.forEach(type => {
+        pokemon.types.forEach((type) => {
           if (type.type && type.type.name) {
             typesSet.add(type.type.name);
           }
@@ -126,26 +132,31 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
     // Filter by generation
     if (this.selectedGeneration) {
-      const generation = this.pokemonService.generations.find(g => g.name === this.selectedGeneration);
+      const generation = this.pokemonService.generations.find(
+        (g) => g.name === this.selectedGeneration
+      );
       if (generation) {
         const start = generation.start;
-        const end = Math.min(start + generation.quantity, this.completeList.length);
+        const end = Math.min(
+          start + generation.quantity,
+          this.completeList.length
+        );
         filtered = filtered.slice(start, end);
       }
     }
 
     // Filter by type - Pokemon must have ALL selected types
     if (this.selectedTypes.length > 0) {
-      filtered = filtered.filter(pokemon => {
+      filtered = filtered.filter((pokemon) => {
         if (!pokemon.types) return false;
 
         // Get the Pokemon's type names
         const pokemonTypeNames = pokemon.types
-          .map(type => type.type?.name)
-          .filter(name => name !== undefined) as string[];
+          .map((type) => type.type?.name)
+          .filter((name) => name !== undefined) as string[];
 
         // Check if Pokemon has ALL selected types
-        return this.selectedTypes.every(selectedType =>
+        return this.selectedTypes.every((selectedType) =>
           pokemonTypeNames.includes(selectedType)
         );
       });
@@ -154,9 +165,10 @@ export class PokedexComponent implements OnInit, OnDestroy {
     // Filter by search term
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(searchLower) ||
-        pokemon.id.toString().includes(searchLower)
+      filtered = filtered.filter(
+        (pokemon) =>
+          pokemon.name.toLowerCase().includes(searchLower) ||
+          pokemon.id.toString().includes(searchLower)
       );
     }
 
