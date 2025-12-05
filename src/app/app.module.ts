@@ -19,7 +19,7 @@ import { MatChipsModule } from '@angular/material/chips';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,44 +33,37 @@ import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.component';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    PokedexComponent,
-    NavigationComponent,
-    BattleComponent,
-    EncounterComponent,
-    BattleDialogComponent,
-    MoveDialogComponent,
-    PokedexInstructionDialogComponent,
-    PokemonDialogComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatExpansionModule,
-    BrowserAnimationsModule,
-    MatGridListModule,
-    MatMenuModule,
-    MatTabsModule,
-    MatTableModule,
-    MatListModule,
-    ScrollingModule,
-    MatDividerModule,
-    MatIconModule,
-    MatDialogModule,
-    MatSelectModule,
-    ReactiveFormsModule,
-    MatChipsModule,
-    MatProgressBarModule,
-  ],
-  providers: [],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        PokedexComponent,
+        NavigationComponent,
+        BattleComponent,
+        EncounterComponent,
+        BattleDialogComponent,
+        MoveDialogComponent,
+        PokedexInstructionDialogComponent,
+        PokemonDialogComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatExpansionModule,
+        BrowserAnimationsModule,
+        MatGridListModule,
+        MatMenuModule,
+        MatTabsModule,
+        MatTableModule,
+        MatListModule,
+        ScrollingModule,
+        MatDividerModule,
+        MatIconModule,
+        MatDialogModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+        MatChipsModule,
+        MatProgressBarModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
