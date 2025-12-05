@@ -9,9 +9,10 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { PokemonDialogComponent } from 'src/app/dialogs/pokemon-dialog/pokemon-dialog.component';
 
 @Component({
-  selector: 'app-pokedex',
-  templateUrl: './pokedex.component.html',
-  styleUrls: ['./pokedex.component.css'],
+    selector: 'app-pokedex',
+    templateUrl: './pokedex.component.html',
+    styleUrls: ['./pokedex.component.css'],
+    standalone: false
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {

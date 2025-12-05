@@ -4,9 +4,10 @@ import { Move } from 'src/app/interfaces/move';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 
 @Component({
-  selector: 'app-move-dialog',
-  templateUrl: './move-dialog.component.html',
-  styleUrls: ['./move-dialog.component.css'],
+    selector: 'app-move-dialog',
+    templateUrl: './move-dialog.component.html',
+    styleUrls: ['./move-dialog.component.css'],
+    standalone: false
 })
 export class MoveDialogComponent {
   moveInfo!: Move;

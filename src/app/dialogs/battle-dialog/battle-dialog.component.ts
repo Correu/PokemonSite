@@ -9,9 +9,10 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { SocketService } from '../../services/socket/socket.service';
 
 @Component({
-  selector: 'app-battle-dialog',
-  templateUrl: './battle-dialog.component.html',
-  styleUrls: ['./battle-dialog.component.css'],
+    selector: 'app-battle-dialog',
+    templateUrl: './battle-dialog.component.html',
+    styleUrls: ['./battle-dialog.component.css'],
+    standalone: false
 })
 export class BattleDialogComponent implements OnInit {
   currentStep = 1;
