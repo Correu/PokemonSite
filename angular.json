@@ -53,10 +53,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "PokemonSite:build:production"
+              "buildTarget": "PokemonSite:build:production"
             },
             "development": {
-              "browserTarget": "PokemonSite:build:development"
+              "buildTarget": "PokemonSite:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -64,7 +64,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "PokemonSite:build"
+            "buildTarget": "PokemonSite:build"
           }
         },
         "test": {
