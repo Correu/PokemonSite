@@ -30,54 +30,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
   lastTime = 0;
   momentumId: any;
 
-  cards = [
-    {
-      title: 'Card 1',
-      subtitle: 'First card',
-      content:
-        'This is the content of the first card. Click and drag to scroll through the cards.',
-    },
-    {
-      title: 'Card 2',
-      subtitle: 'Second card',
-      content:
-        'Another card with interesting content. The scroll is smooth and responsive.',
-    },
-    {
-      title: 'Card 3',
-      subtitle: 'Third card',
-      content: 'Keep scrolling to see more cards in this horizontal layout.',
-    },
-    {
-      title: 'Card 4',
-      subtitle: 'Fourth card',
-      content:
-        'Material Design cards look great with this dragging functionality.',
-    },
-    {
-      title: 'Card 5',
-      subtitle: 'Fifth card',
-      content:
-        'You can add as many cards as you need to this scrollable container.',
-    },
-    {
-      title: 'Card 6',
-      subtitle: 'Sixth card',
-      content: 'The drag-to-scroll feature works seamlessly across all cards.',
-    },
-    {
-      title: 'Card 7',
-      subtitle: 'Seventh card',
-      content: 'Almost at the end! This demonstrates the scrolling capability.',
-    },
-    {
-      title: 'Card 8',
-      subtitle: 'Eighth card',
-      content:
-        'Last card in the collection. You can easily scroll back to the beginning.',
-    },
-  ];
-
   onMouseDown(e: MouseEvent) {
     this.isDragging = true;
     const container = e.currentTarget as HTMLElement;
@@ -109,6 +61,9 @@ export class PokedexComponent implements OnInit, OnDestroy {
     }
     this.lastX = e.pageX;
     this.lastTime = currentTime;
+
+    // Update centered card during drag
+    this.updateCenteredCard(container);
   }
 
   onMouseUp() {
@@ -131,15 +86,90 @@ export class PokedexComponent implements OnInit, OnDestroy {
       if (Math.abs(this.velocityX) > minVelocity) {
         container.scrollLeft -= this.velocityX * 16; // 16ms frame time approximation
         this.velocityX *= friction;
+        this.updateCenteredCard(container);
         this.momentumId = requestAnimationFrame(animate);
       } else {
         this.velocityX = 0;
+        this.snapToNearestCard(container);
       }
     };
 
     // Only apply momentum if there's significant velocity
     if (Math.abs(this.velocityX) > minVelocity) {
       this.momentumId = requestAnimationFrame(animate);
+    } else {
+      this.snapToNearestCard(container);
+    }
+  }
+
+  updateCenteredCard(container: HTMLElement): void {
+    const cards = container.querySelectorAll('.card');
+    if (cards.length === 0) return;
+
+    const containerCenter = container.clientWidth / 2;
+    const containerRect = container.getBoundingClientRect();
+
+    let closestCard: HTMLElement | null = null;
+    let closestDistance = Infinity;
+
+    Array.from(cards).forEach((card) => {
+      const cardElement = card as HTMLElement;
+      const cardRect = cardElement.getBoundingClientRect();
+      const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+      const distance = Math.abs(containerCenter - cardCenter);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestCard = cardElement;
+      }
+    });
+
+    if (closestCard) {
+      const cardIndex = Array.from(cards).indexOf(closestCard);
+      if (cardIndex >= 0 && cardIndex < this.completeList.length) {
+        this.selectedPokemon = this.completeList[cardIndex];
+      }
+    }
+  }
+
+  snapToNearestCard(container: HTMLElement): void {
+    const cards = container.querySelectorAll('.card');
+    if (cards.length === 0) return;
+
+    const containerCenter = container.clientWidth / 2;
+    const containerRect = container.getBoundingClientRect();
+    let closestCard: HTMLElement | null = null;
+    let closestDistance = Infinity;
+
+    Array.from(cards).forEach((card) => {
+      const cardElement = card as HTMLElement;
+      if (cardElement) {
+        const cardRect = cardElement.getBoundingClientRect();
+        const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+        const distance = Math.abs(containerCenter - cardCenter);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestCard = cardElement;
+        }
+      }
+    });
+
+    if (closestCard) {
+      const cardElement = closestCard as HTMLElement;
+      const cardRect = cardElement.getBoundingClientRect();
+      const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+      const scrollOffset = cardCenter - containerCenter;
+
+      container.scrollTo({
+        left: container.scrollLeft + scrollOffset,
+        behavior: 'smooth'
+      });
+
+      const cardIndex = Array.from(cards).indexOf(cardElement);
+      if (cardIndex >= 0 && cardIndex < this.completeList.length) {
+        this.selectedPokemon = this.completeList[cardIndex];
+      }
     }
   }
 
@@ -174,7 +204,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     public pokemonService: PokemonService,
     public dialog: MatDialog,
     @Inject(FormBuilder) private fp: FormBuilder
-  ) {}
+  ) { }
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -191,6 +221,18 @@ export class PokedexComponent implements OnInit, OnDestroy {
       .subscribe((filteredList) => {
         //this.filteredList = filteredList;
       });
+
+    // Set up scroll listener for auto-centering
+    setTimeout(() => {
+      const container = document.querySelector('.card-scroll-container') as HTMLElement;
+      if (container) {
+        container.addEventListener('scroll', () => {
+          if (!this.isDragging) {
+            this.updateCenteredCard(container);
+          }
+        });
+      }
+    }, 100);
   }
 
   ngOnDestroy(): void {
@@ -215,6 +257,14 @@ export class PokedexComponent implements OnInit, OnDestroy {
       this.selectedPokemon = this.filteredList[0];
       this.extractAvailableTypes();
       this.initializePagination();
+
+      // Center the first card after list loads
+      setTimeout(() => {
+        const container = document.querySelector('.card-scroll-container') as HTMLElement;
+        if (container && this.completeList.length > 0) {
+          this.snapToNearestCard(container);
+        }
+      }, 100);
     });
   }
 

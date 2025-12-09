@@ -2,7 +2,6 @@ export interface Pokemon {
   abilities: Ability[];
   base_experience: number;
   forms: Form[];
-  game_indices: Index[];
   height: number;
   held_items: HeldItem[];
   id: string;
@@ -11,9 +10,6 @@ export interface Pokemon {
   moves: Mfe[];
   name: string;
   order: number;
-  past_abilities: any[];
-  past_types: any[];
-  species: Species;
   sprites: Sprites;
   stats: Stat[];
   types: Type[];
@@ -34,11 +30,6 @@ export interface Ability2 {
 export interface Form {
   name: string;
   url: string;
-}
-
-export interface Index {
-  game_index: number;
-  version: Version;
 }
 
 export interface Version {
@@ -88,11 +79,6 @@ export interface MoveLearnMethod {
 }
 
 export interface VersionGroup {
-  name: string;
-  url: string;
-}
-
-export interface Species {
   name: string;
   url: string;
 }
