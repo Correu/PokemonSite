@@ -1,4 +1,10 @@
-import { Component, Injectable, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Injectable,
+  Inject,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { DefaultList } from 'src/app/interfaces/defaultList';
@@ -12,9 +18,161 @@ import { PokemonDialogComponent } from 'src/app/dialogs/pokemon-dialog/pokemon-d
   selector: 'app-pokedex',
   templateUrl: './pokedex.component.html',
   styleUrls: ['./pokedex.component.css'],
+  standalone: false,
 })
 @Injectable()
 export class PokedexComponent implements OnInit, OnDestroy {
+  isDragging = false;
+  startX = 0;
+  scrollLeft = 0;
+  velocityX = 0;
+  lastX = 0;
+  lastTime = 0;
+  momentumId: any;
+
+  onMouseDown(e: MouseEvent) {
+    this.isDragging = true;
+    const container = e.currentTarget as HTMLElement;
+    this.startX = e.pageX - container.offsetLeft;
+    this.scrollLeft = container.scrollLeft;
+    this.lastX = e.pageX;
+    this.lastTime = Date.now();
+    this.velocityX = 0;
+
+    // Cancel any ongoing momentum
+    if (this.momentumId) {
+      cancelAnimationFrame(this.momentumId);
+    }
+  }
+
+  onMouseMove(e: MouseEvent) {
+    if (!this.isDragging) return;
+    e.preventDefault();
+    const container = e.currentTarget as HTMLElement;
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - this.startX) * 2;
+    container.scrollLeft = this.scrollLeft - walk;
+
+    // Calculate velocity for momentum
+    const currentTime = Date.now();
+    const timeDelta = currentTime - this.lastTime;
+    if (timeDelta > 0) {
+      this.velocityX = (e.pageX - this.lastX) / timeDelta;
+    }
+    this.lastX = e.pageX;
+    this.lastTime = currentTime;
+
+    // Update centered card during drag
+    this.updateCenteredCard(container);
+  }
+
+  onMouseUp() {
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.applyMomentum();
+    }
+  }
+
+  applyMomentum() {
+    const container = document.querySelector(
+      '.card-scroll-container'
+    ) as HTMLElement;
+    if (!container) return;
+
+    const friction = 0.99; // Friction coefficient (higher = longer scroll)
+    const minVelocity = 0.4; // Minimum velocity threshold
+
+    const animate = () => {
+      if (Math.abs(this.velocityX) > minVelocity) {
+        container.scrollLeft -= this.velocityX * 16; // 16ms frame time approximation
+        this.velocityX *= friction;
+        this.updateCenteredCard(container);
+        this.momentumId = requestAnimationFrame(animate);
+      } else {
+        this.velocityX = 0;
+        this.snapToNearestCard(container);
+      }
+    };
+
+    // Only apply momentum if there's significant velocity
+    if (Math.abs(this.velocityX) > minVelocity) {
+      this.momentumId = requestAnimationFrame(animate);
+    } else {
+      this.snapToNearestCard(container);
+    }
+  }
+
+  updateCenteredCard(container: HTMLElement): void {
+    const cards = container.querySelectorAll('.card');
+    if (cards.length === 0) return;
+
+    const containerCenter = container.clientWidth / 2;
+    const containerRect = container.getBoundingClientRect();
+
+    let closestCard: HTMLElement | null = null;
+    let closestDistance = Infinity;
+
+    Array.from(cards).forEach((card) => {
+      const cardElement = card as HTMLElement;
+      const cardRect = cardElement.getBoundingClientRect();
+      const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+      const distance = Math.abs(containerCenter - cardCenter);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestCard = cardElement;
+      }
+    });
+
+    if (closestCard) {
+      const cardIndex = Array.from(cards).indexOf(closestCard);
+      if (cardIndex >= 0 && cardIndex < this.completeList.length) {
+        this.selectedPokemon = this.completeList[cardIndex];
+      }
+    }
+  }
+
+  snapToNearestCard(container: HTMLElement): void {
+    const cards = container.querySelectorAll('.card');
+    if (cards.length === 0) return;
+
+    const containerCenter = container.clientWidth / 2;
+    const containerRect = container.getBoundingClientRect();
+    let closestCard: HTMLElement | null = null;
+    let closestDistance = Infinity;
+
+    Array.from(cards).forEach((card) => {
+      const cardElement = card as HTMLElement;
+      if (cardElement) {
+        const cardRect = cardElement.getBoundingClientRect();
+        const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+        const distance = Math.abs(containerCenter - cardCenter);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestCard = cardElement;
+        }
+      }
+    });
+
+    if (closestCard) {
+      const cardElement = closestCard as HTMLElement;
+      const cardRect = cardElement.getBoundingClientRect();
+      const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+      const scrollOffset = cardCenter - containerCenter;
+
+      container.scrollTo({
+        left: container.scrollLeft + scrollOffset,
+        behavior: 'smooth'
+      });
+
+      const cardIndex = Array.from(cards).indexOf(cardElement);
+      if (cardIndex >= 0 && cardIndex < this.completeList.length) {
+        this.selectedPokemon = this.completeList[cardIndex];
+      }
+    }
+  }
+
   //page controll variables
   isHoveringPokemon: boolean = false;
   isLoading: boolean = true;
@@ -45,7 +203,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
   constructor(
     public pokemonService: PokemonService,
     public dialog: MatDialog,
-    private fp: FormBuilder
+    @Inject(FormBuilder) private fp: FormBuilder
   ) { }
 
   //initially load the page to the first pokedex (national dex)
@@ -63,6 +221,18 @@ export class PokedexComponent implements OnInit, OnDestroy {
       .subscribe((filteredList) => {
         //this.filteredList = filteredList;
       });
+
+    // Set up scroll listener for auto-centering
+    setTimeout(() => {
+      const container = document.querySelector('.card-scroll-container') as HTMLElement;
+      if (container) {
+        container.addEventListener('scroll', () => {
+          if (!this.isDragging) {
+            this.updateCenteredCard(container);
+          }
+        });
+      }
+    }, 100);
   }
 
   ngOnDestroy(): void {
@@ -87,14 +257,22 @@ export class PokedexComponent implements OnInit, OnDestroy {
       this.selectedPokemon = this.filteredList[0];
       this.extractAvailableTypes();
       this.initializePagination();
+
+      // Center the first card after list loads
+      setTimeout(() => {
+        const container = document.querySelector('.card-scroll-container') as HTMLElement;
+        if (container && this.completeList.length > 0) {
+          this.snapToNearestCard(container);
+        }
+      }, 100);
     });
   }
 
   private extractAvailableTypes(): void {
     const typesSet = new Set<string>();
-    this.completeList.forEach(pokemon => {
+    this.completeList.forEach((pokemon) => {
       if (pokemon.types) {
-        pokemon.types.forEach(type => {
+        pokemon.types.forEach((type) => {
           if (type.type && type.type.name) {
             typesSet.add(type.type.name);
           }
@@ -125,26 +303,31 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
     // Filter by generation
     if (this.selectedGeneration) {
-      const generation = this.pokemonService.generations.find(g => g.name === this.selectedGeneration);
+      const generation = this.pokemonService.generations.find(
+        (g) => g.name === this.selectedGeneration
+      );
       if (generation) {
         const start = generation.start;
-        const end = Math.min(start + generation.quantity, this.completeList.length);
+        const end = Math.min(
+          start + generation.quantity,
+          this.completeList.length
+        );
         filtered = filtered.slice(start, end);
       }
     }
 
     // Filter by type - Pokemon must have ALL selected types
     if (this.selectedTypes.length > 0) {
-      filtered = filtered.filter(pokemon => {
+      filtered = filtered.filter((pokemon) => {
         if (!pokemon.types) return false;
 
         // Get the Pokemon's type names
         const pokemonTypeNames = pokemon.types
-          .map(type => type.type?.name)
-          .filter(name => name !== undefined) as string[];
+          .map((type) => type.type?.name)
+          .filter((name) => name !== undefined) as string[];
 
         // Check if Pokemon has ALL selected types
-        return this.selectedTypes.every(selectedType =>
+        return this.selectedTypes.every((selectedType) =>
           pokemonTypeNames.includes(selectedType)
         );
       });
@@ -153,9 +336,10 @@ export class PokedexComponent implements OnInit, OnDestroy {
     // Filter by search term
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(searchLower) ||
-        pokemon.id.toString().includes(searchLower)
+      filtered = filtered.filter(
+        (pokemon) =>
+          pokemon.name.toLowerCase().includes(searchLower) ||
+          pokemon.id.toString().includes(searchLower)
       );
     }
 

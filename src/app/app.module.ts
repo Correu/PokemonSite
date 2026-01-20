@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -18,10 +17,14 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -47,17 +50,17 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     PokedexInstructionDialogComponent,
     PokemonDialogComponent,
   ],
+  bootstrap: [AppComponent],
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule,
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
     MatCardModule,
     MatButtonModule,
     MatExpansionModule,
-    BrowserAnimationsModule,
     MatGridListModule,
     MatMenuModule,
     MatTabsModule,
@@ -74,7 +77,6 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     MatCheckboxModule,
     MatTooltipModule,
   ],
-  providers: [],
-  bootstrap: [AppComponent],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
 })
-export class AppModule { }
+export class AppModule {}

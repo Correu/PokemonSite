@@ -10,9 +10,10 @@ import { SocketService } from 'src/app/services/socket/socket.service';
 import { Item } from 'src/app/interfaces/item';
 
 @Component({
-  selector: 'app-battle',
-  templateUrl: './battle.component.html',
-  styleUrls: ['./battle.component.css'],
+    selector: 'app-battle',
+    templateUrl: './battle.component.html',
+    styleUrls: ['./battle.component.css'],
+    standalone: false
 })
 
 @Injectable()

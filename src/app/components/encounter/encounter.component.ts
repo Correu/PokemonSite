@@ -3,9 +3,10 @@ import { DefaultList } from 'src/app/interfaces/defaultList';
 import { EncounterService } from 'src/app/services/encounter/encounter.service';
 
 @Component({
-  selector: 'app-encounter',
-  templateUrl: './encounter.component.html',
-  styleUrls: ['./encounter.component.css'],
+    selector: 'app-encounter',
+    templateUrl: './encounter.component.html',
+    styleUrls: ['./encounter.component.css'],
+    standalone: false
 })
 export class EncounterComponent implements OnInit {
   locations!: DefaultList;
