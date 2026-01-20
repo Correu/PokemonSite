@@ -15,6 +15,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -69,6 +71,8 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     ReactiveFormsModule,
     MatChipsModule,
     MatProgressBarModule,
+    MatCheckboxModule,
+    MatTooltipModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

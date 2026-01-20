@@ -1,0 +1,52 @@
+.battle-key-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.info-text {
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.share-instructions {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: -0.5rem;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.battle-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkbox-container {
+  margin: 0.5rem 0;
+}
+
+.error-message {
+  color: #f44336;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+

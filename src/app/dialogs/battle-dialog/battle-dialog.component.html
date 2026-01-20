@@ -15,7 +15,7 @@
     <h2>Join an Existing Game</h2>
     <mat-form-field appearance="outline">
       <mat-label>Room Key</mat-label>
-      <input matInput [(ngModel)]="joinRoomKey" placeholder="Enter Room Key" name="joinRoomKey" />
+      <input matInput placeholder="Enter Room Key" name="joinRoomKey" />
     </mat-form-field>
     <div *ngIf="joinError" class="error-message">{{ joinError }}</div>
     <div class="button-container">
@@ -28,32 +28,32 @@
     </div>
   </div>
 
-  <div *ngIf="currentStep === 2">
-    <div *ngIf="mode === 'create'">
-      <h2>Battle Room Created!</h2>
-      <div class="battle-key-container">
-        <p>Your Battle Room Key:</p>
-        <mat-form-field appearance="outline">
-          <input matInput [value]="battleKey" readonly />
-          <button mat-icon-button matSuffix (click)="copyToClipboard(battleKey)">
-            <mat-icon>content_copy</mat-icon>
-          </button>
-        </mat-form-field>
+  <div *ngIf="currentStep === 2 && mode === 'create'">
+    <h2>Battle Room Created!</h2>
+    <p class="info-text">Share this room key with your friend to invite them to battle:</p>
+    <div class="battle-key-container">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Room Key</mat-label>
+        <input matInput [value]="battleKey" readonly />
+        <button mat-icon-button matSuffix (click)="copyToClipboard(battleKey)" matTooltip="Copy to clipboard">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </mat-form-field>
+      <p class="share-instructions">Your friend can join using this key in the "Join Game" option.</p>
+      <div class="button-container">
+        <button mat-stroked-button color="warn" (click)="dialogRef.close()">
+          Cancel
+        </button>
         <button mat-raised-button color="primary" (click)="currentStep = 3">
           Continue to Battle Setup
         </button>
       </div>
     </div>
-    <div *ngIf="mode === 'join'">
-      <h2>Joined Room: {{ battleKey }}</h2>
-      <button mat-raised-button color="primary" (click)="currentStep = 3">
-        Continue to Battle Setup
-      </button>
-    </div>
   </div>
 
   <div *ngIf="currentStep === 3">
     <h2>Battle Setup</h2>
+    <p *ngIf="mode === 'join'" class="info-text">Waiting for host to configure battle settings...</p>
     <form [formGroup]="form" class="battle-form">
       <mat-form-field appearance="outline">
         <mat-label>Pokemon Level</mat-label>
@@ -68,9 +68,28 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
+        <mat-label>Number of Pokemon</mat-label>
+        <input matInput type="number" formControlName="numberOfPokemon" placeholder="1-6" />
+        <mat-error *ngIf="form.get('numberOfPokemon')?.hasError('required')">Number of Pokemon is required</mat-error>
+        <mat-error *ngIf="
+            form.get('numberOfPokemon')?.hasError('min') ||
+            form.get('numberOfPokemon')?.hasError('max')
+          ">
+          Number of Pokemon must be between 1 and 6
+        </mat-error>
+      </mat-form-field>
+
+      <div class="checkbox-container">
+        <mat-checkbox formControlName="useItems" (change)="onUseItemsChange()">
+          Enable Items
+        </mat-checkbox>
+      </div>
+
+      <mat-form-field appearance="outline" *ngIf="form.get('useItems')?.value">
         <mat-label>Item Quantity</mat-label>
         <input matInput type="number" formControlName="itemQuantity" placeholder="0-6" />
-        <mat-error *ngIf="form.get('itemQuantity')?.hasError('required')">Item quantity is required</mat-error>
+        <mat-error *ngIf="form.get('itemQuantity')?.hasError('required')">Item quantity is required when items are
+          enabled</mat-error>
         <mat-error *ngIf="
             form.get('itemQuantity')?.hasError('min') ||
             form.get('itemQuantity')?.hasError('max')
@@ -79,10 +98,17 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <div class="checkbox-container">
+        <mat-checkbox formControlName="useGenerationFilter" (change)="onUseGenerationFilterChange()">
+          Filter by Generation (leave unchecked to use all generations)
+        </mat-checkbox>
+      </div>
+
+      <mat-form-field appearance="outline" *ngIf="form.get('useGenerationFilter')?.value">
         <mat-label>Pokemon Generation</mat-label>
         <input matInput type="number" formControlName="generation" placeholder="1-9" />
-        <mat-error *ngIf="form.get('generation')?.hasError('required')">Generation is required</mat-error>
+        <mat-error *ngIf="form.get('generation')?.hasError('required')">Generation is required when filter is
+          enabled</mat-error>
         <mat-error *ngIf="
             form.get('generation')?.hasError('min') ||
             form.get('generation')?.hasError('max')
@@ -95,8 +121,12 @@
         <button mat-stroked-button color="warn" (click)="dialogRef.close()">
           Cancel
         </button>
-        <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="!form.valid">
+        <button *ngIf="mode === 'create'" mat-raised-button color="primary" (click)="nextStep()"
+          [disabled]="!form.valid">
           Start Battle
+        </button>
+        <button *ngIf="mode === 'join'" mat-raised-button color="primary" disabled>
+          Waiting for Host...
         </button>
       </div>
     </form>
