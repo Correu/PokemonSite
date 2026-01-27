@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { CommonModule } from '@angular/common';
 
@@ -32,10 +33,10 @@ import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { BattleComponent } from './components/battle/battle.component';
 import { EncounterComponent } from './components/encounter/encounter.component';
-import { BattleDialogComponent } from './dialogs/battle-dialog/battle-dialog.component';
 import { MoveDialogComponent } from './dialogs/move-dialog/move-dialog.component';
 import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.component';
 
 @NgModule({
@@ -45,7 +46,6 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     NavigationComponent,
     BattleComponent,
     EncounterComponent,
-    BattleDialogComponent,
     MoveDialogComponent,
     PokedexInstructionDialogComponent,
     PokemonDialogComponent,
@@ -74,9 +74,11 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     ReactiveFormsModule,
     MatChipsModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatCheckboxModule,
     MatTooltipModule,
+    MatSlideToggleModule,
   ],
   providers: [provideHttpClient(withInterceptorsFromDi())],
 })
-export class AppModule {}
+export class AppModule { }
