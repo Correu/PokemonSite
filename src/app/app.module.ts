@@ -81,4 +81,4 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
   ],
   providers: [provideHttpClient(withInterceptorsFromDi())],
 })
-export class AppModule { }
+export class AppModule {}

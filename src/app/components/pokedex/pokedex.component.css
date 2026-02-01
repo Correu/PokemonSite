@@ -245,6 +245,28 @@
   }
 }
 
+/* Toolbar for expand/collapse; stays visible for future "book cover" when content is collapsed */
+.pokedex-toolbar {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Main content wrapper: collapse/expand ready for future vertical book-open animation */
+.pokedex-book-content {
+  overflow: hidden;
+  transition: max-height 0.35s ease-out, opacity 0.3s ease-out;
+  max-height: 2000px; /* large enough for content; collapse animates to 0 */
+  opacity: 1;
+}
+
+.pokedex-book-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .scroll-container {
   padding: 24px;
   max-width: 100%;

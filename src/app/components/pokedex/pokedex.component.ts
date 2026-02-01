@@ -30,6 +30,13 @@ export class PokedexComponent implements OnInit, OnDestroy {
   lastTime = 0;
   momentumId: any;
 
+  /** Toggle for main content wrapper; collapsed state is ready for future "book cover" animation. */
+  isContentExpanded = true;
+
+  toggleContentExpanded(): void {
+    this.isContentExpanded = !this.isContentExpanded;
+  }
+
   onMouseDown(e: MouseEvent) {
     this.isDragging = true;
     const container = e.currentTarget as HTMLElement;
