@@ -1,4 +1,3 @@
-<!-- Closed Pokedex Device -->
 <div
   class="pokedex-device"
   [class.folding-up]="isAnimating && isContentExpanded"
@@ -22,7 +21,6 @@
   role="region"
   [attr.aria-hidden]="!isContentExpanded"
 >
-  <!-- Navigation Bar -->
   @if (isContentExpanded) {
   <nav class="pokedex-navigation">
     <div class="nav-buttons">

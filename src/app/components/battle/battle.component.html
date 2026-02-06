@@ -2,11 +2,22 @@
   <!-- Navigation Bar -->
   <nav class="battle-navigation">
     <div class="nav-buttons">
-      <button mat-raised-button color="primary" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <button
+        mat-raised-button
+        color="primary"
+        routerLink=""
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
         <mat-icon>book</mat-icon>
         Pokedex
       </button>
-      <button mat-raised-button color="accent" routerLink="battle" routerLinkActive="active">
+      <button
+        mat-raised-button
+        color="accent"
+        routerLink="battle"
+        routerLinkActive="active"
+      >
         <mat-icon>sports_esports</mat-icon>
         Battle
       </button>
@@ -14,32 +25,48 @@
   </nav>
 
   <!-- Battle Started Screen -->
-  <div *ngIf="battleStarted" class="battle-screen">
+  @if(battleStarted) {
+  <div class="battle-screen">
     <h1>Battle Arena</h1>
     <p>Battle in progress...</p>
     <!-- Add your actual battle UI here -->
   </div>
+  }
 
   <!-- Pre-Battle Setup Screens -->
-  <div *ngIf="!battleStarted" class="setup-container">
+  @if(!battleStarted) {
+  <div class="setup-container">
     <!-- Step 1: Choose Mode -->
-    <div *ngIf="currentStep === 1 && mode === 'choose'" class="step-container">
+    @if(currentStep === 1 && mode === 'choose') {
+    <div class="step-container">
       <h1>Start a Battle</h1>
       <p class="subtitle">Choose how you want to battle</p>
       <div class="button-container">
-        <button mat-raised-button color="primary" (click)="selectMode('create')" class="mode-button">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="selectMode('create')"
+          class="mode-button"
+        >
           <mat-icon>add_circle</mat-icon>
           Create Game
         </button>
-        <button mat-raised-button color="accent" (click)="mode = 'join'" class="mode-button">
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="mode = 'join'"
+          class="mode-button"
+        >
           <mat-icon>login</mat-icon>
           Join Game
         </button>
       </div>
     </div>
+    }
 
     <!-- Step 2: Create - Configure Battle Settings -->
-    <div *ngIf="currentStep === 2 && mode === 'create'" class="step-container">
+    @if(currentStep === 2 && mode === 'create') {
+    <div class="step-container">
       <h1>Configure Battle Settings</h1>
       <p class="subtitle">Set up your battle parameters</p>
       <form [formGroup]="battleConfigForm" class="battle-form">
@@ -50,7 +77,9 @@
               {{ level }}
             </mat-option>
           </mat-select>
-          <mat-error *ngIf="battleConfigForm.get('level')?.hasError('required')">Level is required</mat-error>
+          <mat-error *ngIf="battleConfigForm.get('level')?.hasError('required')"
+            >Level is required</mat-error
+          >
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -73,32 +102,53 @@
           <button mat-stroked-button color="warn" (click)="cancelCreate()">
             Cancel
           </button>
-          <button mat-raised-button color="primary" (click)="submitBattleConfig()" [disabled]="!battleConfigForm.valid">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="submitBattleConfig()"
+            [disabled]="!battleConfigForm.valid"
+          >
             Create Game
           </button>
         </div>
       </form>
     </div>
+    }
 
     <!-- Step 3: Create - Share Room Key -->
-    <div *ngIf="currentStep === 3 && mode === 'create'" class="step-container">
+    @if(currentStep === 3 && mode === 'create') {
+    <div class="step-container">
       <h1>Battle Room Created!</h1>
-      <p class="info-text">Share this room key with your friend to invite them to battle:</p>
+      <p class="info-text">
+        Share this room key with your friend to invite them to battle:
+      </p>
       <div class="battle-key-container">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Room Key</mat-label>
           <input matInput [value]="battleKey" readonly />
-          <button mat-icon-button matSuffix (click)="copyToClipboard(battleKey)" matTooltip="Copy to clipboard">
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="copyToClipboard(battleKey)"
+            matTooltip="Copy to clipboard"
+          >
             <mat-icon>content_copy</mat-icon>
           </button>
         </mat-form-field>
-        <p class="share-instructions">Your friend can join using this key in the "Join Game" option.</p>
+        <p class="share-instructions">
+          Your friend can join using this key in the "Join Game" option.
+        </p>
 
         <div class="config-summary">
           <h3>Battle Configuration:</h3>
           <p><strong>Level:</strong> {{ battleConfig?.level }}</p>
-          <p><strong>Generation:</strong> {{ battleConfig?.generation || 'All' }}</p>
-          <p><strong>Items:</strong> {{ battleConfig?.useItems ? 'Enabled' : 'Disabled' }}</p>
+          <p>
+            <strong>Generation:</strong> {{ battleConfig?.generation || "All" }}
+          </p>
+          <p>
+            <strong>Items:</strong>
+            {{ battleConfig?.useItems ? "Enabled" : "Disabled" }}
+          </p>
         </div>
 
         <div class="button-container">
@@ -111,36 +161,55 @@
         </div>
       </div>
     </div>
+    }
 
     <!-- Step 1: Join Mode - Enter Room Key -->
-    <div *ngIf="currentStep === 1 && mode === 'join'" class="step-container">
+    @if(currentStep === 1 && mode === 'join') {
+    <div class="step-container">
       <h1>Join an Existing Game</h1>
       <p class="subtitle">Enter the room key provided by your friend</p>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Room Key</mat-label>
-        <input matInput placeholder="Enter Room Key" [(ngModel)]="joinRoomKey" />
+        <input
+          matInput
+          placeholder="Enter Room Key"
+          [(ngModel)]="joinRoomKey"
+        />
       </mat-form-field>
-      <div *ngIf="joinError" class="error-message">
+      @if(joinError) {
+      <div class="error-message">
         <mat-icon>error</mat-icon>
         {{ joinError }}
       </div>
+      }
       <div class="button-container">
         <button mat-stroked-button color="primary" (click)="cancelJoin()">
           Back
         </button>
-        <button mat-raised-button color="accent" (click)="tryJoinRoom()" [disabled]="!joinRoomKey">
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="tryJoinRoom()"
+          [disabled]="!joinRoomKey"
+        >
           Join Game
         </button>
       </div>
     </div>
+    }
 
     <!-- Step 4: Join Mode - Waiting for Host -->
-    <div *ngIf="currentStep === 4 && mode === 'join'" class="step-container">
+    @if (currentStep === 4 && mode === 'join') {
+    <div class="step-container">
       <h1>Battle Setup</h1>
       <div class="waiting-container">
         <mat-spinner diameter="50"></mat-spinner>
-        <p class="info-text">Waiting for host to configure battle settings...</p>
-        <p class="room-info">Room: <strong>{{ battleKey }}</strong></p>
+        <p class="info-text">
+          Waiting for host to configure battle settings...
+        </p>
+        <p class="room-info">
+          Room: <strong>{{ battleKey }}</strong>
+        </p>
       </div>
       <div class="button-container">
         <button mat-stroked-button color="warn" (click)="cancelJoin()">
@@ -148,5 +217,7 @@
         </button>
       </div>
     </div>
+    }
   </div>
+  }
 </div>
