@@ -32,12 +32,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { BattleComponent } from './components/battle/battle.component';
-import { EncounterComponent } from './components/encounter/encounter.component';
-import { MoveDialogComponent } from './dialogs/move-dialog/move-dialog.component';
-import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.component';
 
 @NgModule({
   declarations: [
@@ -45,10 +41,6 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     PokedexComponent,
     NavigationComponent,
     BattleComponent,
-    EncounterComponent,
-    MoveDialogComponent,
-    PokedexInstructionDialogComponent,
-    PokemonDialogComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -78,6 +70,7 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     MatCheckboxModule,
     MatTooltipModule,
     MatSlideToggleModule,
+    MatProgressSpinnerModule,
   ],
   providers: [provideHttpClient(withInterceptorsFromDi())],
 })

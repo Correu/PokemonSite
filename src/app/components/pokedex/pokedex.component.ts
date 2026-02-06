@@ -13,7 +13,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { PokemonDialogComponent } from 'src/app/dialogs/pokemon-dialog/pokemon-dialog.component';
 import { PokedexAccessService } from 'src/app/services/pokedex-access/pokedex-access.service';
 
 @Component({
@@ -32,7 +31,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
   lastTime = 0;
   momentumId: any;
 
-  /** Toggle for main content wrapper; collapsed state shows closed Pokedex device. */
   isContentExpanded = false;
   isAnimating = false;
 
@@ -40,23 +38,20 @@ export class PokedexComponent implements OnInit, OnDestroy {
     if (this.isAnimating) return;
 
     if (!this.isContentExpanded) {
-      // Opening: start animation, then expand content
       this.isAnimating = true;
-      // Mark pokedex as opened when user opens it
       this.pokedexAccessService.markPokedexOpened();
       setTimeout(() => {
         this.isContentExpanded = true;
         setTimeout(() => {
           this.isAnimating = false;
-        }, 350); // Match animation duration
+        }, 350);
       }, 50);
     } else {
-      // Closing: collapse content, then show device
       this.isAnimating = true;
       this.isContentExpanded = false;
       setTimeout(() => {
         this.isAnimating = false;
-      }, 400); // Match animation duration
+      }, 400);
     }
   }
 
@@ -73,7 +68,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
     this.lastTime = Date.now();
     this.velocityX = 0;
 
-    // Cancel any ongoing momentum
     if (this.momentumId) {
       cancelAnimationFrame(this.momentumId);
     }
@@ -87,7 +81,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
     const walk = (x - this.startX) * 2;
     container.scrollLeft = this.scrollLeft - walk;
 
-    // Calculate velocity for momentum
     const currentTime = Date.now();
     const timeDelta = currentTime - this.lastTime;
     if (timeDelta > 0) {
@@ -96,7 +89,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
     this.lastX = e.pageX;
     this.lastTime = currentTime;
 
-    // Update centered card during drag
     this.updateCenteredCard(container);
   }
 
@@ -113,12 +105,12 @@ export class PokedexComponent implements OnInit, OnDestroy {
     ) as HTMLElement;
     if (!container) return;
 
-    const friction = 0.99; // Friction coefficient (higher = longer scroll)
-    const minVelocity = 0.4; // Minimum velocity threshold
+    const friction = 0.99;
+    const minVelocity = 0.4;
 
     const animate = () => {
       if (Math.abs(this.velocityX) > minVelocity) {
-        container.scrollLeft -= this.velocityX * 16; // 16ms frame time approximation
+        container.scrollLeft -= this.velocityX * 16;
         this.velocityX *= friction;
         this.updateCenteredCard(container);
         this.momentumId = requestAnimationFrame(animate);
@@ -128,7 +120,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
       }
     };
 
-    // Only apply momentum if there's significant velocity
     if (Math.abs(this.velocityX) > minVelocity) {
       this.momentumId = requestAnimationFrame(animate);
     } else {
@@ -149,7 +140,8 @@ export class PokedexComponent implements OnInit, OnDestroy {
     Array.from(cards).forEach((card) => {
       const cardElement = card as HTMLElement;
       const cardRect = cardElement.getBoundingClientRect();
-      const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+      const cardCenter =
+        cardRect.left - containerRect.left + cardRect.width / 2;
       const distance = Math.abs(containerCenter - cardCenter);
 
       if (distance < closestDistance) {
@@ -179,7 +171,8 @@ export class PokedexComponent implements OnInit, OnDestroy {
       const cardElement = card as HTMLElement;
       if (cardElement) {
         const cardRect = cardElement.getBoundingClientRect();
-        const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+        const cardCenter =
+          cardRect.left - containerRect.left + cardRect.width / 2;
         const distance = Math.abs(containerCenter - cardCenter);
 
         if (distance < closestDistance) {
@@ -192,12 +185,13 @@ export class PokedexComponent implements OnInit, OnDestroy {
     if (closestCard) {
       const cardElement = closestCard as HTMLElement;
       const cardRect = cardElement.getBoundingClientRect();
-      const cardCenter = cardRect.left - containerRect.left + cardRect.width / 2;
+      const cardCenter =
+        cardRect.left - containerRect.left + cardRect.width / 2;
       const scrollOffset = cardCenter - containerCenter;
 
       container.scrollTo({
         left: container.scrollLeft + scrollOffset,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
 
       const cardIndex = Array.from(cards).indexOf(cardElement);
@@ -207,7 +201,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     }
   }
 
-  //page controll variables
+  //page control variables
   isHoveringPokemon: boolean = false;
   isLoading: boolean = true;
 
@@ -240,7 +234,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     @Inject(FormBuilder) private fp: FormBuilder,
     private router: Router,
     private pokedexAccessService: PokedexAccessService
-  ) { }
+  ) {}
 
   //initially load the page to the first pokedex (national dex)
   ngOnInit(): void {
@@ -258,7 +252,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
         //this.filteredList = filteredList;
       });
 
-    // Auto-open pokedex if it was previously opened
     if (this.pokedexAccessService.isPokedexOpened()) {
       setTimeout(() => {
         if (!this.isContentExpanded && !this.isAnimating) {
@@ -267,9 +260,10 @@ export class PokedexComponent implements OnInit, OnDestroy {
       }, 100);
     }
 
-    // Set up scroll listener for auto-centering
     setTimeout(() => {
-      const container = document.querySelector('.card-scroll-container') as HTMLElement;
+      const container = document.querySelector(
+        '.card-scroll-container'
+      ) as HTMLElement;
       if (container) {
         container.addEventListener('scroll', () => {
           if (!this.isDragging) {
@@ -303,9 +297,10 @@ export class PokedexComponent implements OnInit, OnDestroy {
       this.extractAvailableTypes();
       this.initializePagination();
 
-      // Center the first card after list loads
       setTimeout(() => {
-        const container = document.querySelector('.card-scroll-container') as HTMLElement;
+        const container = document.querySelector(
+          '.card-scroll-container'
+        ) as HTMLElement;
         if (container && this.completeList.length > 0) {
           this.snapToNearestCard(container);
         }
@@ -361,24 +356,20 @@ export class PokedexComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Filter by type - Pokemon must have ALL selected types
     if (this.selectedTypes.length > 0) {
       filtered = filtered.filter((pokemon) => {
         if (!pokemon.types) return false;
 
-        // Get the Pokemon's type names
         const pokemonTypeNames = pokemon.types
           .map((type) => type.type?.name)
           .filter((name) => name !== undefined) as string[];
 
-        // Check if Pokemon has ALL selected types
         return this.selectedTypes.every((selectedType) =>
           pokemonTypeNames.includes(selectedType)
         );
       });
     }
 
-    // Filter by search term
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -453,15 +444,5 @@ export class PokedexComponent implements OnInit, OnDestroy {
     const end = Math.min(start + count, this.completeList.length);
 
     return this.completeList.slice(start, end);
-  }
-
-  openDialog() {
-    this.dialog.open(PokemonDialogComponent, {
-      width: 'auto',
-      height: 'auto',
-      maxHeight: '90vh',
-      panelClass: 'custom-dialog-container',
-      data: { pokemon: this.selectedPokemon },
-    });
   }
 }
