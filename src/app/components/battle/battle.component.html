@@ -1,4 +1,18 @@
 <div class="battle-container">
+  <!-- Navigation Bar -->
+  <nav class="battle-navigation">
+    <div class="nav-buttons">
+      <button mat-raised-button color="primary" routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <mat-icon>book</mat-icon>
+        Pokedex
+      </button>
+      <button mat-raised-button color="accent" routerLink="battle" routerLinkActive="active">
+        <mat-icon>sports_esports</mat-icon>
+        Battle
+      </button>
+    </div>
+  </nav>
+
   <!-- Battle Started Screen -->
   <div *ngIf="battleStarted" class="battle-screen">
     <h1>Battle Arena</h1>

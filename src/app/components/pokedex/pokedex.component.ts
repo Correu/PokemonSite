@@ -5,6 +5,7 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { DefaultList } from 'src/app/interfaces/defaultList';
@@ -13,6 +14,7 @@ import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { PokemonDialogComponent } from 'src/app/dialogs/pokemon-dialog/pokemon-dialog.component';
+import { PokedexAccessService } from 'src/app/services/pokedex-access/pokedex-access.service';
 
 @Component({
   selector: 'app-pokedex',
@@ -30,11 +32,36 @@ export class PokedexComponent implements OnInit, OnDestroy {
   lastTime = 0;
   momentumId: any;
 
-  /** Toggle for main content wrapper; collapsed state is ready for future "book cover" animation. */
-  isContentExpanded = true;
+  /** Toggle for main content wrapper; collapsed state shows closed Pokedex device. */
+  isContentExpanded = false;
+  isAnimating = false;
 
   toggleContentExpanded(): void {
-    this.isContentExpanded = !this.isContentExpanded;
+    if (this.isAnimating) return;
+
+    if (!this.isContentExpanded) {
+      // Opening: start animation, then expand content
+      this.isAnimating = true;
+      // Mark pokedex as opened when user opens it
+      this.pokedexAccessService.markPokedexOpened();
+      setTimeout(() => {
+        this.isContentExpanded = true;
+        setTimeout(() => {
+          this.isAnimating = false;
+        }, 350); // Match animation duration
+      }, 50);
+    } else {
+      // Closing: collapse content, then show device
+      this.isAnimating = true;
+      this.isContentExpanded = false;
+      setTimeout(() => {
+        this.isAnimating = false;
+      }, 400); // Match animation duration
+    }
+  }
+
+  closePokedex(): void {
+    this.toggleContentExpanded();
   }
 
   onMouseDown(e: MouseEvent) {
@@ -210,7 +237,9 @@ export class PokedexComponent implements OnInit, OnDestroy {
   constructor(
     public pokemonService: PokemonService,
     public dialog: MatDialog,
-    @Inject(FormBuilder) private fp: FormBuilder
+    @Inject(FormBuilder) private fp: FormBuilder,
+    private router: Router,
+    private pokedexAccessService: PokedexAccessService
   ) { }
 
   //initially load the page to the first pokedex (national dex)
@@ -228,6 +257,15 @@ export class PokedexComponent implements OnInit, OnDestroy {
       .subscribe((filteredList) => {
         //this.filteredList = filteredList;
       });
+
+    // Auto-open pokedex if it was previously opened
+    if (this.pokedexAccessService.isPokedexOpened()) {
+      setTimeout(() => {
+        if (!this.isContentExpanded && !this.isAnimating) {
+          this.isContentExpanded = true;
+        }
+      }, 100);
+    }
 
     // Set up scroll listener for auto-centering
     setTimeout(() => {

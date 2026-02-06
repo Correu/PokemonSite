@@ -245,26 +245,192 @@
   }
 }
 
-/* Toolbar for expand/collapse; stays visible for future "book cover" when content is collapsed */
-.pokedex-toolbar {
-  margin-bottom: 12px;
+/* Closed Pokedex Device - Red box with blue circle button */
+.pokedex-device {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
+  min-height: 400px;
+  cursor: pointer;
+  transition: transform 0.4s ease-out, opacity 0.3s ease-out;
+  position: relative;
+  z-index: 10;
 }
 
-/* Main content wrapper: collapse/expand ready for future vertical book-open animation */
+.pokedex-device.hidden {
+  display: none;
+}
+
+.pokedex-device.folding-down {
+  display: flex;
+  animation: fold-down-appear 0.4s ease-out;
+}
+
+@keyframes fold-down-appear {
+  0% {
+    transform: translateY(-100%) rotateX(90deg);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateY(0) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+.pokedex-device.folding-up {
+  transform: translateY(-100%) rotateX(90deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pokedex-device-body {
+  width: 300px;
+  height: 400px;
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 2px 8px rgba(255, 255, 255, 0.1),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  border: 3px solid #8b0000;
+}
+
+.pokedex-device:hover .pokedex-device-body {
+  transform: scale(1.05);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 2px 8px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.pokedex-device-button {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  border-radius: 50%;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #0d47a1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pokedex-device:hover .pokedex-device-button {
+  transform: scale(1.1);
+  box-shadow:
+    0 6px 16px rgba(25, 118, 210, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.pokedex-device:active .pokedex-device-body {
+  transform: scale(0.98);
+}
+
+.pokedex-device:active .pokedex-device-button {
+  transform: scale(0.95);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Close Button */
+.pokedex-close-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.pokedex-close-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+.pokedex-close-button:active {
+  transform: scale(0.95);
+}
+
+.pokedex-close-button mat-icon {
+  color: #d32f2f;
+}
+
+/* Main content wrapper: collapse/expand with fold-up animation */
 .pokedex-book-content {
   overflow: hidden;
-  transition: max-height 0.35s ease-out, opacity 0.3s ease-out;
-  max-height: 2000px; /* large enough for content; collapse animates to 0 */
+  transition: max-height 0.35s ease-out, opacity 0.3s ease-out, transform 0.4s ease-out;
+  max-height: 2000px;
+  /* large enough for content; collapse animates to 0 */
   opacity: 1;
+  transform: perspective(1000px) rotateX(0deg);
+  transform-origin: top center;
+  position: relative;
 }
 
 .pokedex-book-content.collapsed {
   max-height: 0;
   opacity: 0;
   pointer-events: none;
+  transform: perspective(1000px) rotateX(-90deg);
+}
+
+.pokedex-book-content.opening {
+  transform: perspective(1000px) rotateX(0deg);
+  animation: unfold 0.4s ease-out;
+}
+
+.pokedex-book-content.closing {
+  animation: fold-down 0.4s ease-out;
+}
+
+@keyframes unfold {
+  0% {
+    transform: perspective(1000px) rotateX(-90deg);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: perspective(1000px) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes fold-down {
+  0% {
+    transform: perspective(1000px) rotateX(0deg);
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: perspective(1000px) rotateX(-90deg);
+    opacity: 0;
+  }
 }
 
 .scroll-container {
@@ -396,4 +562,95 @@ h1 {
 mat-card-content p {
   margin: 16px 0;
   color: #666;
+}
+
+/* Navigation Bar Styles */
+.pokedex-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 16px;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-buttons button.active {
+  background-color: rgba(25, 118, 210, 0.1);
+  border: 2px solid #1976d2;
+}
+
+.pokedex-close-button-nav {
+  background: rgba(211, 47, 47, 0.1);
+  transition: all 0.2s ease;
+}
+
+.pokedex-close-button-nav:hover {
+  background: rgba(211, 47, 47, 0.2);
+  transform: scale(1.1);
+}
+
+.pokedex-close-button-nav mat-icon {
+  color: #d32f2f;
+}
+
+.pokedex-close-button-nav:active {
+  transform: scale(0.95);
+}
+
+/* Responsive navigation */
+@media (max-width: 600px) {
+  .pokedex-navigation {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-buttons {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .nav-buttons button {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .nav-buttons button mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .pokedex-close-button-nav {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
 }
