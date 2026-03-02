@@ -1,3 +1,10 @@
+.app-container,
+.main-content {
+  min-height: 100vh;
+  width: 100%;
+  display: block;
+}
+
 .navbar-style {
   background-color: red;
   min-height: 4.2vh;

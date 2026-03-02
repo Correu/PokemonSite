@@ -13,7 +13,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { PokedexAccessService } from 'src/app/services/pokedex-access/pokedex-access.service';
 
 @Component({
   selector: 'app-pokedex',
@@ -30,34 +29,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
   lastX = 0;
   lastTime = 0;
   momentumId: any;
-
-  isContentExpanded = false;
-  isAnimating = false;
-
-  toggleContentExpanded(): void {
-    if (this.isAnimating) return;
-
-    if (!this.isContentExpanded) {
-      this.isAnimating = true;
-      this.pokedexAccessService.markPokedexOpened();
-      setTimeout(() => {
-        this.isContentExpanded = true;
-        setTimeout(() => {
-          this.isAnimating = false;
-        }, 350);
-      }, 50);
-    } else {
-      this.isAnimating = true;
-      this.isContentExpanded = false;
-      setTimeout(() => {
-        this.isAnimating = false;
-      }, 400);
-    }
-  }
-
-  closePokedex(): void {
-    this.toggleContentExpanded();
-  }
 
   onMouseDown(e: MouseEvent) {
     this.isDragging = true;
@@ -232,8 +203,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     public pokemonService: PokemonService,
     public dialog: MatDialog,
     @Inject(FormBuilder) private fp: FormBuilder,
-    private router: Router,
-    private pokedexAccessService: PokedexAccessService
+    private router: Router
   ) {}
 
   //initially load the page to the first pokedex (national dex)
@@ -251,14 +221,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
       .subscribe((filteredList) => {
         //this.filteredList = filteredList;
       });
-
-    if (this.pokedexAccessService.isPokedexOpened()) {
-      setTimeout(() => {
-        if (!this.isContentExpanded && !this.isAnimating) {
-          this.isContentExpanded = true;
-        }
-      }, 100);
-    }
 
     setTimeout(() => {
       const container = document.querySelector(

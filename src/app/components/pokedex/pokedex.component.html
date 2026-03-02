@@ -1,113 +1,116 @@
+<!-- Selected Pokemon – pokedex entry style -->
 <div
-  class="pokedex-device"
-  [class.folding-up]="isAnimating && isContentExpanded"
-  [class.folding-down]="isAnimating && !isContentExpanded"
-  [class.hidden]="isContentExpanded && !isAnimating"
-  (click)="!isContentExpanded && toggleContentExpanded()"
-  role="button"
-  tabindex="0"
-  [attr.aria-label]="'Open Pokedex'"
+  animate.enter="collapse"
+  animate.leave="expand"
+  class="pokedex-entry-panel"
 >
-  <div class="pokedex-device-body">
-    <div class="pokedex-device-button"></div>
+  @if (selectedPokemon) {
+  <div class="pokedex-entry-inner">
+    <div class="pokedex-entry-image-wrap">
+      <img
+        [src]="selectedPokemon.sprites.front_default"
+        [alt]="selectedPokemon.name"
+        class="pokedex-entry-sprite"
+      />
+    </div>
+    <div class="pokedex-entry-details">
+      <div class="pokedex-entry-id">
+        No. {{ selectedPokemon.id | number : '3.0-0' }}
+      </div>
+      <h2 class="pokedex-entry-name">
+        {{ selectedPokemon.name | titlecase }}
+      </h2>
+      <div class="pokedex-entry-types">
+        @for (type of selectedPokemon.types; track type) {
+        <span class="type-badge" [class]="'type-' + type.type.name">
+          {{ type.type.name | titlecase }}
+        </span>
+        }
+      </div>
+      <div class="pokedex-entry-meta-layout">
+        <div class="pokedex-entry-info-block">
+          <div class="pokedex-entry-stats">
+            <span class="stat-line">
+              <strong>Weight</strong>
+              {{ (selectedPokemon.weight / 4.536).toFixed(1) }} lbs
+            </span>
+            @if (selectedPokemon.height) {
+            <span class="stat-line">
+              <strong>Height</strong>
+              {{ (selectedPokemon.height * 0.328084).toFixed(1) }} ft
+            </span>
+            }
+            <span class="stat-line">
+              <strong>Base EXP</strong>
+              {{ selectedPokemon.base_experience }}
+            </span>
+          </div>
+
+          @if (selectedPokemon.abilities?.length) {
+          <div class="pokedex-entry-abilities">
+            <div class="section-title">Abilities</div>
+            <ul>
+              @for (ability of selectedPokemon.abilities; track ability) {
+              <li>
+                {{ ability.ability.name | titlecase }}
+                @if (ability.is_hidden) {
+                <span class="ability-tag">Hidden</span>
+                }
+              </li>
+              }
+            </ul>
+          </div>
+          }
+        </div>
+
+        <div class="pokedex-entry-stats-block">
+          <div class="section-title">Base Stats</div>
+          @for (stat of selectedPokemon.stats; track stat) {
+          <div class="stat-row">
+            <div class="stat-name">
+              {{ stat.stat.name | uppercase }}
+            </div>
+            <div class="stat-bar">
+              <div
+                class="stat-bar-fill"
+                [style.width.%]="(stat.base_stat / 255) * 100"
+              ></div>
+            </div>
+            <div class="stat-value">
+              {{ stat.base_stat }}
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
   </div>
+  }
 </div>
 
+<!-- Scrollable Pokemon strip -->
 <div
-  class="pokedex-book-content"
-  [class.collapsed]="!isContentExpanded"
-  [class.opening]="isAnimating && isContentExpanded"
-  [class.closing]="isAnimating && !isContentExpanded"
-  role="region"
-  [attr.aria-hidden]="!isContentExpanded"
+  class="card-scroll-container"
+  #scrollContainer
+  (mousedown)="onMouseDown($event)"
+  (mousemove)="onMouseMove($event)"
+  (mouseup)="onMouseUp()"
+  (mouseleave)="onMouseUp()"
+  [class.grabbing]="isDragging"
 >
-  @if (isContentExpanded) {
-  <nav class="pokedex-navigation">
-    <div class="nav-buttons">
-      <button
-        mat-raised-button
-        color="primary"
-        routerLink=""
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <mat-icon>book</mat-icon>
-        Pokedex
-      </button>
-      <button
-        mat-raised-button
-        color="accent"
-        routerLink="battle"
-        routerLinkActive="active"
-      >
-        <mat-icon>sports_esports</mat-icon>
-        Battle
-      </button>
-    </div>
-    <button
-      class="pokedex-close-button-nav"
-      (click)="closePokedex()"
-      aria-label="Close Pokedex"
-      mat-icon-button
-      type="button"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-  </nav>
-  }
-
-  <div
-    animate.enter="collapse"
-    animate.leave="expand"
-    class="selected-pokemon-header"
+  @for (pokemon of completeList; track pokemon) {
+  <mat-card
+    class="pokemon-card"
+    [class.selected]="selectedPokemon?.id === pokemon.id"
+    (click)="updatePokemon(pokemon)"
   >
-    @if (selectedPokemon) {
-    <div class="selected-pokemon-display">
-      <div class="selected-pokemon-image">
-        <img
-          [src]="selectedPokemon.sprites.front_default"
-          [alt]="selectedPokemon.name"
-        />
-      </div>
-      <div class="selected-pokemon-info">
-        <div class="selected-pokemon-id">#{{ selectedPokemon.id }}</div>
-        <div class="selected-pokemon-name">
-          {{ selectedPokemon.name | titlecase }}
-        </div>
-        <div class="selected-pokemon-types">
-          @for (type of selectedPokemon.types; track type) {
-          <span class="type-badge" [class]="'type-' + type.type.name">
-            {{ type.type.name | titlecase }}
-          </span>
-          }
-          <div type="number">
-            {{ (selectedPokemon.weight / 4.536).toFixed(2) }} lbs
-          </div>
-        </div>
-      </div>
-    </div>
-    }
-  </div>
-  <div
-    class="card-scroll-container"
-    #scrollContainer
-    (mousedown)="onMouseDown($event)"
-    (mousemove)="onMouseMove($event)"
-    (mouseup)="onMouseUp()"
-    (mouseleave)="onMouseUp()"
-    [class.grabbing]="isDragging"
-  >
-    @for (pokemon of completeList; track pokemon) {
-    <mat-card
-      class="card"
-      [class.selected]="selectedPokemon?.id === pokemon.id"
-    >
-      <mat-card-content
-        style="display: flex; justify-content: center; align-items: center"
-      >
+    <mat-card-content class="pokemon-card-content">
+      <div class="pokemon-card-sprite">
         <img [src]="pokemon.sprites.front_default" [alt]="pokemon.name" />
-      </mat-card-content>
-    </mat-card>
-    }
-  </div>
+      </div>
+      <div class="pokemon-card-id">#{{ pokemon.id | number : '3.0-0' }}</div>
+      <div class="pokemon-card-name">{{ pokemon.name | titlecase }}</div>
+    </mat-card-content>
+  </mat-card>
+  }
 </div>
