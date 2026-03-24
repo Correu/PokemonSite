@@ -5,6 +5,32 @@
   display: block;
 }
 
+.app-banner {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(90deg, #ff9800, #ffc107);
+  color: #212121;
+  font-size: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.app-banner-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.app-banner-text {
+  opacity: 0.9;
+}
+
 .navbar-style {
   background-color: red;
   min-height: 4.2vh;
