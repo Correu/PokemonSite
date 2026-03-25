@@ -1,0 +1,73 @@
+<div class="pokedex-shell-wrapper">
+  <div class="pokedex-flip-container">
+    <!-- Device (base): left side, click to open when closed -->
+    <div
+      class="pokedex-device"
+      (click)="!isContentExpanded && toggleContentExpanded()"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="'Open Pokedex'"
+    >
+      <div class="pokedex-device-body">
+        <div class="pokedex-device-button"></div>
+      </div>
+    </div>
+
+    <!-- Content (screen): hinge on left, rotates right-to-left when opening -->
+    <div
+      class="pokedex-content-wrapper"
+      [class.content-open]="isContentExpanded"
+    >
+      <div
+        class="pokedex-book-content"
+        [class.content-open]="isContentExpanded"
+        role="region"
+        [attr.aria-hidden]="!isContentExpanded"
+      >
+        <!-- Inner pokedex screen: bezel + viewport -->
+        <div class="pokedex-inner-screen">
+      @if (isContentExpanded) {
+      <nav class="pokedex-navigation">
+        <div class="nav-buttons">
+          <button
+            mat-raised-button
+            color="primary"
+            routerLink=""
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <mat-icon>book</mat-icon>
+            Pokedex
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            routerLink="battle"
+            routerLinkActive="active"
+          >
+            <mat-icon>sports_esports</mat-icon>
+            Battle
+          </button>
+        </div>
+        <button
+          class="pokedex-close-button-nav"
+          (click)="closePokedex()"
+          aria-label="Close Pokedex"
+          mat-icon-button
+          type="button"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </nav>
+      }
+      <div
+        class="pokedex-outlet-wrapper"
+        [class.pokedex-outlet-visible]="isContentExpanded"
+      >
+        <router-outlet></router-outlet>
+      </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

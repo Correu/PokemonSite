@@ -26,7 +26,7 @@ export class PokemonService {
     { name: 'Generation 4', quantity: 107, start: 386 },
     { name: 'Generation 5', quantity: 156, start: 493 },
     { name: 'Generation 6', quantity: 72, start: 649 },
-    { name: 'Generation 7', quantity: 88, start: 722 },
+    { name: 'Generation 7', quantity: 88, start: 721 },
     { name: 'Generation 8', quantity: 96, start: 809 },
     { name: 'Generation 9', quantity: 120, start: 906 },
   ];
