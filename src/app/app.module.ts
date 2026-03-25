@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -15,47 +14,47 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
+import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { PokedexShellComponent } from './components/pokedex-shell/pokedex-shell.component';
 import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { BattleComponent } from './components/battle/battle.component';
-import { EncounterComponent } from './components/encounter/encounter.component';
-import { BattleDialogComponent } from './dialogs/battle-dialog/battle-dialog.component';
-import { MoveDialogComponent } from './dialogs/move-dialog/move-dialog.component';
-import { PokedexInstructionDialogComponent } from './dialogs/pokedex-instruction-dialog/pokedex-instruction-dialog.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
     AppComponent,
+    PokedexShellComponent,
     PokedexComponent,
     NavigationComponent,
     BattleComponent,
-    EncounterComponent,
-    BattleDialogComponent,
-    MoveDialogComponent,
-    PokedexInstructionDialogComponent,
-    PokemonDialogComponent,
   ],
+  bootstrap: [AppComponent],
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule,
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
     MatCardModule,
     MatButtonModule,
     MatExpansionModule,
-    BrowserAnimationsModule,
     MatGridListModule,
     MatMenuModule,
     MatTabsModule,
@@ -69,8 +68,12 @@ import { PokemonDialogComponent } from './dialogs/pokemon-dialog/pokemon-dialog.
     ReactiveFormsModule,
     MatChipsModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatCheckboxModule,
+    MatTooltipModule,
+    MatSlideToggleModule,
+    MatProgressSpinnerModule,
   ],
-  providers: [],
-  bootstrap: [AppComponent],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
 })
-export class AppModule { }
+export class AppModule {}
