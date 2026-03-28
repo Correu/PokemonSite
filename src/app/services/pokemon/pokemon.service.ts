@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { Pokemon } from '../../interfaces/pokemon';
 import { Move } from '../../interfaces/move';
 import { DefaultList } from 'src/app/interfaces/defaultList';
@@ -18,6 +18,20 @@ export class PokemonService {
 
   playerTeam: Pokemon[] = [];
   enemyTeam: Pokemon[] = [];
+
+  private readonly selectedPokedexSubject = new BehaviorSubject<
+    Pokemon | undefined
+  >(undefined);
+  readonly selectedPokedexPokemon$ =
+    this.selectedPokedexSubject.asObservable();
+
+  setPokedexSelection(pokemon: Pokemon | undefined): void {
+    this.selectedPokedexSubject.next(pokemon);
+  }
+
+  get selectedPokedexPokemon(): Pokemon | undefined {
+    return this.selectedPokedexSubject.value;
+  }
 
   generations = [
     { name: 'Generation 1', quantity: 151, start: 0 },

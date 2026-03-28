@@ -16,6 +16,9 @@ import { Item } from 'src/app/interfaces/item';
 
 @Injectable()
 export class BattleComponent {
+  /** When true, only the placeholder UI is shown; full flow is disabled. */
+  readonly battleUnderDevelopment = true;
+
   //assign the values to display, carried from the service.
   playerTeam: Pokemon[] = this.pokemonService.playerTeam;
   enemyTeam: Pokemon[] = this.pokemonService.enemyTeam;
@@ -73,6 +76,9 @@ export class BattleComponent {
   }
 
   async ngOnInit(): Promise<void> {
+    if (this.battleUnderDevelopment) {
+      return;
+    }
     if (!this.pokemonService.battleLoad) {
       const { teamA, teamB } = await this.battleService.getRandomTeams();
       this.teamA = teamA;

@@ -1,71 +1,208 @@
 <div class="pokedex-shell-wrapper">
-  <div class="pokedex-flip-container">
-    <!-- Device (base): left side, click to open when closed -->
-    <div
-      class="pokedex-device"
-      (click)="!isContentExpanded && toggleContentExpanded()"
-      role="button"
-      tabindex="0"
-      [attr.aria-label]="'Open Pokedex'"
-    >
-      <div class="pokedex-device-body">
-        <div class="pokedex-device-button"></div>
-      </div>
-    </div>
-
-    <!-- Content (screen): hinge on left, rotates right-to-left when opening -->
-    <div
-      class="pokedex-content-wrapper"
-      [class.content-open]="isContentExpanded"
-    >
+  <div class="pokedex-outer-frame">
+    <div class="pokedex-flip-container">
+      @if (!isContentExpanded) {
       <div
-        class="pokedex-book-content"
-        [class.content-open]="isContentExpanded"
-        role="region"
-        [attr.aria-hidden]="!isContentExpanded"
+        class="pokedex-device"
+        (click)="toggleContentExpanded()"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="toggleContentExpanded()"
+        (keydown.space)="$event.preventDefault(); toggleContentExpanded()"
+        [attr.aria-label]="'Open Pokedex'"
       >
-        <!-- Inner pokedex screen: bezel + viewport -->
-        <div class="pokedex-inner-screen">
-      @if (isContentExpanded) {
-      <nav class="pokedex-navigation">
-        <div class="nav-buttons">
-          <button
-            mat-raised-button
-            color="primary"
-            routerLink=""
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            <mat-icon>book</mat-icon>
-            Pokedex
-          </button>
-          <button
-            mat-raised-button
-            color="accent"
-            routerLink="battle"
-            routerLinkActive="active"
-          >
-            <mat-icon>sports_esports</mat-icon>
-            Battle
-          </button>
+        <div class="pokedex-device-body">
+          <div class="pokedex-device-button"></div>
         </div>
-        <button
-          class="pokedex-close-button-nav"
-          (click)="closePokedex()"
-          aria-label="Close Pokedex"
-          mat-icon-button
-          type="button"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      </nav>
-      }
-      <div
-        class="pokedex-outlet-wrapper"
-        [class.pokedex-outlet-visible]="isContentExpanded"
-      >
-        <router-outlet></router-outlet>
       </div>
+      }
+
+      <div
+        class="pokedex-content-wrapper"
+        [class.content-open]="isContentExpanded"
+      >
+        <div
+          class="pokedex-book-content"
+          [class.content-open]="isContentExpanded"
+          role="region"
+          [attr.aria-hidden]="!isContentExpanded"
+        >
+          <div
+            class="pokedex-kanto-chassis"
+            [class.pokedex-kanto-chassis--open]="isContentExpanded"
+          >
+            <div class="kanto-left-panel">
+              <div class="kanto-left-header">
+                <div class="kanto-lens" aria-hidden="true"></div>
+                <div class="kanto-led-row" aria-hidden="true">
+                  <span class="kanto-led kanto-led--red"></span>
+                  <span class="kanto-led kanto-led--yellow"></span>
+                  <span class="kanto-led kanto-led--green"></span>
+                </div>
+              </div>
+
+              <ng-container *ngIf="selectedPokemon$ | async as selectedPokemon">
+                <div class="kanto-main-lcd">
+                  <div class="kanto-lcd-bezel">
+                    <div class="kanto-lcd-dots" aria-hidden="true">
+                      <span></span><span></span>
+                    </div>
+                    <div class="kanto-lcd-screen">
+                      <div class="kanto-sprite-wrap">
+                        <img
+                          [src]="selectedPokemon.sprites.front_default"
+                          [alt]="selectedPokemon.name"
+                          class="kanto-sprite"
+                        />
+                      </div>
+                      <div class="kanto-name-bar">
+                        {{ selectedPokemon.name | uppercase }} #{{
+                          selectedPokemon.id
+                        }}
+                      </div>
+                    </div>
+                    <div class="kanto-lcd-footer" aria-hidden="true">
+                      <span class="kanto-lcd-btn"></span>
+                      <span class="kanto-lcd-grill"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="kanto-left-details">
+                  <div class="pokedex-entry-types">
+                    @for (type of selectedPokemon.types; track type) {
+                    <span
+                      class="type-badge"
+                      [class]="'type-' + type.type.name"
+                    >
+                      {{ type.type.name | titlecase }}
+                    </span>
+                    }
+                  </div>
+                  <div class="pokedex-entry-meta-layout">
+                    <div class="pokedex-entry-info-block">
+                      <div class="pokedex-entry-stats">
+                        <span class="stat-line">
+                          <strong>Weight</strong>
+                          {{
+                            (selectedPokemon.weight / 4.536).toFixed(1)
+                          }}
+                          lbs
+                        </span>
+                        @if (selectedPokemon.height) {
+                        <span class="stat-line">
+                          <strong>Height</strong>
+                          {{
+                            (selectedPokemon.height * 0.328084).toFixed(1)
+                          }}
+                          ft
+                        </span>
+                        }
+                        <span class="stat-line">
+                          <strong>Base EXP</strong>
+                          {{ selectedPokemon.base_experience }}
+                        </span>
+                      </div>
+
+                      @if (selectedPokemon.abilities.length) {
+                      <div class="pokedex-entry-abilities">
+                        <div class="section-title">Abilities</div>
+                        <ul>
+                          @for (
+                            ability of selectedPokemon.abilities;
+                            track ability
+                          ) {
+                          <li>
+                            {{ ability.ability.name | titlecase }}
+                            @if (ability.is_hidden) {
+                            <span class="ability-tag">Hidden</span>
+                            }
+                          </li>
+                          }
+                        </ul>
+                      </div>
+                      }
+                    </div>
+
+                    <div class="pokedex-entry-stats-block">
+                      <div class="section-title">Base Stats</div>
+                      @for (stat of selectedPokemon.stats; track stat) {
+                      <div class="stat-row">
+                        <div class="stat-name">
+                          {{ stat.stat.name | uppercase }}
+                        </div>
+                        <div class="stat-bar">
+                          <div
+                            class="stat-bar-fill"
+                            [style.width.%]="(stat.base_stat / 255) * 100"
+                          ></div>
+                        </div>
+                        <div class="stat-value">
+                          {{ stat.base_stat }}
+                        </div>
+                      </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+              <div class="kanto-left-deco" aria-hidden="true">
+                <span class="kanto-deco-circle"></span>
+                <span class="kanto-deco-pills"></span>
+              </div>
+            </div>
+
+            <div class="kanto-hinge" aria-hidden="true"></div>
+
+            <div class="kanto-right-panel">
+              <div class="kanto-right-top">
+                <div class="kanto-secondary-lcd">
+                  <span class="kanto-secondary-label">Mode</span>
+                </div>
+                <button
+                  class="pokedex-close-fab"
+                  (click)="closePokedex()"
+                  aria-label="Close Pokedex"
+                  mat-icon-button
+                  type="button"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+
+              <div class="pokedex-tab-grid">
+                @for (tab of navTabs; track tab.id) {
+                @if (tab.disabled || tab.route === null) {
+                <span
+                  class="pokedex-tab-key pokedex-tab-key--reserved"
+                  [attr.data-tab]="tab.id"
+                  >{{ tab.label }}</span
+                >
+                } @else {
+                <a
+                  class="pokedex-tab-key"
+                  [routerLink]="tabRouterLink(tab)"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{
+                    exact: tab.exact ?? false,
+                  }"
+                  >{{ tab.label }}</a
+                >
+                } }
+              </div>
+
+              <div class="kanto-nav-deco" aria-hidden="true">
+                <span class="kanto-mini-led"></span>
+                <span class="kanto-mini-led"></span>
+                <span class="kanto-arrow-pad"></span>
+              </div>
+
+              <div class="pokedex-outlet-wrapper">
+                <router-outlet></router-outlet>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

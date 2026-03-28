@@ -5,7 +5,6 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { DefaultList } from 'src/app/interfaces/defaultList';
@@ -99,7 +98,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
   }
 
   updateCenteredCard(container: HTMLElement): void {
-    const cards = container.querySelectorAll('.card');
+    const cards = container.querySelectorAll('.pokemon-card');
     if (cards.length === 0) return;
 
     const containerCenter = container.clientWidth / 2;
@@ -124,13 +123,13 @@ export class PokedexComponent implements OnInit, OnDestroy {
     if (closestCard) {
       const cardIndex = Array.from(cards).indexOf(closestCard);
       if (cardIndex >= 0 && cardIndex < this.completeList.length) {
-        this.selectedPokemon = this.completeList[cardIndex];
+        this.setSelectedPokemon(this.completeList[cardIndex]);
       }
     }
   }
 
   snapToNearestCard(container: HTMLElement): void {
-    const cards = container.querySelectorAll('.card');
+    const cards = container.querySelectorAll('.pokemon-card');
     if (cards.length === 0) return;
 
     const containerCenter = container.clientWidth / 2;
@@ -167,9 +166,14 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
       const cardIndex = Array.from(cards).indexOf(cardElement);
       if (cardIndex >= 0 && cardIndex < this.completeList.length) {
-        this.selectedPokemon = this.completeList[cardIndex];
+        this.setSelectedPokemon(this.completeList[cardIndex]);
       }
     }
+  }
+
+  private setSelectedPokemon(pokemon: Pokemon | undefined): void {
+    this.selectedPokemon = pokemon;
+    this.pokemonService.setPokedexSelection(pokemon);
   }
 
   //page control variables
@@ -202,8 +206,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
   constructor(
     public pokemonService: PokemonService,
     public dialog: MatDialog,
-    @Inject(FormBuilder) private fp: FormBuilder,
-    private router: Router
+    @Inject(FormBuilder) private fp: FormBuilder
   ) {}
 
   //initially load the page to the first pokedex (national dex)
@@ -255,7 +258,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
     this.pokemonService.getPokedex().subscribe((pokemonList: Pokemon[]) => {
       this.completeList = pokemonList;
       this.filteredList = this.completeList;
-      this.selectedPokemon = this.filteredList[0];
+      this.setSelectedPokemon(this.filteredList[0]);
       this.extractAvailableTypes();
       this.initializePagination();
 
@@ -372,18 +375,18 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
   updateDetailsById(pokemonName: string) {
     this.pokemonService.getPokemon(pokemonName).subscribe((res: any) => {
-      this.selectedPokemon = res;
+      this.setSelectedPokemon(res);
     });
   }
 
   updateDetailsByName(pokemonName: string) {
     this.pokemonService.getPokemonByName(pokemonName).subscribe((res: any) => {
-      this.selectedPokemon = res;
+      this.setSelectedPokemon(res);
     });
   }
 
   updatePokemon(pokemon: any) {
-    this.selectedPokemon = pokemon;
+    this.setSelectedPokemon(pokemon);
   }
 
   selectRange(start: number, count: number): void {
@@ -393,7 +396,7 @@ export class PokedexComponent implements OnInit, OnDestroy {
 
     const end = Math.min(start + count, this.completeList.length); // Ensure it doesn't exceed the list length
     this.filteredList = this.completeList.slice(start, end);
-    this.selectedPokemon = this.filteredList[0];
+    this.setSelectedPokemon(this.filteredList[0]);
   }
 
   getPokemonForGeneration(generation: any): Pokemon[] {
