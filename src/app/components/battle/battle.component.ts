@@ -6,6 +6,11 @@ import { ItemService } from 'src/app/services/items/item.service';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { SocketService } from 'src/app/services/socket/socket.service';
 import { Item } from 'src/app/interfaces/item';
+import {
+  BattleConfigEventPayload,
+  BattleTurnEventPayload,
+  GameEventEnvelope,
+} from 'src/app/interfaces/battle-event';
 
 @Component({
     selector: 'app-battle',
@@ -147,15 +152,22 @@ export class BattleComponent {
 
         // Prepare battle configuration
         const formValue = this.battleConfigForm.value;
-        this.battleConfig = {
+        const configPayload: BattleConfigEventPayload = {
           level: formValue.level,
           generation: formValue.generation,
           useItems: formValue.useItems,
           itemQuantity: formValue.useItems ? 6 : 0, // Default to 6 items if enabled
         };
+        this.battleConfig = configPayload;
+
+        const configEvent: GameEventEnvelope = {
+          type: 'battle:config',
+          version: 1,
+          payload: configPayload,
+        };
 
         // Send battle configuration to server
-        this.socketService.sendGameEvent(this.battleKey, this.battleConfig);
+        this.socketService.sendGameEvent(this.battleKey, configEvent);
 
         // Move to room key sharing step
         this.currentStep = 3;
@@ -169,6 +181,31 @@ export class BattleComponent {
   startBattle() {
     this.battleStarted = true;
     // Additional battle start logic here
+  }
+
+  /**
+   * Transport-ready turn event payload for future battle flow rollout.
+   * Uses move IDs from local moves.json instead of move names.
+   */
+  sendTurnEvent(
+    actorId: string,
+    moveId: number,
+    targetSlot: number,
+    turnNumber: number
+  ): void {
+    if (!this.battleKey) return;
+    const turnPayload: BattleTurnEventPayload = {
+      actorId,
+      moveId,
+      targetSlot,
+      turnNumber,
+    };
+    const turnEvent: GameEventEnvelope = {
+      type: 'battle:turn',
+      version: 1,
+      payload: turnPayload,
+    };
+    this.socketService.sendGameEvent(this.battleKey, turnEvent);
   }
 
   copyToClipboard(text: string) {

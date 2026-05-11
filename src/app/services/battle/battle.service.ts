@@ -25,10 +25,7 @@ export class BattleService {
   /** Helper Functions */
   //gets the current move list and limits it based on the users selected level range
   private changeMoveset(pokemon: Pokemon, selectedLevel: number): void {
-    pokemon.moves = pokemon.moves.filter(
-      (move) =>
-        move.version_group_details.at(0)!.level_learned_at < selectedLevel
-    );
+    pokemon.moves = pokemon.moves.filter((move) => move.level <= selectedLevel);
   }
 
   //need to reassign stats to the object field after calculations

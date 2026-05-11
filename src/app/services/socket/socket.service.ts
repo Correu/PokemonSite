@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable, Subject } from 'rxjs';
+import { GameEventEnvelope } from 'src/app/interfaces/battle-event';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private socket: Socket;
-  private gameEventSubject = new Subject<any>();
+  private gameEventSubject = new Subject<GameEventEnvelope>();
 
   constructor() {
     this.socket = io('http://localhost:3000'); // or container URL
@@ -15,7 +16,7 @@ export class SocketService {
   }
 
   private setupSocketListeners() {
-    this.socket.on('gameEvent', (data) => {
+    this.socket.on('gameEvent', (data: GameEventEnvelope) => {
       this.gameEventSubject.next(data);
     });
   }
@@ -42,11 +43,11 @@ export class SocketService {
     });
   }
 
-  sendGameEvent(roomId: string, data: any) {
-    this.socket.emit('gameEvent', { roomId, data });
+  sendGameEvent(roomId: string, event: GameEventEnvelope) {
+    this.socket.emit('gameEvent', { roomId, data: event });
   }
 
-  onGameEvent(): Observable<any> {
+  onGameEvent(): Observable<GameEventEnvelope> {
     return this.gameEventSubject.asObservable();
   }
 

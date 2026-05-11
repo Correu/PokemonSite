@@ -7,7 +7,7 @@ export interface Pokemon {
   id: string;
   is_default: boolean;
   location_area_encounters: string;
-  moves: Mfe[];
+  moves: PokemonLearnsetMove[];
   name: string;
   order: number;
   sprites: Sprites;
@@ -57,28 +57,14 @@ export interface Version2 {
   url: string;
 }
 
-export interface Mfe {
-  move: Move;
-  version_group_details: VersionGroupDetail[];
+export interface PokemonLearnsetMove {
+  moveId: number;
+  level: number;
+  method: string;
+  versionGroup?: string;
 }
 
 export interface Move {
-  name: string;
-  url: string;
-}
-
-export interface VersionGroupDetail {
-  level_learned_at: number;
-  move_learn_method: MoveLearnMethod;
-  version_group: VersionGroup;
-}
-
-export interface MoveLearnMethod {
-  name: string;
-  url: string;
-}
-
-export interface VersionGroup {
   name: string;
   url: string;
 }
