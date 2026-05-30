@@ -1,242 +1,402 @@
-import { Component, Injectable } from '@angular/core';
-import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import {
+  BattleActionPayload,
+  BattleConfig,
+  BattleFormat,
+  BattleGameEvent,
+  JoinRoomResponse,
+} from 'src/app/interfaces/battle';
 import { Pokemon } from 'src/app/interfaces/pokemon';
+import { BattleStateService } from 'src/app/services/battle/battle-state.service';
 import { BattleService } from 'src/app/services/battle/battle.service';
-import { ItemService } from 'src/app/services/items/item.service';
-import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { SocketService } from 'src/app/services/socket/socket.service';
-import { Item } from 'src/app/interfaces/item';
 
 @Component({
-    selector: 'app-battle',
-    templateUrl: './battle.component.html',
-    styleUrls: ['./battle.component.css'],
-    standalone: false
+  selector: 'app-battle',
+  templateUrl: './battle.component.html',
+  styleUrls: ['./battle.component.css'],
+  standalone: false,
 })
-
-@Injectable()
-export class BattleComponent {
-  /** When true, only the placeholder UI is shown; full flow is disabled. */
-  readonly battleUnderDevelopment = true;
-
-  //assign the values to display, carried from the service.
-  playerTeam: Pokemon[] = this.pokemonService.playerTeam;
-  enemyTeam: Pokemon[] = this.pokemonService.enemyTeam;
-
-  selectedLevel: number = 0;
-
-  teamA: Pokemon[] = [];
-  teamB: Pokemon[] = [];
-
-  // Item arrays
-  playerItems: Item[] = [];
-  enemyItems: Item[] = [];
-
-  showPokemonStats: boolean = false;
-  showPokemonSelect: boolean = false;
-  showItemSelect: boolean = false;
-  currentPokemonIndex: number = 0;
-
-  // Battle flow state
-  currentStep: number = 1;
+export class BattleComponent implements OnInit, OnDestroy {
+  currentStep = 1;
   mode: 'choose' | 'create' | 'join' = 'choose';
-  battleKey: string = '';
-  joinRoomKey: string = '';
-  joinError: string = '';
-  battleConfig: any = null;
-  battleStarted: boolean = false;
+  battleKey = '';
+  joinRoomKey = '';
+  joinError = '';
+  battleServerUrl = '';
 
-  // Options for dropdowns
-  levelOptions: number[] = Array.from({ length: 100 }, (_, i) => i + 1);
-  generationOptions: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  private playerTeam: Pokemon[] = [];
+  private localBattlerIndex = 0;
 
-  roomId: string = '';
-  players: string[] = [];
+  levelOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+  teamSizeOptions = [1, 2, 3, 4, 5, 6];
+  playerCountOptions = [2, 3, 4];
+  formatOptions: { value: BattleFormat; label: string }[] = [
+    { value: 'singles', label: 'Singles' },
+    { value: 'doubles', label: 'Doubles' },
+  ];
 
-  roomIdFormControl = new FormControl('', [Validators.required]);
-  messageForm: FormGroup;
   battleConfigForm: FormGroup;
+  readonly battleState$ = this.battleState.phase$;
+  readonly field$ = this.battleState.field$;
+  readonly config$ = this.battleState.config$;
+
+  private subs = new Subscription();
 
   constructor(
-    private pokemonService: PokemonService,
     private battleService: BattleService,
-    private itemService: ItemService,
+    private battleState: BattleStateService,
     private socketService: SocketService,
     private fb: FormBuilder
   ) {
-    this.messageForm = this.fb.group({
-      message: [''],
-    });
-    
     this.battleConfigForm = this.fb.group({
-      level: [50, [Validators.required]], // Default to level 50
-      generation: [null], // null means all generations
-      useItems: [false], // Slide toggle for enabling/disabling items
+      level: [50, Validators.required],
+      teamSize: [6, Validators.required],
+      useItems: [false],
+      itemQuantity: [6],
+      format: ['singles' as BattleFormat, Validators.required],
+      maxPlayers: [2, Validators.required],
+      generation: [null as number | null],
     });
   }
 
-  async ngOnInit(): Promise<void> {
-    if (this.battleUnderDevelopment) {
-      return;
+  ngOnInit(): void {
+    this.battleServerUrl = this.socketService.getServerUrl();
+    const socketId = this.socketService.getSocketId();
+    if (socketId) {
+      this.battleState.setLocalPlayerId(socketId);
     }
-    if (!this.pokemonService.battleLoad) {
-      const { teamA, teamB } = await this.battleService.getRandomTeams();
-      this.teamA = teamA;
-      this.teamB = teamB;
-      console.log('Teams loaded:', this.teamA, this.teamB);
 
-      // Fetch random items for both players
-      this.loadItems();
-    }
-  }
+    this.subs.add(
+      this.socketService.onGameEvent().subscribe((event) => {
+        this.handleGameEvent(event);
+      })
+    );
 
-  pushButton() {
-    // this.socketService.sendGameEvent(this.roomId, {
-    //   move: 'attack',
-    //   damage: 15,
-    // });
+    this.subs.add(
+      this.socketService.onPlayerJoined().subscribe((playerId) => {
+        const socketId = this.socketService.getSocketId();
+        if (socketId) {
+          this.battleState.addPlayer(socketId);
+        }
+        this.battleState.addPlayer(playerId);
+        this.battleState.patchField({
+          message: `${this.battleState.playerIds.length}/${this.battleState.requiredPlayerCount()} players connected.`,
+        });
+      })
+    );
 
-    this.socketService.sendMessage(
-      this.messageForm.value.message,
-      'this is a test hit to the server'
+    this.subs.add(
+      this.socketService.onPlayerLeft().subscribe((playerId) => {
+        if (playerId === '__room_closed__') {
+          this.battleState.reset();
+          this.currentStep = 1;
+          this.mode = 'choose';
+          return;
+        }
+        this.battleState.removePlayer(playerId);
+      })
     );
   }
 
-  selectMode(selected: 'create' | 'join') {
-    this.mode = selected;
-    if (selected === 'create') {
-      this.currentStep = 2; // Show battle configuration form
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+  get isHost(): boolean {
+    return this.battleState.isHost;
+  }
+
+  get menuView(): string {
+    return this.battleState.menuView;
+  }
+
+  get playerIds(): string[] {
+    return this.battleState.playerIds;
+  }
+
+  get requiredPlayers(): number {
+    return this.battleState.requiredPlayerCount();
+  }
+
+  get canStartBattle(): boolean {
+    return this.isHost && this.battleState.hasEnoughPlayers();
+  }
+
+  applyBattleServerUrl(): void {
+    this.socketService.setServerUrl(this.battleServerUrl);
+    this.battleServerUrl = this.socketService.getServerUrl();
+    const socketId = this.socketService.getSocketId();
+    if (socketId) {
+      this.battleState.setLocalPlayerId(socketId);
     }
   }
 
-  async tryJoinRoom() {
-    this.joinError = '';
-    this.socketService.joinRoom(this.joinRoomKey, (response: any) => {
-      if (response && response.success) {
-        this.battleKey = this.joinRoomKey;
-        this.currentStep = 4; // Show waiting screen for join mode
-      } else {
-        this.joinError = response?.error || 'Failed to join room.';
-      }
-    });
+  selectMode(selected: 'create' | 'join'): void {
+    this.mode = selected;
+    this.currentStep = selected === 'create' ? 2 : 5;
   }
 
-  cancelCreate() {
+  cancelCreate(): void {
     this.mode = 'choose';
     this.currentStep = 1;
-    this.battleConfigForm.reset({
-      level: 50,
-      generation: null,
-      useItems: false,
-    });
+    this.resetConfigForm();
   }
 
-  cancelJoin() {
+  cancelJoin(): void {
     this.mode = 'choose';
     this.currentStep = 1;
     this.joinRoomKey = '';
     this.joinError = '';
   }
 
-  async submitBattleConfig() {
-    if (this.battleConfigForm.valid) {
-      try {
-        // Create the game room
-        this.battleKey = await this.socketService.createGame();
-        this.socketService.joinRoom(this.battleKey);
+  async submitBattleConfig(): Promise<void> {
+    if (!this.battleConfigForm.valid) {
+      return;
+    }
 
-        // Prepare battle configuration
-        const formValue = this.battleConfigForm.value;
-        this.battleConfig = {
-          level: formValue.level,
-          generation: formValue.generation,
-          useItems: formValue.useItems,
-          itemQuantity: formValue.useItems ? 6 : 0, // Default to 6 items if enabled
-        };
+    try {
+      this.battleKey = await this.socketService.createGame();
+      const socketId = this.socketService.getSocketId();
+      if (socketId) {
+        this.battleState.setLocalPlayerId(socketId);
+        this.battleState.setPlayerIds([socketId]);
+      }
+      this.battleState.setRoom(this.battleKey, true);
 
-        // Send battle configuration to server
-        this.socketService.sendGameEvent(this.battleKey, this.battleConfig);
+      const config = this.buildConfigFromForm();
+      this.battleState.applyConfig(config);
 
-        // Move to room key sharing step
+      this.socketService.sendGameEvent(this.battleKey, {
+        type: 'battleConfig',
+        config,
+      });
+
+      this.currentStep = 3;
+    } catch {
+      alert('Failed to create room. Check that the battle server is running.');
+    }
+  }
+
+  tryJoinRoom(): void {
+    this.joinError = '';
+    this.socketService.joinRoom(this.joinRoomKey, (response: JoinRoomResponse) => {
+      if (!response.success) {
+        this.joinError = response.error ?? 'Failed to join room.';
+        return;
+      }
+
+      this.battleKey = this.joinRoomKey;
+      const socketId = this.socketService.getSocketId();
+      if (socketId) {
+        this.battleState.setLocalPlayerId(socketId);
+      }
+      this.battleState.setRoom(this.battleKey, false);
+
+      if (response.users) {
+        this.battleState.setPlayerIds(response.users);
+      }
+      if (response.battleConfig) {
+        this.battleState.applyConfig(response.battleConfig);
+      }
+
+      this.socketService.sendGameEvent(this.battleKey, {
+        type: 'playerReady',
+        ready: true,
+      });
+
+      this.currentStep = 4;
+    });
+  }
+
+  async startBattle(): Promise<void> {
+    if (!this.canStartBattle || !this.battleState.config) {
+      return;
+    }
+
+    this.playerTeam = await this.battleService.buildTeam(this.battleState.config);
+    const active = this.battleService.createBattler(
+      this.playerTeam[this.localBattlerIndex]!,
+      this.battleState.config.level
+    );
+
+    this.battleState.setPlayerActive(active);
+    this.battleState.startBattleLocally(`Go! ${active.displayName}!`);
+
+    this.socketService.sendGameEvent(this.battleKey, { type: 'battleStart' });
+    this.broadcastFieldState(`Go! ${active.displayName}!`);
+
+    this.currentStep = 6;
+  }
+
+  openFightMenu(): void {
+    this.battleState.setMenuView('fight');
+  }
+
+  backToMainMenu(): void {
+    this.battleState.setMenuView('main');
+  }
+
+  onMainAction(action: BattleActionPayload['kind']): void {
+    const active = this.battleState.field.playerActive;
+    if (!active) {
+      return;
+    }
+
+    if (action === 'fight') {
+      this.openFightMenu();
+      return;
+    }
+
+    const payload: BattleActionPayload = {
+      kind: action,
+      message: this.menuMessageForAction(action, active.displayName),
+    };
+    this.battleState.patchField({ message: payload.message ?? '' });
+    this.emitAction(payload);
+    this.battleState.setMenuView('main');
+  }
+
+  useMove(moveIndex: number): void {
+    const active = this.battleState.field.playerActive;
+    const opponent = this.battleState.field.opponentActive;
+    if (!active || !opponent) {
+      return;
+    }
+
+    const move = active.moves[moveIndex];
+    if (!move) {
+      return;
+    }
+
+    this.battleService.applyMoveDamage(active, opponent, moveIndex);
+    const message = this.battleState.buildActionMessage(
+      { kind: 'move', moveName: move.name },
+      active.displayName
+    );
+    this.battleState.patchField({
+      message,
+      playerActive: { ...active },
+      opponentActive: { ...opponent },
+    });
+
+    this.emitAction({ kind: 'move', moveIndex, moveName: move.name, message });
+    this.broadcastFieldState(message);
+    this.battleState.setMenuView('main');
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).catch(() => undefined);
+  }
+
+  private handleGameEvent(event: BattleGameEvent): void {
+    if (event.senderId === this.socketService.getSocketId()) {
+      if (event.type === 'battleConfig') {
         this.currentStep = 3;
-      } catch (err) {
-        alert('Failed to create room. Please try again.');
-        console.error('Error creating room:', err);
+      }
+      return;
+    }
+
+    this.battleState.handleRemoteEvent(event, event.senderId ?? null);
+
+    if (event.type === 'battleConfig' && event.config) {
+      this.currentStep = 4;
+    }
+
+    if (event.type === 'battleStart') {
+      void this.prepareGuestBattle();
+      this.currentStep = 6;
+    }
+
+    if (event.type === 'battleState' && event.field?.playerActive) {
+      this.battleState.setOpponentActive(event.field.playerActive);
+      if (event.field.message) {
+        this.battleState.patchField({ message: event.field.message });
       }
     }
   }
 
-  startBattle() {
-    this.battleStarted = true;
-    // Additional battle start logic here
-  }
-
-  copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text).then(() => {
-      console.log('Battle key copied to clipboard');
-    });
-  }
-
-  private loadItems(): void {
-    // Get 30 random items for the player
-    this.itemService.getRandomItems().subscribe((items) => {
-      this.playerItems = items;
-      console.log('Player items loaded:', this.playerItems);
-    });
-
-    // Get 30 random items for the enemy
-    this.itemService.getRandomItems().subscribe((items) => {
-      this.enemyItems = items;
-      console.log('Enemy items loaded:', this.enemyItems);
-    });
-  }
-
-  showStats(): void {
-    this.showPokemonStats = true;
-  }
-
-  hideStats(): void {
-    this.showPokemonStats = false;
-  }
-
-  selectPokemon(index: number): void {
-    this.currentPokemonIndex = index;
-    this.showPokemonSelect = false;
-  }
-
-  showItems(): void {
-    this.showItemSelect = true;
-  }
-
-  hideItems(): void {
-    this.showItemSelect = false;
-  }
-
-  useItem(item: Item): void {
-    // Implement item usage logic here
-    console.log(`Using item: ${item.name}`);
-    this.hideItems();
-  }
-
-  getItemDescription(item: Item): string {
-    // Find the English description from flavor_text_entries
-    const englishEntry = item.flavor_text_entries?.find(
-      (entry) => entry.language.name === 'en'
-    );
-
-    if (englishEntry) {
-      return englishEntry.text;
+  private async prepareGuestBattle(): Promise<void> {
+    if (!this.battleState.config) {
+      return;
     }
-
-
-    // Fallback to effect entries if flavor text is not available
-    const englishEffect = item.effect_entries?.find(
-      (entry) => entry.language.name === 'en'
+    this.playerTeam = await this.battleService.buildTeam(this.battleState.config);
+    const active = this.battleService.createBattler(
+      this.playerTeam[this.localBattlerIndex]!,
+      this.battleState.config.level
     );
+    this.battleState.setPlayerActive(active);
+    this.battleState.startBattleLocally(`Go! ${active.displayName}!`);
+    this.broadcastFieldState(`Go! ${active.displayName}!`);
+  }
 
-    if (englishEffect) {
-      return englishEffect.short_effect;
+  private broadcastFieldState(message: string): void {
+    if (!this.battleKey) {
+      return;
     }
-    return 'No description available';
+    const field = this.battleState.field;
+    this.socketService.sendGameEvent(this.battleKey, {
+      type: 'battleState',
+      field: {
+        playerActive: field.playerActive,
+        opponentActive: null,
+        message,
+        turn: field.turn,
+      },
+    });
+  }
+
+  private emitAction(action: BattleActionPayload): void {
+    if (!this.battleKey) {
+      return;
+    }
+    this.socketService.sendGameEvent(this.battleKey, {
+      type: 'battleAction',
+      action,
+    });
+  }
+
+  private menuMessageForAction(
+    action: BattleActionPayload['kind'],
+    name: string
+  ): string {
+    switch (action) {
+      case 'bag':
+        return `${name} opened the bag!`;
+      case 'switch':
+        return `${name} is switching Pokémon!`;
+      case 'run':
+        return `${name} couldn't get away!`;
+      default:
+        return `What will ${name} do?`;
+    }
+  }
+
+  private buildConfigFromForm(): BattleConfig {
+    const formValue = this.battleConfigForm.value;
+    const useItems = !!formValue.useItems;
+    return {
+      level: formValue.level,
+      teamSize: formValue.teamSize,
+      useItems,
+      itemQuantity: useItems ? formValue.itemQuantity : 0,
+      format: formValue.format,
+      maxPlayers: formValue.maxPlayers,
+      generation: formValue.generation,
+    };
+  }
+
+  private resetConfigForm(): void {
+    this.battleConfigForm.reset({
+      level: 50,
+      teamSize: 6,
+      useItems: false,
+      itemQuantity: 6,
+      format: 'singles',
+      maxPlayers: 2,
+      generation: null,
+    });
   }
 }

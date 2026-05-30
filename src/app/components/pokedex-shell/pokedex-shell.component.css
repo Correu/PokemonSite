@@ -169,6 +169,12 @@
   padding: 8px 10px 8px 6px;
 }
 
+.kanto-battle-field {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
 .kanto-left-header {
   display: flex;
   align-items: center;

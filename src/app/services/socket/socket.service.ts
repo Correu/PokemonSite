@@ -1,27 +1,55 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable, Subject } from 'rxjs';
+import { BattleGameEvent, JoinRoomResponse } from 'src/app/interfaces/battle';
+import { environment } from 'src/environments/environment';
+
+const BATTLE_SOCKET_STORAGE_KEY = 'pokemonBattleSocketUrl';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
-  private socket: Socket;
-  private gameEventSubject = new Subject<any>();
+  private socket!: Socket;
+  private currentUrl: string;
+  private gameEventSubject = new Subject<BattleGameEvent>();
+  private playerJoinedSubject = new Subject<string>();
+  private playerLeftSubject = new Subject<string>();
 
   constructor() {
-    this.socket = io('http://localhost:3000'); // or container URL
-    this.setupSocketListeners();
+    this.currentUrl = this.resolveInitialUrl();
+    this.socket = io(this.currentUrl);
+    this.attachSocketListeners();
   }
 
-  private setupSocketListeners() {
-    this.socket.on('gameEvent', (data) => {
-      this.gameEventSubject.next(data);
-    });
+  getServerUrl(): string {
+    return this.currentUrl;
   }
 
-  joinRoom(roomId: string | null, cb?: (response: any) => void) {
-    this.socket.emit('joinRoom', roomId, (response: any) => {
+  setServerUrl(url: string): void {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      return;
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(BATTLE_SOCKET_STORAGE_KEY, trimmed);
+    }
+    if (trimmed === this.currentUrl && this.socket.connected) {
+      return;
+    }
+    this.currentUrl = trimmed;
+    this.socket.removeAllListeners();
+    this.socket.disconnect();
+    this.socket = io(trimmed);
+    this.attachSocketListeners();
+  }
+
+  getSocketId(): string | undefined {
+    return this.socket.id;
+  }
+
+  joinRoom(roomId: string, cb?: (response: JoinRoomResponse) => void): void {
+    this.socket.emit('joinRoom', roomId, (response: JoinRoomResponse) => {
       if (cb) {
         cb(response);
       } else if (response.error) {
@@ -32,7 +60,7 @@ export class SocketService {
 
   createGame(): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.socket.emit('createRoom', {}, (response: any) => {
+      this.socket.emit('createRoom', {}, (response: { roomKey?: string }) => {
         if (response.roomKey) {
           resolve(response.roomKey);
         } else {
@@ -42,42 +70,63 @@ export class SocketService {
     });
   }
 
-  sendGameEvent(roomId: string, data: any) {
+  sendGameEvent(roomId: string, data: BattleGameEvent): void {
     this.socket.emit('gameEvent', { roomId, data });
   }
 
-  onGameEvent(): Observable<any> {
+  onGameEvent(): Observable<BattleGameEvent> {
     return this.gameEventSubject.asObservable();
   }
 
-  onPlayerJoined(callback: (playerId: string) => void) {
-    this.socket.on('playerJoined', callback);
+  onPlayerJoined(): Observable<string> {
+    return this.playerJoinedSubject.asObservable();
   }
 
-  sendMessage(roomKey: string, message: string) {
-    // Send a message
+  onPlayerLeft(): Observable<string> {
+    return this.playerLeftSubject.asObservable();
+  }
+
+  sendMessage(roomKey: string, message: string): void {
     this.socket.emit(
       'sendMessage',
-      { roomKey: roomKey, message: message },
-      (response: any) => {
-        if (response.success) {
-          console.log('Message sent!');
-        } else {
+      { roomKey, message },
+      (response: { success?: boolean; error?: string }) => {
+        if (!response.success) {
           console.error(response.error);
         }
       }
     );
   }
 
-  onRecievedMessage(callback: (payload: any) => void) {
-    // Listen for messages
-    this.socket.on('receiveMessage', (payload) => {
-      console.log('📨 New message received:', payload);
-      callback(payload);
-    });
+  private resolveInitialUrl(): string {
+    if (typeof window === 'undefined') {
+      return environment.socketUrl;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('socketUrl')?.trim();
+    if (fromQuery) {
+      localStorage.setItem(BATTLE_SOCKET_STORAGE_KEY, fromQuery);
+      return fromQuery;
+    }
+    const stored = localStorage.getItem(BATTLE_SOCKET_STORAGE_KEY)?.trim();
+    if (stored) {
+      return stored;
+    }
+    return environment.socketUrl;
   }
 
-  getSocketId(): string | undefined {
-    return this.socket.id;
+  private attachSocketListeners(): void {
+    this.socket.on('gameEvent', (data: BattleGameEvent) => {
+      this.gameEventSubject.next(data);
+    });
+    this.socket.on('playerJoined', (playerId: string) => {
+      this.playerJoinedSubject.next(playerId);
+    });
+    this.socket.on('playerLeft', (playerId: string) => {
+      this.playerLeftSubject.next(playerId);
+    });
+    this.socket.on('roomClosed', () => {
+      this.playerLeftSubject.next('__room_closed__');
+    });
   }
 }

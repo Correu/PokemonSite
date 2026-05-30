@@ -1,0 +1,88 @@
+@if (phase$ | async; as phase) {
+<div class="battle-field" [class.battle-field--idle]="phase === 'idle'">
+  @if (field$ | async; as field) {
+  <div class="battle-field-scene">
+    <div class="battle-field-sky"></div>
+    <div class="battle-field-ground"></div>
+
+    @if (field.opponentActive; as foe) {
+    <div class="battle-field-foe-platform">
+      <img
+        class="battle-field-foe-sprite"
+        [src]="foe.frontSprite"
+        [alt]="foe.displayName"
+      />
+    </div>
+
+    <div class="battle-status battle-status--foe">
+      <div class="battle-status-name-row">
+        <span class="battle-status-name">{{ foe.displayName }}</span>
+        @if (foe.gender) {
+        <span
+          class="battle-status-gender"
+          [class.battle-status-gender--female]="foe.gender === 'female'"
+          >{{ genderSymbol(foe.gender) }}</span
+        >
+        }
+        <span class="battle-status-level">Lv.{{ foe.level }}</span>
+      </div>
+      <div class="battle-status-hp-row">
+        <span class="battle-status-hp-label">HP</span>
+        <div class="battle-status-hp-track">
+          <div
+            class="battle-status-hp-fill"
+            [style.width.%]="hpPercent(foe.currentHp, foe.maxHp)"
+          ></div>
+        </div>
+      </div>
+    </div>
+    }
+
+    @if (field.playerActive; as ally) {
+    <div class="battle-field-ally-platform">
+      <img
+        class="battle-field-ally-sprite"
+        [src]="ally.backSprite"
+        [alt]="ally.displayName"
+      />
+    </div>
+
+    <div class="battle-status battle-status--ally">
+      <div class="battle-status-name-row">
+        <span class="battle-status-name">{{ ally.displayName }}</span>
+        @if (ally.gender) {
+        <span
+          class="battle-status-gender"
+          [class.battle-status-gender--female]="ally.gender === 'female'"
+          >{{ genderSymbol(ally.gender) }}</span
+        >
+        }
+        <span class="battle-status-level">Lv.{{ ally.level }}</span>
+      </div>
+      <div class="battle-status-hp-row">
+        <span class="battle-status-hp-label">HP</span>
+        <div class="battle-status-hp-track">
+          <div
+            class="battle-status-hp-fill"
+            [style.width.%]="hpPercent(ally.currentHp, ally.maxHp)"
+          ></div>
+        </div>
+      </div>
+      <div class="battle-status-hp-numbers">
+        {{ ally.currentHp }}/{{ ally.maxHp }}
+      </div>
+      <div class="battle-status-exp-track">
+        <div class="battle-status-exp-fill"></div>
+      </div>
+    </div>
+    }
+
+    @if (!field.playerActive && !field.opponentActive) {
+    <div class="battle-field-empty">
+      <p>{{ field.message }}</p>
+    </div>
+    }
+  </div>
+  }
+</div>
+}

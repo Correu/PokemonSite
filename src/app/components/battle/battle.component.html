@@ -1,20 +1,233 @@
-<div class="battle-container battle-container--placeholder">
-  <div class="battle-placeholder">
-    <mat-icon class="battle-placeholder-icon" aria-hidden="true"
-      >construction</mat-icon
-    >
-    <h1 class="battle-placeholder-title">Battle</h1>
-    <p class="battle-placeholder-lead">Under development</p>
-    <p class="battle-placeholder-text">
-      Multiplayer battles and room setup are not available yet. Check back in a
-      future update.
-    </p>
-    <p class="battle-placeholder-hint">
-      Use the <strong>List</strong> tab on the Pokédex to browse Pokémon.
-    </p>
-    <a mat-stroked-button color="primary" routerLink="/" class="battle-back-link">
-      <mat-icon>arrow_back</mat-icon>
-      Back to List
-    </a>
+<div class="battle-container">
+  <div class="setup-container">
+    @if (currentStep === 1) {
+    <div class="step-container">
+      <h1>Battle</h1>
+      <p class="subtitle">Create a match or join with a room code.</p>
+
+      <div class="socket-server-panel">
+        <p class="socket-server-title">Battle server</p>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Socket.IO URL</mat-label>
+          <input matInput [(ngModel)]="battleServerUrl" />
+        </mat-form-field>
+        <button
+          mat-stroked-button
+          type="button"
+          class="full-width"
+          (click)="applyBattleServerUrl()"
+        >
+          Apply and reconnect
+        </button>
+      </div>
+
+      <div class="button-container">
+        <button
+          mat-raised-button
+          color="primary"
+          class="mode-button"
+          type="button"
+          (click)="selectMode('create')"
+        >
+          <mat-icon>add</mat-icon>
+          Create Match
+        </button>
+        <button
+          mat-raised-button
+          color="accent"
+          class="mode-button"
+          type="button"
+          (click)="selectMode('join')"
+        >
+          <mat-icon>login</mat-icon>
+          Join Match
+        </button>
+      </div>
+    </div>
+    }
+
+    @if (currentStep === 2 && mode === 'create') {
+    <div class="step-container">
+      <h1>Battle Settings</h1>
+      <p class="subtitle">Configure rules for this match.</p>
+
+      <form [formGroup]="battleConfigForm" class="battle-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Pokémon level</mat-label>
+          <mat-select formControlName="level">
+            @for (lvl of levelOptions; track lvl) {
+            <mat-option [value]="lvl">{{ lvl }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Pokémon per team</mat-label>
+          <mat-select formControlName="teamSize">
+            @for (size of teamSizeOptions; track size) {
+            <mat-option [value]="size">{{ size }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Battle format</mat-label>
+          <mat-select formControlName="format">
+            @for (fmt of formatOptions; track fmt.value) {
+            <mat-option [value]="fmt.value">{{ fmt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Number of players</mat-label>
+          <mat-select formControlName="maxPlayers">
+            @for (count of playerCountOptions; track count) {
+            <mat-option [value]="count">{{ count }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="toggle-container">
+          <mat-slide-toggle formControlName="useItems">Items allowed</mat-slide-toggle>
+        </div>
+
+        @if (battleConfigForm.value.useItems) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Items per player</mat-label>
+          <mat-select formControlName="itemQuantity">
+            @for (qty of teamSizeOptions; track qty) {
+            <mat-option [value]="qty">{{ qty }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        }
+
+        <div class="button-container">
+          <button mat-button type="button" (click)="cancelCreate()">Back</button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            [disabled]="battleConfigForm.invalid"
+            (click)="submitBattleConfig()"
+          >
+            Create Room
+          </button>
+        </div>
+      </form>
+    </div>
+    }
+
+    @if (currentStep === 3) {
+    <div class="step-container">
+      <h1>Share Room Code</h1>
+      <p class="info-text">Send this code and your server URL to other players.</p>
+      <div class="battle-key-container">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Room code</mat-label>
+          <input matInput [value]="battleKey" readonly />
+        </mat-form-field>
+        <button mat-stroked-button type="button" (click)="copyToClipboard(battleKey)">
+          Copy code
+        </button>
+      </div>
+      <p class="share-instructions">
+        Players: {{ playerIds.length }} / {{ requiredPlayers }}
+      </p>
+      <div class="button-container">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="!canStartBattle"
+          (click)="startBattle()"
+        >
+          Start Battle
+        </button>
+      </div>
+    </div>
+    }
+
+    @if (currentStep === 4) {
+    <div class="step-container waiting-container">
+      <h1>Waiting Room</h1>
+      <p class="room-info">
+        Room <strong>{{ battleKey }}</strong>
+      </p>
+      @if (config$ | async; as config) {
+      <div class="config-summary">
+        <h3>Match rules</h3>
+        <p>Level {{ config.level }} · {{ config.teamSize }} Pokémon · {{ config.format }}</p>
+        <p>Players {{ playerIds.length }} / {{ config.maxPlayers }}</p>
+        <p>Items: {{ config.useItems ? config.itemQuantity + ' each' : 'Off' }}</p>
+      </div>
+      }
+      <p class="info-text">Waiting for the host to start the battle…</p>
+    </div>
+    }
+
+    @if (currentStep === 5 && mode === 'join') {
+    <div class="step-container">
+      <h1>Join Match</h1>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Room code</mat-label>
+        <input matInput [(ngModel)]="joinRoomKey" />
+      </mat-form-field>
+      @if (joinError) {
+      <p class="error-message">{{ joinError }}</p>
+      }
+      <div class="button-container">
+        <button mat-button type="button" (click)="cancelJoin()">Back</button>
+        <button mat-raised-button color="primary" type="button" (click)="tryJoinRoom()">
+          Join
+        </button>
+      </div>
+    </div>
+    }
+
+    @if (currentStep === 6) {
+    <div class="step-container battle-command-panel">
+      @if (field$ | async; as field) {
+      <div class="battle-message-box">
+        <p>{{ field.message || ('What will ' + (field.playerActive?.displayName || 'your Pokémon') + ' do?') }}</p>
+      </div>
+
+      @if (menuView === 'main') {
+      <div class="battle-action-grid">
+        <button type="button" class="battle-action-btn battle-action-btn--fight" (click)="onMainAction('fight')">
+          FIGHT
+        </button>
+        <button type="button" class="battle-action-btn battle-action-btn--bag" (click)="onMainAction('bag')">
+          BAG
+        </button>
+        <button type="button" class="battle-action-btn battle-action-btn--switch" (click)="onMainAction('switch')">
+          POKÉMON
+        </button>
+        <button type="button" class="battle-action-btn battle-action-btn--run" (click)="onMainAction('run')">
+          RUN
+        </button>
+      </div>
+      } @else {
+      <div class="battle-move-grid">
+        @for (move of field.playerActive?.moves ?? []; track move.name; let i = $index) {
+        <button
+          type="button"
+          class="battle-move-btn"
+          [disabled]="move.pp <= 0"
+          (click)="useMove(i)"
+        >
+          <span class="battle-move-name">{{ move.name }}</span>
+          <span class="battle-move-pp">{{ move.pp }}/{{ move.maxPp }}</span>
+        </button>
+        }
+      </div>
+      <button mat-button type="button" class="battle-back-moves" (click)="backToMainMenu()">
+        Back
+      </button>
+      }
+      }
+    </div>
+    }
   </div>
 </div>
