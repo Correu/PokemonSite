@@ -12,6 +12,15 @@ import { Pokemon } from 'src/app/interfaces/pokemon';
 import { BattleStateService } from 'src/app/services/battle/battle-state.service';
 import { BattleService } from 'src/app/services/battle/battle.service';
 import { SocketService } from 'src/app/services/socket/socket.service';
+<<<<<<< HEAD
+=======
+import { Item } from 'src/app/interfaces/item';
+import {
+  BattleConfigEventPayload,
+  BattleTurnEventPayload,
+  GameEventEnvelope,
+} from 'src/app/interfaces/battle-event';
+>>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
 
 @Component({
   selector: 'app-battle',
@@ -157,6 +166,7 @@ export class BattleComponent implements OnInit, OnDestroy {
       return;
     }
 
+<<<<<<< HEAD
     try {
       this.battleKey = await this.socketService.createGame();
       const socketId = this.socketService.getSocketId();
@@ -168,6 +178,26 @@ export class BattleComponent implements OnInit, OnDestroy {
 
       const config = this.buildConfigFromForm();
       this.battleState.applyConfig(config);
+=======
+        // Prepare battle configuration
+        const formValue = this.battleConfigForm.value;
+        const configPayload: BattleConfigEventPayload = {
+          level: formValue.level,
+          generation: formValue.generation,
+          useItems: formValue.useItems,
+          itemQuantity: formValue.useItems ? 6 : 0, // Default to 6 items if enabled
+        };
+        this.battleConfig = configPayload;
+
+        const configEvent: GameEventEnvelope = {
+          type: 'battle:config',
+          version: 1,
+          payload: configPayload,
+        };
+
+        // Send battle configuration to server
+        this.socketService.sendGameEvent(this.battleKey, configEvent);
+>>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
 
       this.socketService.sendGameEvent(this.battleKey, {
         type: 'battleConfig',
@@ -318,9 +348,97 @@ export class BattleComponent implements OnInit, OnDestroy {
     }
   }
 
+<<<<<<< HEAD
   private async prepareGuestBattle(): Promise<void> {
     if (!this.battleState.config) {
       return;
+=======
+  startBattle() {
+    this.battleStarted = true;
+    // Additional battle start logic here
+  }
+
+  /**
+   * Transport-ready turn event payload for future battle flow rollout.
+   * Uses move IDs from local moves.json instead of move names.
+   */
+  sendTurnEvent(
+    actorId: string,
+    moveId: number,
+    targetSlot: number,
+    turnNumber: number
+  ): void {
+    if (!this.battleKey) return;
+    const turnPayload: BattleTurnEventPayload = {
+      actorId,
+      moveId,
+      targetSlot,
+      turnNumber,
+    };
+    const turnEvent: GameEventEnvelope = {
+      type: 'battle:turn',
+      version: 1,
+      payload: turnPayload,
+    };
+    this.socketService.sendGameEvent(this.battleKey, turnEvent);
+  }
+
+  copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      console.log('Battle key copied to clipboard');
+    });
+  }
+
+  private loadItems(): void {
+    // Get 30 random items for the player
+    this.itemService.getRandomItems().subscribe((items) => {
+      this.playerItems = items;
+      console.log('Player items loaded:', this.playerItems);
+    });
+
+    // Get 30 random items for the enemy
+    this.itemService.getRandomItems().subscribe((items) => {
+      this.enemyItems = items;
+      console.log('Enemy items loaded:', this.enemyItems);
+    });
+  }
+
+  showStats(): void {
+    this.showPokemonStats = true;
+  }
+
+  hideStats(): void {
+    this.showPokemonStats = false;
+  }
+
+  selectPokemon(index: number): void {
+    this.currentPokemonIndex = index;
+    this.showPokemonSelect = false;
+  }
+
+  showItems(): void {
+    this.showItemSelect = true;
+  }
+
+  hideItems(): void {
+    this.showItemSelect = false;
+  }
+
+  useItem(item: Item): void {
+    // Implement item usage logic here
+    console.log(`Using item: ${item.name}`);
+    this.hideItems();
+  }
+
+  getItemDescription(item: Item): string {
+    // Find the English description from flavor_text_entries
+    const englishEntry = item.flavor_text_entries?.find(
+      (entry) => entry.language.name === 'en'
+    );
+
+    if (englishEntry) {
+      return englishEntry.text;
+>>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
     }
     this.playerTeam = await this.battleService.buildTeam(this.battleState.config);
     const active = this.battleService.createBattler(

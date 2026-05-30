@@ -45,6 +45,7 @@ export class BattleService {
     };
   }
 
+<<<<<<< HEAD
   applyMoveDamage(attacker: BattleBattler, defender: BattleBattler, moveIndex: number): number {
     const move = attacker.moves[moveIndex];
     if (!move || move.pp <= 0) {
@@ -57,6 +58,12 @@ export class BattleService {
       defender.isFainted = true;
     }
     return damage;
+=======
+  /** Helper Functions */
+  //gets the current move list and limits it based on the users selected level range
+  private changeMoveset(pokemon: Pokemon, selectedLevel: number): void {
+    pokemon.moves = pokemon.moves.filter((move) => move.level <= selectedLevel);
+>>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
   }
 
   private buildMoveSlots(pokemon: Pokemon, level: number): BattleMoveSlot[] {
