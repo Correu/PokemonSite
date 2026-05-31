@@ -5,7 +5,6 @@ import {
   BattleConfig,
   BattleFieldState,
   BattleGameEvent,
-  BattleMenuView,
   BattlePhase,
 } from 'src/app/interfaces/battle';
 
@@ -32,7 +31,6 @@ export class BattleStateService {
   isHost = false;
   localPlayerId = '';
   playerIds: string[] = [];
-  menuView: BattleMenuView = 'main';
 
   get phase(): BattlePhase {
     return this.phaseSubject.value;
@@ -51,7 +49,6 @@ export class BattleStateService {
     this.isHost = false;
     this.localPlayerId = '';
     this.playerIds = [];
-    this.menuView = 'main';
     this.phaseSubject.next('idle');
     this.configSubject.next(null);
     this.fieldSubject.next({ ...EMPTY_FIELD });
@@ -97,12 +94,7 @@ export class BattleStateService {
 
   startBattleLocally(message: string): void {
     this.phaseSubject.next('active');
-    this.menuView = 'main';
     this.patchField({ message, turn: 1 });
-  }
-
-  setMenuView(view: BattleMenuView): void {
-    this.menuView = view;
   }
 
   patchField(patch: Partial<BattleFieldState>): void {
@@ -157,9 +149,6 @@ export class BattleStateService {
   }
 
   buildActionMessage(action: BattleActionPayload, battlerName: string): string {
-    if (action.kind === 'move' && action.moveName) {
-      return `${battlerName} used ${action.moveName}!`;
-    }
     if (action.kind === 'run') {
       return `${battlerName} got away!`;
     }

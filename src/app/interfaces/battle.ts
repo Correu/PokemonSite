@@ -1,6 +1,5 @@
 export type BattleFormat = 'singles' | 'doubles';
 export type BattlePhase = 'idle' | 'lobby' | 'waiting' | 'active' | 'finished';
-export type BattleMenuView = 'main' | 'fight';
 
 export interface BattleConfig {
   level: number;
@@ -10,12 +9,6 @@ export interface BattleConfig {
   format: BattleFormat;
   maxPlayers: number;
   generation: number | null;
-}
-
-export interface BattleMoveSlot {
-  name: string;
-  pp: number;
-  maxPp: number;
 }
 
 export interface BattleBattler {
@@ -28,7 +21,6 @@ export interface BattleBattler {
   gender: 'male' | 'female' | null;
   frontSprite: string;
   backSprite: string;
-  moves: BattleMoveSlot[];
   isFainted: boolean;
 }
 
@@ -47,9 +39,7 @@ export type BattleGameEventType =
   | 'battleAction';
 
 export interface BattleActionPayload {
-  kind: 'fight' | 'bag' | 'switch' | 'run' | 'move';
-  moveIndex?: number;
-  moveName?: string;
+  kind: 'fight' | 'bag' | 'switch' | 'run';
   message?: string;
 }
 

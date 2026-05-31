@@ -193,7 +193,6 @@
         <p>{{ field.message || ('What will ' + (field.playerActive?.displayName || 'your Pokémon') + ' do?') }}</p>
       </div>
 
-      @if (menuView === 'main') {
       <div class="battle-action-grid">
         <button type="button" class="battle-action-btn battle-action-btn--fight" (click)="onMainAction('fight')">
           FIGHT
@@ -208,24 +207,6 @@
           RUN
         </button>
       </div>
-      } @else {
-      <div class="battle-move-grid">
-        @for (move of field.playerActive?.moves ?? []; track move.name; let i = $index) {
-        <button
-          type="button"
-          class="battle-move-btn"
-          [disabled]="move.pp <= 0"
-          (click)="useMove(i)"
-        >
-          <span class="battle-move-name">{{ move.name }}</span>
-          <span class="battle-move-pp">{{ move.pp }}/{{ move.maxPp }}</span>
-        </button>
-        }
-      </div>
-      <button mat-button type="button" class="battle-back-moves" (click)="backToMainMenu()">
-        Back
-      </button>
-      }
       }
     </div>
     }

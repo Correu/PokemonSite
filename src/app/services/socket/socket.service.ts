@@ -1,29 +1,20 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable, Subject } from 'rxjs';
-<<<<<<< HEAD
 import { BattleGameEvent, JoinRoomResponse } from 'src/app/interfaces/battle';
 import { environment } from 'src/environments/environment';
 
 const BATTLE_SOCKET_STORAGE_KEY = 'pokemonBattleSocketUrl';
-=======
-import { GameEventEnvelope } from 'src/app/interfaces/battle-event';
->>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
-<<<<<<< HEAD
   private socket!: Socket;
   private currentUrl: string;
   private gameEventSubject = new Subject<BattleGameEvent>();
   private playerJoinedSubject = new Subject<string>();
   private playerLeftSubject = new Subject<string>();
-=======
-  private socket: Socket;
-  private gameEventSubject = new Subject<GameEventEnvelope>();
->>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
 
   constructor() {
     this.currentUrl = this.resolveInitialUrl();
@@ -31,15 +22,8 @@ export class SocketService {
     this.attachSocketListeners();
   }
 
-<<<<<<< HEAD
   getServerUrl(): string {
     return this.currentUrl;
-=======
-  private setupSocketListeners() {
-    this.socket.on('gameEvent', (data: GameEventEnvelope) => {
-      this.gameEventSubject.next(data);
-    });
->>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
   }
 
   setServerUrl(url: string): void {
@@ -86,19 +70,11 @@ export class SocketService {
     });
   }
 
-<<<<<<< HEAD
   sendGameEvent(roomId: string, data: BattleGameEvent): void {
     this.socket.emit('gameEvent', { roomId, data });
   }
 
   onGameEvent(): Observable<BattleGameEvent> {
-=======
-  sendGameEvent(roomId: string, event: GameEventEnvelope) {
-    this.socket.emit('gameEvent', { roomId, data: event });
-  }
-
-  onGameEvent(): Observable<GameEventEnvelope> {
->>>>>>> 5883c18d2539c58b2d2b52b4aedc19cb59bcf4f1
     return this.gameEventSubject.asObservable();
   }
 
@@ -118,10 +94,9 @@ export class SocketService {
         if (!response.success) {
           console.error(response.error);
         }
-      }
+      },
     );
   }
-
   private resolveInitialUrl(): string {
     if (typeof window === 'undefined') {
       return environment.socketUrl;
