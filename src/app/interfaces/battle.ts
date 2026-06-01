@@ -1,5 +1,5 @@
 export type BattleFormat = 'singles' | 'doubles';
-export type BattlePhase = 'idle' | 'lobby' | 'waiting' | 'active' | 'finished';
+export type BattlePhase = 'idle' | 'lobby' | 'waiting' | 'teamSelect' | 'active' | 'finished';
 
 export interface BattleConfig {
   level: number;
@@ -34,6 +34,8 @@ export interface BattleFieldState {
 export type BattleGameEventType =
   | 'battleConfig'
   | 'playerReady'
+  | 'allPlayersConnected'
+  | 'teamSelect'
   | 'battleStart'
   | 'battleState'
   | 'battleAction';
@@ -49,7 +51,9 @@ export interface BattleGameEvent {
   config?: BattleConfig;
   field?: BattleFieldState;
   action?: BattleActionPayload;
+  battler?: BattleBattler;
   ready?: boolean;
+  users?: string[];
 }
 
 export interface JoinRoomResponse {
@@ -60,4 +64,5 @@ export interface JoinRoomResponse {
   status?: string;
   users?: string[];
   maxPlayers?: number;
+  readyForTeamSelect?: boolean;
 }

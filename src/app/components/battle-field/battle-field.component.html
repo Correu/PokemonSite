@@ -1,7 +1,25 @@
 @if (phase$ | async; as phase) {
-<div class="battle-field" [class.battle-field--idle]="phase === 'idle'">
+<div
+  class="battle-field"
+  [class.battle-field--idle]="phase === 'idle' || phase === 'waiting' || phase === 'lobby'"
+  [class.battle-field--team-select]="phase === 'teamSelect'"
+  [class.battle-field--active]="phase === 'active'"
+>
   @if (field$ | async; as field) {
   <div class="battle-field-scene">
+    @if (phase === 'teamSelect') {
+    <div class="battle-field-overlay battle-field-overlay--team-select">
+      <mat-icon>sports_kabaddi</mat-icon>
+      <p>Match ready — choose your Pokémon!</p>
+    </div>
+    }
+
+    @if (phase === 'active' && field.message.includes('BATTLE START')) {
+    <div class="battle-field-overlay battle-field-overlay--start">
+      <p>{{ field.message }}</p>
+    </div>
+    }
+
     <div class="battle-field-sky"></div>
     <div class="battle-field-ground"></div>
 
@@ -77,7 +95,7 @@
     </div>
     }
 
-    @if (!field.playerActive && !field.opponentActive) {
+    @if (!field.playerActive && !field.opponentActive && phase !== 'teamSelect') {
     <div class="battle-field-empty">
       <p>{{ field.message }}</p>
     </div>

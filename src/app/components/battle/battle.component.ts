@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import {
@@ -26,9 +26,15 @@ export class BattleComponent implements OnInit, OnDestroy {
   joinRoomKey = '';
   joinError = '';
   battleServerUrl = '';
+  socketConnected = false;
+  creatingRoom = false;
+  createRoomError = '';
 
-  private playerTeam: Pokemon[] = [];
-  private localBattlerIndex = 0;
+  teamOptions: Pokemon[] = [];
+  selectedTeamIndex: number | null = null;
+  localSelectionConfirmed = false;
+  opponentSelectionConfirmed = false;
+  teamSelectLoading = false;
 
   levelOptions = Array.from({ length: 100 }, (_, i) => i + 1);
   teamSizeOptions = [1, 2, 3, 4, 5, 6];
@@ -41,14 +47,17 @@ export class BattleComponent implements OnInit, OnDestroy {
   battleConfigForm: FormGroup;
   readonly field$ = this.battleState.field$;
   readonly config$ = this.battleState.config$;
+  readonly phase$ = this.battleState.phase$;
 
   private subs = new Subscription();
+  private teamSelectEntered = false;
 
   constructor(
     private battleService: BattleService,
     private battleState: BattleStateService,
     private socketService: SocketService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
     this.battleConfigForm = this.fb.group({
       level: [50, Validators.required],
@@ -63,14 +72,22 @@ export class BattleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.battleServerUrl = this.socketService.getServerUrl();
-    const socketId = this.socketService.getSocketId();
-    if (socketId) {
-      this.battleState.setLocalPlayerId(socketId);
-    }
+    this.socketConnected = this.socketService.connected;
+    this.refreshSocketPlayerId();
+
+    this.subs.add(
+      this.socketService.onConnectionChange().subscribe((connected) => {
+        this.socketConnected = connected;
+        if (connected) {
+          this.refreshSocketPlayerId();
+        }
+        this.cdr.markForCheck();
+      })
+    );
 
     this.subs.add(
       this.socketService.onGameEvent().subscribe((event) => {
-        this.handleGameEvent(event);
+        void this.handleGameEvent(event);
       })
     );
 
@@ -81,21 +98,20 @@ export class BattleComponent implements OnInit, OnDestroy {
           this.battleState.addPlayer(socketId);
         }
         this.battleState.addPlayer(playerId);
-        this.battleState.patchField({
-          message: `${this.battleState.playerIds.length}/${this.battleState.requiredPlayerCount()} players connected.`,
-        });
+        this.updateWaitingMessage();
+        void this.tryEnterTeamSelect();
       })
     );
 
     this.subs.add(
       this.socketService.onPlayerLeft().subscribe((playerId) => {
         if (playerId === '__room_closed__') {
-          this.battleState.reset();
-          this.currentStep = 1;
-          this.mode = 'choose';
+          this.resetMatchState();
           return;
         }
         this.battleState.removePlayer(playerId);
+        this.opponentSelectionConfirmed = false;
+        this.updateWaitingMessage();
       })
     );
   }
@@ -116,17 +132,21 @@ export class BattleComponent implements OnInit, OnDestroy {
     return this.battleState.requiredPlayerCount();
   }
 
-  get canStartBattle(): boolean {
-    return this.isHost && this.battleState.hasEnoughPlayers();
+  get allPlayersConnected(): boolean {
+    return this.battleState.hasEnoughPlayers();
+  }
+
+  get waitingForOpponent(): boolean {
+    return this.localSelectionConfirmed && !this.opponentSelectionConfirmed;
   }
 
   applyBattleServerUrl(): void {
+    this.createRoomError = '';
     this.socketService.setServerUrl(this.battleServerUrl);
     this.battleServerUrl = this.socketService.getServerUrl();
-    const socketId = this.socketService.getSocketId();
-    if (socketId) {
-      this.battleState.setLocalPlayerId(socketId);
-    }
+    this.socketConnected = this.socketService.connected;
+    this.refreshSocketPlayerId();
+    this.cdr.markForCheck();
   }
 
   selectMode(selected: 'create' | 'join'): void {
@@ -148,15 +168,19 @@ export class BattleComponent implements OnInit, OnDestroy {
   }
 
   async submitBattleConfig(): Promise<void> {
+    this.createRoomError = '';
     if (!this.battleConfigForm.valid) {
+      this.battleConfigForm.markAllAsTouched();
+      this.createRoomError = 'Complete all battle settings before creating a room.';
       return;
     }
 
+    this.creatingRoom = true;
     try {
       this.battleKey = await this.socketService.createGame();
+      this.refreshSocketPlayerId();
       const socketId = this.socketService.getSocketId();
       if (socketId) {
-        this.battleState.setLocalPlayerId(socketId);
         this.battleState.setPlayerIds([socketId]);
       }
       this.battleState.setRoom(this.battleKey, true);
@@ -170,8 +194,15 @@ export class BattleComponent implements OnInit, OnDestroy {
       });
 
       this.currentStep = 3;
-    } catch {
-      alert('Failed to create room. Check that the battle server is running.');
+      this.updateWaitingMessage();
+    } catch (err) {
+      this.createRoomError =
+        err instanceof Error
+          ? err.message
+          : 'Failed to create room. Check that the battle server is running.';
+    } finally {
+      this.creatingRoom = false;
+      this.cdr.markForCheck();
     }
   }
 
@@ -202,28 +233,55 @@ export class BattleComponent implements OnInit, OnDestroy {
         ready: true,
       });
 
-      this.currentStep = 4;
+      if (response.readyForTeamSelect) {
+        void this.enterTeamSelect();
+      } else {
+        this.currentStep = 4;
+        this.updateWaitingMessage();
+      }
     });
   }
 
-  async startBattle(): Promise<void> {
-    if (!this.canStartBattle || !this.battleState.config) {
+  selectTeamPokemon(index: number): void {
+    if (this.localSelectionConfirmed) {
+      return;
+    }
+    this.selectedTeamIndex = index;
+    const config = this.battleState.config;
+    const pokemon = this.teamOptions[index];
+    if (config && pokemon) {
+      const preview = this.battleService.createBattler(pokemon, config.level);
+      this.battleState.setPlayerActive(preview);
+    }
+  }
+
+  confirmTeamSelection(): void {
+    if (
+      this.selectedTeamIndex === null ||
+      !this.battleState.config ||
+      this.localSelectionConfirmed
+    ) {
       return;
     }
 
-    this.playerTeam = await this.battleService.buildTeam(this.battleState.config);
-    const active = this.battleService.createBattler(
-      this.playerTeam[this.localBattlerIndex]!,
+    const pokemon = this.teamOptions[this.selectedTeamIndex]!;
+    const battler = this.battleService.createBattler(
+      pokemon,
       this.battleState.config.level
     );
 
-    this.battleState.setPlayerActive(active);
-    this.battleState.startBattleLocally(`Go! ${active.displayName}!`);
+    this.localSelectionConfirmed = true;
+    this.battleState.setPlayerActive(battler);
+    this.battleState.patchField({
+      message: `${battler.displayName} is ready! Waiting for opponent…`,
+    });
 
-    this.socketService.sendGameEvent(this.battleKey, { type: 'battleStart' });
-    this.broadcastFieldState(`Go! ${active.displayName}!`);
+    this.socketService.sendGameEvent(this.battleKey, {
+      type: 'teamSelect',
+      battler,
+    });
 
-    this.currentStep = 6;
+    this.tryBeginBattle();
   }
 
   onMainAction(action: BattleActionPayload['kind']): void {
@@ -251,7 +309,24 @@ export class BattleComponent implements OnInit, OnDestroy {
     navigator.clipboard.writeText(text).catch(() => undefined);
   }
 
-  private handleGameEvent(event: BattleGameEvent): void {
+  private async handleGameEvent(event: BattleGameEvent): Promise<void> {
+    if (event.type === 'allPlayersConnected') {
+      if (event.users) {
+        this.battleState.setPlayerIds(event.users);
+      }
+      await this.enterTeamSelect();
+      return;
+    }
+
+    if (event.type === 'teamSelect' && event.senderId !== this.socketService.getSocketId()) {
+      if (event.battler) {
+        this.battleState.setOpponentActive(event.battler);
+        this.opponentSelectionConfirmed = true;
+        this.tryBeginBattle();
+      }
+      return;
+    }
+
     if (event.senderId === this.socketService.getSocketId()) {
       if (event.type === 'battleConfig') {
         this.currentStep = 3;
@@ -263,33 +338,59 @@ export class BattleComponent implements OnInit, OnDestroy {
 
     if (event.type === 'battleConfig' && event.config) {
       this.currentStep = 4;
-    }
-
-    if (event.type === 'battleStart') {
-      void this.prepareGuestBattle();
-      this.currentStep = 6;
-    }
-
-    if (event.type === 'battleState' && event.field?.playerActive) {
-      this.battleState.setOpponentActive(event.field.playerActive);
-      if (event.field.message) {
-        this.battleState.patchField({ message: event.field.message });
-      }
+      this.updateWaitingMessage();
     }
   }
 
-  private async prepareGuestBattle(): Promise<void> {
-    if (!this.battleState.config) {
+  private async tryEnterTeamSelect(): Promise<void> {
+    if (this.allPlayersConnected && this.battleState.config) {
+      await this.enterTeamSelect();
+    }
+  }
+
+  private async enterTeamSelect(): Promise<void> {
+    if (this.teamSelectEntered || !this.battleState.config) {
       return;
     }
-    this.playerTeam = await this.battleService.buildTeam(this.battleState.config);
-    const active = this.battleService.createBattler(
-      this.playerTeam[this.localBattlerIndex]!,
-      this.battleState.config.level
-    );
-    this.battleState.setPlayerActive(active);
-    this.battleState.startBattleLocally(`Go! ${active.displayName}!`);
-    this.broadcastFieldState(`Go! ${active.displayName}!`);
+    this.teamSelectEntered = true;
+    this.teamSelectLoading = true;
+    this.currentStep = 7;
+    this.battleState.enterTeamSelectPhase();
+
+    this.teamOptions = await this.battleService.buildTeam(this.battleState.config);
+    this.teamSelectLoading = false;
+
+    if (this.teamOptions.length > 0) {
+      this.selectTeamPokemon(0);
+    }
+  }
+
+  private tryBeginBattle(): void {
+    if (!this.localSelectionConfirmed || !this.opponentSelectionConfirmed) {
+      return;
+    }
+
+    const ally = this.battleState.field.playerActive;
+    const foe = this.battleState.field.opponentActive;
+    if (!ally || !foe) {
+      return;
+    }
+
+    const message = `BATTLE START! Go, ${ally.displayName}!`;
+    this.battleState.startBattleLocally(message);
+    this.currentStep = 6;
+    this.broadcastFieldState(message);
+  }
+
+  private updateWaitingMessage(): void {
+    const connected = this.battleState.playerIds.length;
+    const required = this.requiredPlayers;
+    this.battleState.patchField({
+      message:
+        connected < required
+          ? `Waiting for players… (${connected}/${required})`
+          : 'All players connected!',
+    });
   }
 
   private broadcastFieldState(message: string): void {
@@ -301,7 +402,7 @@ export class BattleComponent implements OnInit, OnDestroy {
       type: 'battleState',
       field: {
         playerActive: field.playerActive,
-        opponentActive: null,
+        opponentActive: field.opponentActive,
         message,
         turn: field.turn,
       },
@@ -332,6 +433,27 @@ export class BattleComponent implements OnInit, OnDestroy {
       default:
         return `What will ${name} do?`;
     }
+  }
+
+  private refreshSocketPlayerId(): void {
+    const socketId = this.socketService.getSocketId();
+    if (socketId) {
+      this.battleState.setLocalPlayerId(socketId);
+    }
+  }
+
+  private resetMatchState(): void {
+    this.battleState.reset();
+    this.currentStep = 1;
+    this.mode = 'choose';
+    this.teamOptions = [];
+    this.selectedTeamIndex = null;
+    this.localSelectionConfirmed = false;
+    this.opponentSelectionConfirmed = false;
+    this.teamSelectEntered = false;
+    this.teamSelectLoading = false;
+    this.createRoomError = '';
+    this.creatingRoom = false;
   }
 
   private buildConfigFromForm(): BattleConfig {

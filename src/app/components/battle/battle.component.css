@@ -24,6 +24,21 @@
     font-weight: 600;
 }
 
+.socket-connection-status {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: #c62828;
+    font-weight: 600;
+}
+
+.socket-connection-status--inline {
+    margin: 0 0 0.75rem;
+}
+
+.socket-connection-status--ok {
+    color: #2e7d32;
+}
+
 .battle-command-panel {
     display: flex;
     flex-direction: column;
@@ -117,6 +132,178 @@
 
 .battle-back-moves {
     align-self: flex-start;
+}
+
+.match-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 2px solid #bdbdbd;
+    background: #f5f5f5;
+}
+
+.match-status-banner mat-icon {
+    color: #757575;
+}
+
+.match-status-banner strong {
+    display: block;
+    font-size: 0.95rem;
+    color: #424242;
+}
+
+.match-status-banner p {
+    margin: 0.15rem 0 0;
+    font-size: 0.82rem;
+    color: #616161;
+}
+
+.match-status-banner--ready {
+    border-color: #66bb6a;
+    background: #e8f5e9;
+    animation: readyPulse 1.2s ease-in-out 2;
+}
+
+.match-status-banner--ready mat-icon {
+    color: #2e7d32;
+}
+
+.match-status-banner--ready strong {
+    color: #1b5e20;
+}
+
+@keyframes readyPulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.team-select-panel {
+    width: 100%;
+}
+
+.team-select-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.team-select-header-icon {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    font-size: 2.5rem !important;
+    color: #c62828;
+}
+
+.team-select-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 0;
+}
+
+.team-select-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    max-height: 14rem;
+    overflow-y: auto;
+}
+
+.team-select-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.45rem 0.35rem;
+    border: 2px solid #bdbdbd;
+    border-radius: 10px;
+    background: #fafafa;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.team-select-card:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.team-select-card--selected {
+    border-color: #1976d2;
+    background: #e3f2fd;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.25);
+}
+
+.team-select-card:disabled {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.team-select-sprite {
+    width: 3.5rem;
+    height: 3.5rem;
+    image-rendering: pixelated;
+}
+
+.team-select-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.team-select-level {
+    font-size: 0.65rem;
+    color: #616161;
+}
+
+.team-select-confirmed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: #e8f5e9;
+    border: 2px solid #66bb6a;
+    color: #2e7d32;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.team-select-wait {
+    text-align: center;
+    font-style: italic;
+}
+
+.battle-start-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #c62828, #e53935);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.battle-start-banner mat-icon {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+    font-size: 1.1rem !important;
 }
 
 .battle-container--placeholder {

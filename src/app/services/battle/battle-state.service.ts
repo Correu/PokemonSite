@@ -97,6 +97,16 @@ export class BattleStateService {
     this.patchField({ message, turn: 1 });
   }
 
+  enterTeamSelectPhase(): void {
+    this.phaseSubject.next('teamSelect');
+    this.patchField({
+      playerActive: null,
+      opponentActive: null,
+      message: 'All players connected! Choose your Pokémon!',
+      turn: 0,
+    });
+  }
+
   patchField(patch: Partial<BattleFieldState>): void {
     this.fieldSubject.next({ ...this.fieldSubject.value, ...patch });
   }
@@ -117,8 +127,20 @@ export class BattleStateService {
         }
         break;
 
+      case 'allPlayersConnected':
+        if (event.users) {
+          this.setPlayerIds(event.users);
+        }
+        this.enterTeamSelectPhase();
+        break;
+
+      case 'teamSelect':
+        if (event.senderId && event.senderId !== this.localPlayerId && event.battler) {
+          this.setOpponentActive(event.battler);
+        }
+        break;
+
       case 'battleStart':
-        this.startBattleLocally('A wild battle begins!');
         break;
 
       case 'battleState':

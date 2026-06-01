@@ -19,6 +19,12 @@
         >
           Apply and reconnect
         </button>
+        <p
+          class="socket-connection-status"
+          [class.socket-connection-status--ok]="socketConnected"
+        >
+          {{ socketConnected ? 'Connected to battle server' : 'Not connected — apply server URL above' }}
+        </p>
       </div>
 
       <div class="button-container">
@@ -52,6 +58,13 @@
       <p class="subtitle">Configure rules for this match.</p>
 
       <form [formGroup]="battleConfigForm" class="battle-form">
+        <p
+          class="socket-connection-status socket-connection-status--inline"
+          [class.socket-connection-status--ok]="socketConnected"
+        >
+          {{ socketConnected ? 'Server connected' : 'Connect to the battle server before creating a room' }}
+        </p>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Pokémon level</mat-label>
           <mat-select formControlName="level">
@@ -103,16 +116,26 @@
         </mat-form-field>
         }
 
+        @if (createRoomError) {
+        <p class="error-message">{{ createRoomError }}</p>
+        }
+
         <div class="button-container">
-          <button mat-button type="button" (click)="cancelCreate()">Back</button>
+          <button mat-button type="button" (click)="cancelCreate()" [disabled]="creatingRoom">
+            Back
+          </button>
           <button
             mat-raised-button
             color="primary"
             type="button"
-            [disabled]="battleConfigForm.invalid"
+            [disabled]="battleConfigForm.invalid || creatingRoom"
             (click)="submitBattleConfig()"
           >
+            @if (creatingRoom) {
+            Creating room…
+            } @else {
             Create Room
+            }
           </button>
         </div>
       </form>
@@ -132,20 +155,20 @@
           Copy code
         </button>
       </div>
-      <p class="share-instructions">
-        Players: {{ playerIds.length }} / {{ requiredPlayers }}
-      </p>
-      <div class="button-container">
-        <button
-          mat-raised-button
-          color="primary"
-          type="button"
-          [disabled]="!canStartBattle"
-          (click)="startBattle()"
-        >
-          Start Battle
-        </button>
+
+      <div class="match-status-banner" [class.match-status-banner--ready]="allPlayersConnected">
+        <mat-icon>{{ allPlayersConnected ? 'check_circle' : 'hourglass_top' }}</mat-icon>
+        <div>
+          <strong>{{ allPlayersConnected ? 'All players connected!' : 'Waiting for opponent…' }}</strong>
+          <p>Players {{ playerIds.length }} / {{ requiredPlayers }}</p>
+        </div>
       </div>
+
+      @if (!allPlayersConnected) {
+      <p class="share-instructions">
+        Team selection opens once everyone has joined the room.
+      </p>
+      }
     </div>
     }
 
@@ -163,7 +186,16 @@
         <p>Items: {{ config.useItems ? config.itemQuantity + ' each' : 'Off' }}</p>
       </div>
       }
-      <p class="info-text">Waiting for the host to start the battle…</p>
+      <div class="match-status-banner" [class.match-status-banner--ready]="allPlayersConnected">
+        <mat-icon>{{ allPlayersConnected ? 'check_circle' : 'hourglass_top' }}</mat-icon>
+        <div>
+          <strong>{{ allPlayersConnected ? 'All players connected!' : 'Waiting for all players…' }}</strong>
+          <p>{{ playerIds.length }} / {{ requiredPlayers }} in room</p>
+        </div>
+      </div>
+      @if (!allPlayersConnected) {
+      <p class="info-text">Team selection will begin when everyone has joined.</p>
+      }
     </div>
     }
 
@@ -186,8 +218,73 @@
     </div>
     }
 
+    @if (currentStep === 7) {
+    <div class="step-container team-select-panel">
+      <div class="team-select-header">
+        <mat-icon class="team-select-header-icon">sports_kabaddi</mat-icon>
+        <h1>Choose Your Pokémon</h1>
+        <p class="subtitle">Both players are connected. Pick who you'll send into battle.</p>
+      </div>
+
+      @if (teamSelectLoading) {
+      <div class="team-select-loading">
+        <mat-spinner diameter="36"></mat-spinner>
+        <p>Building your team…</p>
+      </div>
+      } @else {
+      <div class="team-select-grid">
+        @for (pokemon of teamOptions; track pokemon.id; let i = $index) {
+        <button
+          type="button"
+          class="team-select-card"
+          [class.team-select-card--selected]="selectedTeamIndex === i"
+          [disabled]="localSelectionConfirmed"
+          (click)="selectTeamPokemon(i)"
+        >
+          <img
+            [src]="pokemon.sprites.front_default"
+            [alt]="pokemon.name"
+            class="team-select-sprite"
+          />
+          <span class="team-select-name">{{ pokemon.name | titlecase }}</span>
+          @if (config$ | async; as config) {
+          <span class="team-select-level">Lv. {{ config.level }}</span>
+          }
+        </button>
+        }
+      </div>
+
+      @if (localSelectionConfirmed) {
+      <div class="team-select-confirmed">
+        <mat-icon>done</mat-icon>
+        <span>Your Pokémon is locked in!</span>
+      </div>
+      @if (waitingForOpponent) {
+      <p class="info-text team-select-wait">Waiting for your opponent to choose…</p>
+      }
+      } @else {
+      <div class="button-container">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="selectedTeamIndex === null"
+          (click)="confirmTeamSelection()"
+        >
+          Send out Pokémon!
+        </button>
+      </div>
+      }
+      }
+    </div>
+    }
+
     @if (currentStep === 6) {
-    <div class="step-container battle-command-panel">
+    <div class="step-container battle-command-panel battle-command-panel--active">
+      <div class="battle-start-banner">
+        <mat-icon>flash_on</mat-icon>
+        <span>Battle in progress</span>
+      </div>
       @if (field$ | async; as field) {
       <div class="battle-message-box">
         <p>{{ field.message || ('What will ' + (field.playerActive?.displayName || 'your Pokémon') + ' do?') }}</p>
