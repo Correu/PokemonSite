@@ -1,84 +1,227 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable, Subject } from 'rxjs';
-import { GameEventEnvelope } from 'src/app/interfaces/battle-event';
+import { BattleGameEvent, JoinRoomResponse } from 'src/app/interfaces/battle';
+import { environment } from 'src/environments/environment';
+
+const BATTLE_SOCKET_STORAGE_KEY = 'pokemonBattleSocketUrl';
+const DEFAULT_ACK_TIMEOUT_MS = 15_000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
-  private socket: Socket;
-  private gameEventSubject = new Subject<GameEventEnvelope>();
+  private socket!: Socket;
+  private currentUrl: string;
+  private gameEventSubject = new Subject<BattleGameEvent>();
+  private playerJoinedSubject = new Subject<string>();
+  private playerLeftSubject = new Subject<string>();
+  private connectionSubject = new Subject<boolean>();
 
   constructor() {
-    this.socket = io('http://localhost:3000'); // or container URL
-    this.setupSocketListeners();
+    this.currentUrl = this.resolveInitialUrl();
+    this.socket = this.createSocket(this.currentUrl);
+    this.attachSocketListeners();
   }
 
-  private setupSocketListeners() {
-    this.socket.on('gameEvent', (data: GameEventEnvelope) => {
-      this.gameEventSubject.next(data);
-    });
+  get connected(): boolean {
+    return this.socket?.connected ?? false;
   }
 
-  joinRoom(roomId: string | null, cb?: (response: any) => void) {
-    this.socket.emit('joinRoom', roomId, (response: any) => {
-      if (cb) {
-        cb(response);
-      } else if (response.error) {
-        alert(response.error);
-      }
-    });
+  onConnectionChange(): Observable<boolean> {
+    return this.connectionSubject.asObservable();
   }
 
-  createGame(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.socket.emit('createRoom', {}, (response: any) => {
-        if (response.roomKey) {
-          resolve(response.roomKey);
-        } else {
-          reject('Failed to create room');
-        }
-      });
-    });
+  getServerUrl(): string {
+    return this.currentUrl;
   }
 
-  sendGameEvent(roomId: string, event: GameEventEnvelope) {
-    this.socket.emit('gameEvent', { roomId, data: event });
-  }
-
-  onGameEvent(): Observable<GameEventEnvelope> {
-    return this.gameEventSubject.asObservable();
-  }
-
-  onPlayerJoined(callback: (playerId: string) => void) {
-    this.socket.on('playerJoined', callback);
-  }
-
-  sendMessage(roomKey: string, message: string) {
-    // Send a message
-    this.socket.emit(
-      'sendMessage',
-      { roomKey: roomKey, message: message },
-      (response: any) => {
-        if (response.success) {
-          console.log('Message sent!');
-        } else {
-          console.error(response.error);
-        }
-      }
-    );
-  }
-
-  onRecievedMessage(callback: (payload: any) => void) {
-    // Listen for messages
-    this.socket.on('receiveMessage', (payload) => {
-      console.log('📨 New message received:', payload);
-      callback(payload);
-    });
+  setServerUrl(url: string): void {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      return;
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(BATTLE_SOCKET_STORAGE_KEY, trimmed);
+    }
+    if (trimmed === this.currentUrl && this.socket.connected) {
+      return;
+    }
+    this.currentUrl = trimmed;
+    this.socket.removeAllListeners();
+    this.socket.disconnect();
+    this.socket = this.createSocket(trimmed);
+    this.attachSocketListeners();
   }
 
   getSocketId(): string | undefined {
     return this.socket.id;
+  }
+
+  waitUntilConnected(timeoutMs = DEFAULT_ACK_TIMEOUT_MS): Promise<void> {
+    if (this.socket.connected) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        cleanup();
+        reject(
+          new Error(
+            `Could not connect to ${this.currentUrl}. Start PokemonSiteServer and verify the battle server URL.`
+          )
+        );
+      }, timeoutMs);
+
+      const onConnect = () => {
+        cleanup();
+        resolve();
+      };
+
+      const cleanup = () => {
+        clearTimeout(timer);
+        this.socket.off('connect', onConnect);
+      };
+
+      this.socket.on('connect', onConnect);
+      this.socket.connect();
+    });
+  }
+
+  joinRoom(roomId: string, cb?: (response: JoinRoomResponse) => void): void {
+    this.emitWithAck<JoinRoomResponse>('joinRoom', roomId)
+      .then((response) => {
+        if (cb) {
+          cb(response);
+        } else if (response.error) {
+          alert(response.error);
+        }
+      })
+      .catch((err) => {
+        if (cb) {
+          cb({ error: this.errorMessage(err) });
+        } else {
+          alert(this.errorMessage(err));
+        }
+      });
+  }
+
+  createGame(): Promise<string> {
+    return this.waitUntilConnected().then(
+      () =>
+        this.emitWithAck<{ roomKey?: string }>('createRoom', {}).then((response) => {
+          if (response.roomKey) {
+            return response.roomKey;
+          }
+          throw new Error('Server did not return a room code.');
+        })
+    );
+  }
+
+  sendGameEvent(roomId: string, data: BattleGameEvent): void {
+    if (!this.socket.connected) {
+      console.warn('Socket not connected; game event not sent.', data.type);
+      return;
+    }
+    this.socket.emit('gameEvent', { roomId, data });
+  }
+
+  onGameEvent(): Observable<BattleGameEvent> {
+    return this.gameEventSubject.asObservable();
+  }
+
+  onPlayerJoined(): Observable<string> {
+    return this.playerJoinedSubject.asObservable();
+  }
+
+  onPlayerLeft(): Observable<string> {
+    return this.playerLeftSubject.asObservable();
+  }
+
+  sendMessage(roomKey: string, message: string): void {
+    this.emitWithAck('sendMessage', { roomKey, message }).catch((err) => {
+      console.error(this.errorMessage(err));
+    });
+  }
+
+  private createSocket(url: string): Socket {
+    return io(url, {
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      timeout: 10_000,
+    });
+  }
+
+  private emitWithAck<T>(event: string, payload: unknown): Promise<T> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket.connected) {
+        reject(new Error('Not connected to the battle server.'));
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        reject(
+          new Error(
+            `Request timed out (${event}). Is PokemonSiteServer running at ${this.currentUrl}?`
+          )
+        );
+      }, DEFAULT_ACK_TIMEOUT_MS);
+
+      this.socket.emit(event, payload, (response: T) => {
+        clearTimeout(timer);
+        resolve(response);
+      });
+    });
+  }
+
+  private errorMessage(err: unknown): string {
+    return err instanceof Error ? err.message : 'Battle server request failed.';
+  }
+
+  private resolveInitialUrl(): string {
+    if (typeof window === 'undefined') {
+      return environment.socketUrl;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('socketUrl')?.trim();
+    if (fromQuery) {
+      localStorage.setItem(BATTLE_SOCKET_STORAGE_KEY, fromQuery);
+      return fromQuery;
+    }
+    const stored = localStorage.getItem(BATTLE_SOCKET_STORAGE_KEY)?.trim();
+    if (stored) {
+      return stored;
+    }
+    return environment.socketUrl;
+  }
+
+  private attachSocketListeners(): void {
+    this.socket.on('connect', () => {
+      this.connectionSubject.next(true);
+    });
+    this.socket.on('disconnect', () => {
+      this.connectionSubject.next(false);
+    });
+    this.socket.on('connect_error', () => {
+      this.connectionSubject.next(false);
+    });
+
+    this.socket.on('gameEvent', (data: BattleGameEvent) => {
+      this.gameEventSubject.next(data);
+    });
+    this.socket.on('playerJoined', (playerId: string) => {
+      this.playerJoinedSubject.next(playerId);
+    });
+    this.socket.on('playerLeft', (playerId: string) => {
+      this.playerLeftSubject.next(playerId);
+    });
+    this.socket.on('roomClosed', () => {
+      this.playerLeftSubject.next('__room_closed__');
+    });
+
+    if (this.socket.connected) {
+      this.connectionSubject.next(true);
+    }
   }
 }

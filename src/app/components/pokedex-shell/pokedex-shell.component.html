@@ -45,6 +45,9 @@
                 </div>
               </div>
 
+              @if (isBattleRoute$ | async) {
+              <app-battle-field class="kanto-battle-field"></app-battle-field>
+              } @else {
               <ng-container *ngIf="selectedPokemon$ | async as selectedPokemon">
                 <div class="kanto-main-lcd">
                   <div class="kanto-lcd-bezel">
@@ -150,6 +153,7 @@
                   </div>
                 </div>
               </ng-container>
+              }
 
               <div class="kanto-left-deco" aria-hidden="true">
                 <span class="kanto-deco-circle"></span>

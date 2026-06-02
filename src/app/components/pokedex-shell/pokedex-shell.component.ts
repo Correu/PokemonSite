@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+<<<<<<< HEAD
 import { filter } from 'rxjs/operators';
+=======
+import { filter, map, startWith } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+>>>>>>> c66908abf8ca8ebf750579da5fe8e85f4268035e
 import { PokedexAccessService } from 'src/app/services/pokedex-access/pokedex-access.service';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 
@@ -26,6 +31,7 @@ export class PokedexShellComponent implements OnInit {
   modeLabel = 'Dex';
 
   readonly selectedPokemon$ = this.pokemonService.selectedPokedexPokemon$;
+  readonly isBattleRoute$: Observable<boolean>;
 
   readonly navTabs: PokedexNavTab[] = [
     { id: 'list', label: 'Dex', route: '', exact: true },
@@ -39,7 +45,17 @@ export class PokedexShellComponent implements OnInit {
     private pokedexAccessService: PokedexAccessService,
     public pokemonService: PokemonService,
     private router: Router
+<<<<<<< HEAD
   ) {}
+=======
+  ) {
+    this.isBattleRoute$ = this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects.includes('/battle')),
+      startWith(this.router.url.includes('/battle'))
+    );
+  }
+>>>>>>> c66908abf8ca8ebf750579da5fe8e85f4268035e
 
   ngOnInit(): void {
     if (this.pokedexAccessService.isPokedexOpened()) {
