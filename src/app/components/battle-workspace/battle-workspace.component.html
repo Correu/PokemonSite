@@ -1,0 +1,207 @@
+<div class="battle-workspace">
+  <nav class="battle-workspace-nav" aria-label="Battle setup steps">
+    <button
+      type="button"
+      class="nav-chip"
+      [class.active]="workspaceStep === 'room'"
+      (click)="goStep('room')"
+    >
+      Room
+    </button>
+    <button
+      type="button"
+      class="nav-chip"
+      [disabled]="!canGoTeam()"
+      [class.active]="workspaceStep === 'team'"
+      (click)="goStep('team')"
+    >
+      Team
+    </button>
+    <button
+      type="button"
+      class="nav-chip"
+      [disabled]="!canGoMoves()"
+      [class.active]="workspaceStep === 'moves'"
+      (click)="goStep('moves')"
+    >
+      Moves
+    </button>
+    <button
+      type="button"
+      class="nav-chip"
+      [disabled]="!canGoItems()"
+      [class.active]="workspaceStep === 'items'"
+      (click)="goStep('items')"
+    >
+      Items
+    </button>
+  </nav>
+
+  @if (workspaceStep === 'room') {
+  <section class="bw-section">
+    @if (roomMode === 'choose') {
+    <h2 class="bw-title">Battle</h2>
+    <p class="bw-lead">Create a room as host, or join with a key.</p>
+    <div class="bw-actions">
+      <button mat-raised-button color="primary" (click)="selectCreate()">
+        Create room
+      </button>
+      <button mat-raised-button color="accent" (click)="selectJoin()">
+        Join room
+      </button>
+    </div>
+    } @if (roomMode === 'create') {
+    <button mat-button type="button" (click)="backToChoose()">Back</button>
+    <h3 class="bw-subtitle">Battle settings</h3>
+    <form [formGroup]="battleConfigForm" class="bw-form">
+      <mat-form-field appearance="outline" class="bw-field">
+        <mat-label>Level</mat-label>
+        <mat-select formControlName="level">
+          @for (lv of levelOptions; track lv) {
+          <mat-option [value]="lv">{{ lv }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="bw-field">
+        <mat-label>Generation</mat-label>
+        <mat-select formControlName="generation">
+          <mat-option [value]="null">All</mat-option>
+          @for (g of generationOptions; track g) {
+          <mat-option [value]="g">Gen {{ g }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <div class="bw-toggle">
+        <mat-slide-toggle formControlName="useItems">Items on</mat-slide-toggle>
+      </div>
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="submitCreateRoom()"
+        [disabled]="!battleConfigForm.valid"
+      >
+        Create room
+      </button>
+    </form>
+    } @if (roomMode === 'join') {
+    <button mat-button type="button" (click)="backToChoose()">Back</button>
+    <h3 class="bw-subtitle">Join with room key</h3>
+    <mat-form-field appearance="outline" class="bw-field">
+      <mat-label>Room key</mat-label>
+      <input matInput [(ngModel)]="joinRoomKey" name="joinKey" />
+    </mat-form-field>
+    @if (joinError) {
+    <p class="bw-error">{{ joinError }}</p>
+    }
+    <button mat-raised-button color="accent" type="button" (click)="tryJoin()">
+      Join
+    </button>
+    }
+
+    @if (session.roomKey$ | async; as rk) {
+    @if (rk) {
+    <div class="bw-roombox">
+      <div><strong>Room</strong>: {{ rk }}</div>
+      @if ((session.role$ | async) === 'host') {
+      <p class="bw-hint">
+        Share this key. When your opponent joins, press
+        <strong>Start match</strong>.
+      </p>
+      @if (session.guestPresent$ | async) {
+      <button
+        mat-raised-button
+        color="warn"
+        type="button"
+        (click)="hostStartMatch()"
+      >
+        Start match
+      </button>
+      } @else {
+      <p class="bw-wait">Waiting for opponent…</p>
+      }
+      } @else if ((session.role$ | async) === 'guest') {
+      <p class="bw-hint">Waiting for host to start the match…</p>
+      }
+    </div>
+    }
+    }
+  </section>
+  }
+
+  @if (workspaceStep === 'team') {
+  <section class="bw-section">
+    <h3 class="bw-subtitle">
+      Pick up to 6 Pokémon ({{ (session.selectedTeam$ | async)?.length ?? 0
+      }}/6)
+    </h3>
+    <div class="bw-pokegrid">
+      @for (p of pokedexSlice; track p.id) {
+      <mat-card
+        class="bw-pokecard"
+        [class.bw-pokecard--on]="isPokemonSelected(p)"
+        (click)="togglePokemon(p)"
+      >
+        <mat-card-content>
+          @if (p.sprites?.front_default) {
+          <img
+            class="bw-mini-sprite"
+            [src]="p.sprites.front_default"
+            [alt]="p.name"
+          />
+          }
+          <div class="bw-poke-name">{{ p.name | titlecase }}</div>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+  </section>
+  }
+
+  @if (workspaceStep === 'moves') {
+  <section class="bw-section">
+    <h3 class="bw-subtitle">Choose up to 4 moves per Pokémon</h3>
+    @if (session.selectedTeam$ | async; as team) {
+    @for (p of team; track p.id) {
+    <div class="bw-move-block">
+      <h4 class="bw-poke-name">{{ p.name | titlecase }}</h4>
+      @if (p.moves?.length) {
+      <div class="bw-move-chips">
+        @for (lm of p.moves; track lm.moveId) {
+        <button
+          type="button"
+          class="bw-chip"
+          [class.bw-chip--on]="moveSelected(p, lm.moveId)"
+          (click)="toggleMove(p, lm.moveId)"
+        >
+          {{ moveLabel(lm.moveId) | titlecase }}
+        </button>
+        }
+      </div>
+      } @else {
+      <p class="bw-hint">No catalog moves in learnset for this Pokémon.</p>
+      }
+    </div>
+    }
+    }
+  </section>
+  }
+
+  @if (workspaceStep === 'items') {
+  <section class="bw-section">
+    <h3 class="bw-subtitle">Items (up to 6)</h3>
+    <div class="bw-move-chips">
+      @for (it of itemChoices; track it.name) {
+      <button
+        type="button"
+        class="bw-chip"
+        [class.bw-chip--on]="isItemSelected(it)"
+        (click)="toggleItem(it)"
+      >
+        {{ it.name | titlecase }}
+      </button>
+      }
+    </div>
+  </section>
+  }
+</div>

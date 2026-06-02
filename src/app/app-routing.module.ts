@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { BattleComponent } from './components/battle/battle.component';
+import { BattleWorkspaceComponent } from './components/battle-workspace/battle-workspace.component';
 import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { PokedexShellComponent } from './components/pokedex-shell/pokedex-shell.component';
 import { PokedexAccessGuard } from './guards/pokedex-access.guard';
@@ -16,7 +16,7 @@ const routes: Routes = [
       },
       {
         path: 'battle',
-        component: BattleComponent,
+        component: BattleWorkspaceComponent,
         canActivate: [PokedexAccessGuard],
       },
     ],

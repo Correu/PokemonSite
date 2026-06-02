@@ -1,11 +1,25 @@
-.app-container,
-.main-content {
-  min-height: 100vh;
+.app-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
   width: 100%;
-  display: block;
+}
+
+.main-content {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .app-banner {
+  flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
   padding: 0.75rem 1.25rem;
@@ -74,7 +88,6 @@
   margin: 0 1vw;
 }
 
-/* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .navbar-style {
     padding: 0.8vh 1.5vw;

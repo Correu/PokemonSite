@@ -32,7 +32,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { PokedexShellComponent } from './components/pokedex-shell/pokedex-shell.component';
 import { PokedexComponent } from './components/pokedex/pokedex.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
-import { BattleComponent } from './components/battle/battle.component';
+import { BattleStageComponent } from './components/battle-stage/battle-stage.component';
+import { BattleWorkspaceComponent } from './components/battle-workspace/battle-workspace.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -42,7 +43,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     PokedexShellComponent,
     PokedexComponent,
     NavigationComponent,
-    BattleComponent,
+    BattleStageComponent,
+    BattleWorkspaceComponent,
   ],
   bootstrap: [AppComponent],
   imports: [

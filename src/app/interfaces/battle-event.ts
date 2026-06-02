@@ -12,10 +12,24 @@ export interface BattleTurnEventPayload {
   turnNumber: number;
 }
 
-export type GameEventPayload = BattleConfigEventPayload | BattleTurnEventPayload;
+export interface BattleMatchStartPayload {
+  roomKey: string;
+  startedAt: string;
+  hostSocketId: string;
+}
+
+export type GameEventPayload =
+  | BattleConfigEventPayload
+  | BattleTurnEventPayload
+  | BattleMatchStartPayload;
+
+export type GameEventType =
+  | 'battle:config'
+  | 'battle:turn'
+  | 'battle:matchStart';
 
 export interface GameEventEnvelope {
-  type: 'battle:config' | 'battle:turn';
+  type: GameEventType;
   version: 1;
   payload: GameEventPayload;
 }

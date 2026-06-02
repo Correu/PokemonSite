@@ -1,0 +1,175 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.battle-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.battle-workspace-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nav-chip {
+  border: 2px solid #37474f;
+  background: #eceff1;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nav-chip.active {
+  background: #fff59d;
+  border-color: #1a1a1a;
+}
+
+.bw-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bw-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.bw-lead {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.bw-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.bw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
+}
+
+.bw-field {
+  width: 100%;
+}
+
+.bw-toggle {
+  margin: 4px 0;
+}
+
+.bw-roombox {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.bw-hint {
+  margin: 8px 0 0;
+  color: #424242;
+  font-size: 0.8rem;
+}
+
+.bw-wait {
+  margin: 8px 0 0;
+  font-style: italic;
+  color: #616161;
+}
+
+.bw-error {
+  color: #c62828;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.bw-pokegrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  max-height: 48vh;
+  overflow: auto;
+}
+
+.bw-pokecard {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.bw-pokecard--on {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.bw-mini-sprite {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+  margin: 0 auto 4px;
+}
+
+.bw-poke-name {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.bw-move-block {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.bw-move-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bw-chip {
+  border: 2px solid #546e7a;
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.bw-chip--on {
+  background: #c8e6c9;
+  border-color: #1b5e20;
+}
