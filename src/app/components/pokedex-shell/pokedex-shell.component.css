@@ -229,18 +229,11 @@
   padding: 8px 10px 8px 6px;
 }
 
-<<<<<<< HEAD
-.kanto-battle-stage-host {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-=======
 .kanto-battle-field {
   flex: 1;
   min-height: 0;
   display: flex;
->>>>>>> c66908abf8ca8ebf750579da5fe8e85f4268035e
+  flex-direction: column;
 }
 
 .kanto-left-header {

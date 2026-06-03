@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable, Subject } from 'rxjs';
 import { BattleGameEvent, JoinRoomResponse } from 'src/app/interfaces/battle';
+import { GameEventEnvelope } from 'src/app/interfaces/battle-event';
+
+export type SocketGameEvent = BattleGameEvent | GameEventEnvelope;
 import { environment } from 'src/environments/environment';
 
 const BATTLE_SOCKET_STORAGE_KEY = 'pokemonBattleSocketUrl';
@@ -13,7 +16,7 @@ const DEFAULT_ACK_TIMEOUT_MS = 15_000;
 export class SocketService {
   private socket!: Socket;
   private currentUrl: string;
-  private gameEventSubject = new Subject<BattleGameEvent>();
+  private gameEventSubject = new Subject<SocketGameEvent>();
   private playerJoinedSubject = new Subject<string>();
   private playerLeftSubject = new Subject<string>();
   private connectionSubject = new Subject<boolean>();
@@ -118,7 +121,7 @@ export class SocketService {
     );
   }
 
-  sendGameEvent(roomId: string, data: BattleGameEvent): void {
+  sendGameEvent(roomId: string, data: SocketGameEvent): void {
     if (!this.socket.connected) {
       console.warn('Socket not connected; game event not sent.', data.type);
       return;
@@ -126,7 +129,7 @@ export class SocketService {
     this.socket.emit('gameEvent', { roomId, data });
   }
 
-  onGameEvent(): Observable<BattleGameEvent> {
+  onGameEvent(): Observable<SocketGameEvent> {
     return this.gameEventSubject.asObservable();
   }
 
@@ -207,7 +210,7 @@ export class SocketService {
       this.connectionSubject.next(false);
     });
 
-    this.socket.on('gameEvent', (data: BattleGameEvent) => {
+    this.socket.on('gameEvent', (data: SocketGameEvent) => {
       this.gameEventSubject.next(data);
     });
     this.socket.on('playerJoined', (playerId: string) => {

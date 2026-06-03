@@ -33,3 +33,21 @@ export interface GameEventEnvelope {
   version: 1;
   payload: GameEventPayload;
 }
+
+export function isGameEventEnvelope(
+  event: unknown
+): event is GameEventEnvelope {
+  if (!event || typeof event !== 'object') {
+    return false;
+  }
+  const e = event as GameEventEnvelope;
+  return (
+    e.version === 1 &&
+    typeof e.type === 'string' &&
+    (e.type === 'battle:config' ||
+      e.type === 'battle:turn' ||
+      e.type === 'battle:matchStart') &&
+    e.payload !== null &&
+    typeof e.payload === 'object'
+  );
+}

@@ -11,6 +11,7 @@ import {
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { BattleStateService } from 'src/app/services/battle/battle-state.service';
 import { BattleService } from 'src/app/services/battle/battle.service';
+import { isGameEventEnvelope } from 'src/app/interfaces/battle-event';
 import { SocketService } from 'src/app/services/socket/socket.service';
 
 @Component({
@@ -87,6 +88,9 @@ export class BattleComponent implements OnInit, OnDestroy {
 
     this.subs.add(
       this.socketService.onGameEvent().subscribe((event) => {
+        if (isGameEventEnvelope(event)) {
+          return;
+        }
         void this.handleGameEvent(event);
       })
     );

@@ -12,6 +12,7 @@ import {
   BattleConfigEventPayload,
   BattleMatchStartPayload,
   GameEventEnvelope,
+  isGameEventEnvelope,
 } from 'src/app/interfaces/battle-event';
 import { SocketService } from '../socket/socket.service';
 import { PokemonService } from '../pokemon/pokemon.service';
@@ -66,6 +67,7 @@ export class BattleSessionService {
   );
 
   private gameEventSub: Subscription | null = null;
+  private playerJoinedSub: Subscription | null = null;
   private opponentSub: Subscription | null = null;
 
   readonly playerStage$: Observable<BattleStagePokemon | null> = combineLatest([
@@ -84,7 +86,7 @@ export class BattleSessionService {
     private readonly pokemonService: PokemonService,
     private readonly itemService: ItemService
   ) {
-    this.socket.onPlayerJoined((peerId) => {
+    this.playerJoinedSub = this.socket.onPlayerJoined().subscribe((peerId) => {
       if (this.role$.value === 'host' && peerId !== this.socket.getSocketId()) {
         this.guestPresent$.next(true);
         if (this.phase$.value === 'awaitingGuest') {
@@ -209,7 +211,10 @@ export class BattleSessionService {
     return firstValueFrom(this.itemService.getRandomItems());
   }
 
-  private handleGameEvent(event: GameEventEnvelope): void {
+  private handleGameEvent(event: unknown): void {
+    if (!isGameEventEnvelope(event)) {
+      return;
+    }
     if (event.type === 'battle:config') {
       this.battleConfig$.next(event.payload as BattleConfigEventPayload);
       return;
