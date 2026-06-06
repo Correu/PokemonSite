@@ -3,6 +3,9 @@ export interface BattleConfigEventPayload {
   itemQuantity: number;
   generation: number | null;
   useItems: boolean;
+  teamSize?: number;
+  maxPlayers?: number;
+  format?: 'singles' | 'doubles';
 }
 
 export interface BattleTurnEventPayload {
@@ -18,15 +21,35 @@ export interface BattleMatchStartPayload {
   hostSocketId: string;
 }
 
+export interface BattleReadyStatePayload {
+  readyPlayerIds: string[];
+  requiredCount: number;
+  allReady: boolean;
+}
+
+export interface BattleCountdownPayload {
+  seconds: number;
+  endsAt: string;
+}
+
+/** Client → server: toggle ready (no fields required). */
+export type BattleReadyPayload = Record<string, never>;
+
 export type GameEventPayload =
   | BattleConfigEventPayload
   | BattleTurnEventPayload
-  | BattleMatchStartPayload;
+  | BattleMatchStartPayload
+  | BattleReadyStatePayload
+  | BattleCountdownPayload
+  | BattleReadyPayload;
 
 export type GameEventType =
   | 'battle:config'
   | 'battle:turn'
-  | 'battle:matchStart';
+  | 'battle:matchStart'
+  | 'battle:ready'
+  | 'battle:readyState'
+  | 'battle:countdown';
 
 export interface GameEventEnvelope {
   type: GameEventType;
@@ -46,7 +69,10 @@ export function isGameEventEnvelope(
     typeof e.type === 'string' &&
     (e.type === 'battle:config' ||
       e.type === 'battle:turn' ||
-      e.type === 'battle:matchStart') &&
+      e.type === 'battle:matchStart' ||
+      e.type === 'battle:ready' ||
+      e.type === 'battle:readyState' ||
+      e.type === 'battle:countdown') &&
     e.payload !== null &&
     typeof e.payload === 'object'
   );

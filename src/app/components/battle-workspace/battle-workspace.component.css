@@ -100,6 +100,86 @@
   font-size: 0.8rem;
 }
 
+.bw-hint--success {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.bw-full-btn {
+  width: 100%;
+}
+
+.socket-server-panel {
+  padding: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: #fafafa;
+  margin-bottom: 8px;
+}
+
+.socket-server-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.socket-connection-status {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.socket-connection-status--ok {
+  color: #2e7d32;
+}
+
+.match-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 12px;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 2px solid #bdbdbd;
+  background: #f5f5f5;
+}
+
+.match-status-banner mat-icon {
+  color: #757575;
+}
+
+.match-status-banner strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.match-status-banner p {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: #616161;
+}
+
+.match-status-banner--ready {
+  border-color: #66bb6a;
+  background: #e8f5e9;
+  animation: readyPulse 1s ease-in-out 2;
+}
+
+.match-status-banner--ready mat-icon {
+  color: #2e7d32;
+}
+
+@keyframes readyPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
 .bw-wait {
   margin: 8px 0 0;
   font-style: italic;
@@ -172,4 +252,17 @@
 .bw-chip--on {
   background: #c8e6c9;
   border-color: #1b5e20;
+}
+
+.ready-panel {
+  margin-top: 8px;
+}
+
+.ready-countdown {
+  margin: 12px 0 0;
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1;
+  color: #1a237e;
 }

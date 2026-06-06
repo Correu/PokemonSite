@@ -63,6 +63,10 @@ export interface JoinRoomResponse {
   battleConfig?: BattleConfig | null;
   status?: string;
   users?: string[];
+  playerCount?: number;
   maxPlayers?: number;
+  matchStarted?: boolean;
   readyForTeamSelect?: boolean;
+  readyPlayerIds?: string[];
+  countdownEndsAt?: string | null;
 }

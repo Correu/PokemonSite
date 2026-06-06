@@ -11,48 +11,65 @@
     <button
       type="button"
       class="nav-chip"
-      [disabled]="!canGoTeam()"
+      [disabled]="!(session.matchStarted$ | async)"
       [class.active]="workspaceStep === 'team'"
       (click)="goStep('team')"
     >
-      Team
-    </button>
-    <button
-      type="button"
-      class="nav-chip"
-      [disabled]="!canGoMoves()"
-      [class.active]="workspaceStep === 'moves'"
-      (click)="goStep('moves')"
-    >
-      Moves
-    </button>
-    <button
-      type="button"
-      class="nav-chip"
-      [disabled]="!canGoItems()"
-      [class.active]="workspaceStep === 'items'"
-      (click)="goStep('items')"
-    >
-      Items
+      Pokémon
     </button>
   </nav>
 
   @if (workspaceStep === 'room') {
   <section class="bw-section">
+    <div class="socket-server-panel">
+      <p class="socket-server-title">1. Connect to battle server</p>
+      <mat-form-field appearance="outline" class="bw-field">
+        <mat-label>Socket.IO URL</mat-label>
+        <input matInput [(ngModel)]="battleServerUrl" name="socketUrl" />
+      </mat-form-field>
+      <button mat-stroked-button type="button" class="bw-full-btn" (click)="applyServerUrl()">
+        Apply and reconnect
+      </button>
+      <p
+        class="socket-connection-status"
+        [class.socket-connection-status--ok]="socketConnected"
+      >
+        {{
+          socketConnected
+            ? 'Connected — you can host or join a match'
+            : 'Not connected — start PokemonSiteServer, then apply URL above'
+        }}
+      </p>
+    </div>
+
     @if (roomMode === 'choose') {
     <h2 class="bw-title">Battle</h2>
-    <p class="bw-lead">Create a room as host, or join with a key.</p>
+    <p class="bw-lead">Host a match and share a link, or join with a room code.</p>
     <div class="bw-actions">
-      <button mat-raised-button color="primary" (click)="selectCreate()">
-        Create room
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        [disabled]="!socketConnected"
+        (click)="selectCreate()"
+      >
+        Host match
       </button>
-      <button mat-raised-button color="accent" (click)="selectJoin()">
-        Join room
+      <button
+        mat-raised-button
+        color="accent"
+        type="button"
+        [disabled]="!socketConnected"
+        (click)="selectJoin()"
+      >
+        Join match
       </button>
     </div>
-    } @if (roomMode === 'create') {
+    }
+
+    @if (roomMode === 'create') {
     <button mat-button type="button" (click)="backToChoose()">Back</button>
-    <h3 class="bw-subtitle">Battle settings</h3>
+    <h3 class="bw-subtitle">2. Match settings</h3>
     <form [formGroup]="battleConfigForm" class="bw-form">
       <mat-form-field appearance="outline" class="bw-field">
         <mat-label>Level</mat-label>
@@ -72,56 +89,136 @@
         </mat-select>
       </mat-form-field>
       <div class="bw-toggle">
-        <mat-slide-toggle formControlName="useItems">Items on</mat-slide-toggle>
+        <mat-slide-toggle formControlName="useItems">Items allowed</mat-slide-toggle>
       </div>
+      @if (createError) {
+      <p class="bw-error">{{ createError }}</p>
+      }
       <button
         mat-raised-button
         color="primary"
         type="button"
         (click)="submitCreateRoom()"
-        [disabled]="!battleConfigForm.valid"
+        [disabled]="!battleConfigForm.valid || creatingRoom"
       >
-        Create room
+        @if (creatingRoom) {
+        Creating room…
+        } @else {
+        Start match and create room
+        }
       </button>
     </form>
-    } @if (roomMode === 'join') {
+    }
+
+    @if (roomMode === 'join') {
     <button mat-button type="button" (click)="backToChoose()">Back</button>
-    <h3 class="bw-subtitle">Join with room key</h3>
+    <h3 class="bw-subtitle">Join with room code</h3>
     <mat-form-field appearance="outline" class="bw-field">
-      <mat-label>Room key</mat-label>
+      <mat-label>Room code</mat-label>
       <input matInput [(ngModel)]="joinRoomKey" name="joinKey" />
     </mat-form-field>
     @if (joinError) {
     <p class="bw-error">{{ joinError }}</p>
     }
-    <button mat-raised-button color="accent" type="button" (click)="tryJoin()">
-      Join
+    <button
+      mat-raised-button
+      color="accent"
+      type="button"
+      (click)="tryJoin()"
+      [disabled]="joiningRoom"
+    >
+      @if (joiningRoom) {
+      Joining…
+      } @else {
+      Join room
+      }
     </button>
     }
 
     @if (session.roomKey$ | async; as rk) {
     @if (rk) {
     <div class="bw-roombox">
-      <div><strong>Room</strong>: {{ rk }}</div>
-      @if ((session.role$ | async) === 'host') {
+      <h3 class="bw-subtitle">3. Invite your opponent</h3>
       <p class="bw-hint">
-        Share this key. When your opponent joins, press
-        <strong>Start match</strong>.
+        Share the link or room code below. When both players are in the room,
+        each player must press <strong>Ready</strong>. A short countdown starts
+        when everyone is ready, then Pokémon selection opens.
       </p>
-      @if (session.guestPresent$ | async) {
-      <button
-        mat-raised-button
-        color="warn"
-        type="button"
-        (click)="hostStartMatch()"
-      >
-        Start match
+
+      <mat-form-field appearance="outline" class="bw-field">
+        <mat-label>Room code</mat-label>
+        <input matInput [value]="rk" readonly />
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="copyRoomCode()">
+        Copy room code
       </button>
+
+      <mat-form-field appearance="outline" class="bw-field">
+        <mat-label>Invite link</mat-label>
+        <input matInput [value]="inviteUrl" readonly />
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="copyInvite()">
+        Copy invite link
+      </button>
+
+      @let countdownSecs = session.countdownSeconds$ | async;
+
+      <div
+        class="match-status-banner"
+        [class.match-status-banner--ready]="allPlayersConnected"
+      >
+        <mat-icon>{{ allPlayersConnected ? 'check_circle' : 'hourglass_top' }}</mat-icon>
+        <div>
+          @if (countdownSecs !== null && countdownSecs > 0) {
+          <strong>Match starting in {{ countdownSecs }}…</strong>
+          <p>Get ready — Pokémon selection opens next.</p>
+          } @else if (!allPlayersConnected) {
+          <strong>
+            @if ((session.role$ | async) === 'host') {
+            Waiting for opponent…
+            } @else {
+            Waiting for all players…
+            }
+          </strong>
+          <p>Players {{ playerCount }} / {{ maxPlayers }}</p>
+          } @else if (readyCount >= maxPlayers) {
+          <strong>Everyone is ready!</strong>
+          <p>Starting countdown…</p>
+          } @else if (allPlayersConnected) {
+          <strong>Ready up</strong>
+          <p>Ready {{ readyCount }} / {{ maxPlayers }}</p>
+          } @else {
+          <strong>Both players connected!</strong>
+          <p>Press Ready when you are set to battle.</p>
+          }
+        </div>
+      </div>
+
+      @if (showReadyPanel && !(session.matchStarted$ | async)) {
+      @if (countdownSecs === null || countdownSecs <= 0) {
+      <div class="ready-panel">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          class="bw-full-btn"
+          [disabled]="session.isLocalReady()"
+          (click)="markReady()"
+        >
+          @if (session.isLocalReady()) {
+          You are ready
+          } @else {
+          Ready up
+          }
+        </button>
+      </div>
       } @else {
-      <p class="bw-wait">Waiting for opponent…</p>
+      <p class="ready-countdown" aria-live="polite">{{ countdownSecs }}</p>
       }
-      } @else if ((session.role$ | async) === 'guest') {
-      <p class="bw-hint">Waiting for host to start the match…</p>
+      }
+
+      @if ((session.matchStarted$ | async)) {
+      <p class="bw-hint bw-hint--success">Match is ready — go to the Pokémon tab.</p>
       }
     </div>
     }
@@ -131,9 +228,16 @@
 
   @if (workspaceStep === 'team') {
   <section class="bw-section">
+    <div class="match-status-banner match-status-banner--ready">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        <strong>Match started</strong>
+        <p>Choose the Pokémon you want to battle with.</p>
+      </div>
+    </div>
+
     <h3 class="bw-subtitle">
-      Pick up to 6 Pokémon ({{ (session.selectedTeam$ | async)?.length ?? 0
-      }}/6)
+      Your team ({{ (session.selectedTeam$ | async)?.length ?? 0 }}/6)
     </h3>
     <div class="bw-pokegrid">
       @for (p of pokedexSlice; track p.id) {
@@ -153,53 +257,6 @@
           <div class="bw-poke-name">{{ p.name | titlecase }}</div>
         </mat-card-content>
       </mat-card>
-      }
-    </div>
-  </section>
-  }
-
-  @if (workspaceStep === 'moves') {
-  <section class="bw-section">
-    <h3 class="bw-subtitle">Choose up to 4 moves per Pokémon</h3>
-    @if (session.selectedTeam$ | async; as team) {
-    @for (p of team; track p.id) {
-    <div class="bw-move-block">
-      <h4 class="bw-poke-name">{{ p.name | titlecase }}</h4>
-      @if (p.moves?.length) {
-      <div class="bw-move-chips">
-        @for (lm of p.moves; track lm.moveId) {
-        <button
-          type="button"
-          class="bw-chip"
-          [class.bw-chip--on]="moveSelected(p, lm.moveId)"
-          (click)="toggleMove(p, lm.moveId)"
-        >
-          {{ moveLabel(lm.moveId) | titlecase }}
-        </button>
-        }
-      </div>
-      } @else {
-      <p class="bw-hint">No catalog moves in learnset for this Pokémon.</p>
-      }
-    </div>
-    }
-    }
-  </section>
-  }
-
-  @if (workspaceStep === 'items') {
-  <section class="bw-section">
-    <h3 class="bw-subtitle">Items (up to 6)</h3>
-    <div class="bw-move-chips">
-      @for (it of itemChoices; track it.name) {
-      <button
-        type="button"
-        class="bw-chip"
-        [class.bw-chip--on]="isItemSelected(it)"
-        (click)="toggleItem(it)"
-      >
-        {{ it.name | titlecase }}
-      </button>
       }
     </div>
   </section>
