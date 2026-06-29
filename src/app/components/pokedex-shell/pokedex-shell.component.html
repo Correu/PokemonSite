@@ -34,7 +34,7 @@
             class="pokedex-kanto-chassis"
             [class.pokedex-kanto-chassis--open]="isContentExpanded"
           >
-            <div class="kanto-left-panel">
+            <div class="kanto-left-panel shell-panel--desktop">
               @if (!isBattleRoute) {
               <div class="kanto-left-header">
                 <div class="kanto-lens" aria-hidden="true"></div>
@@ -160,10 +160,33 @@
               }
             </div>
 
-            <div class="kanto-hinge" aria-hidden="true"></div>
+            <div class="kanto-hinge shell-panel--desktop" aria-hidden="true"></div>
 
             <div class="kanto-right-panel">
-              <div class="kanto-right-top">
+              <div class="pokedex-mobile-header shell-panel--mobile">
+                <div class="kanto-left-header">
+                  <div class="kanto-lens" aria-hidden="true"></div>
+                  <div class="kanto-led-row" aria-hidden="true">
+                    <span class="kanto-led kanto-led--red"></span>
+                    <span class="kanto-led kanto-led--yellow"></span>
+                    <span class="kanto-led kanto-led--green"></span>
+                  </div>
+                </div>
+                <div class="kanto-secondary-lcd">
+                  <span class="kanto-secondary-label">{{ modeLabel }}</span>
+                </div>
+                <button
+                  class="pokedex-close-fab"
+                  (click)="closePokedex()"
+                  aria-label="Close Pokedex"
+                  mat-icon-button
+                  type="button"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+
+              <div class="kanto-right-top shell-panel--desktop">
                 <div class="kanto-secondary-lcd">
                   <span class="kanto-secondary-label">{{ modeLabel }}</span>
                 </div>
@@ -199,7 +222,7 @@
                 } }
               </div>
 
-              <div class="kanto-nav-deco" aria-hidden="true">
+              <div class="kanto-nav-deco shell-panel--desktop" aria-hidden="true">
                 <span class="kanto-mini-led"></span>
                 <span class="kanto-mini-led"></span>
                 <span class="kanto-arrow-pad"></span>

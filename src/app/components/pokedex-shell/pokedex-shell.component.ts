@@ -45,6 +45,13 @@ export class PokedexShellComponent implements OnInit {
     if (this.pokedexAccessService.isPokedexOpened()) {
       this.isContentExpanded = true;
     }
+
+    this.pokedexAccessService.pokedexOpened$.subscribe((opened) => {
+      if (opened) {
+        this.isContentExpanded = true;
+      }
+    });
+
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => this.syncRouteMode());

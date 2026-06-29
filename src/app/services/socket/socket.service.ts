@@ -92,7 +92,21 @@ export class SocketService {
   }
 
   joinRoom(roomId: string, cb?: (response: JoinRoomResponse) => void): void {
-    this.emitWithAck<JoinRoomResponse>('joinRoom', roomId)
+    const trimmed = roomId?.trim();
+    if (!trimmed) {
+      const err = { error: 'Room code is required.' } as JoinRoomResponse;
+      if (cb) {
+        cb(err);
+      } else {
+        alert(err.error);
+      }
+      return;
+    }
+
+    this.waitUntilConnected()
+      .then(() =>
+        this.emitWithAck<JoinRoomResponse>('joinRoom', trimmed)
+      )
       .then((response) => {
         if (cb) {
           cb(response);

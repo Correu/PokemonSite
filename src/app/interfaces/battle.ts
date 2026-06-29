@@ -1,6 +1,9 @@
 export type BattleFormat = 'singles' | 'doubles';
 export type BattlePhase = 'idle' | 'lobby' | 'waiting' | 'teamSelect' | 'active' | 'finished';
 
+/** Original 151 — battle roster is always Generation I. */
+export const GEN1_POKEMON_COUNT = 151;
+
 export interface BattleConfig {
   level: number;
   teamSize: number;
@@ -8,7 +11,6 @@ export interface BattleConfig {
   itemQuantity: number;
   format: BattleFormat;
   maxPlayers: number;
-  generation: number | null;
 }
 
 export interface BattleBattler {

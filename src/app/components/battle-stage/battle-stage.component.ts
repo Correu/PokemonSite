@@ -11,11 +11,13 @@ import { BattleSessionService } from 'src/app/services/battle/battle-session.ser
 export class BattleStageComponent {
   readonly vm$ = combineLatest([
     this.session.playerStage$,
-    this.session.opponentPreview$,
+    this.session.opponentStage$,
+    this.session.combatState$,
   ]).pipe(
-    map(([player, foe]) => ({
+    map(([player, foe, combat]) => ({
       player,
       foe,
+      message: combat?.message ?? '',
     }))
   );
 

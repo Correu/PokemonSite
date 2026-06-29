@@ -4,12 +4,21 @@ import { ActivatedRoute } from '@angular/router';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { Item } from 'src/app/interfaces/item';
 import { BattleConfigEventPayload } from 'src/app/interfaces/battle-event';
-import { MovesCatalog } from 'src/app/interfaces/move';
+import { GEN1_POKEMON_COUNT } from 'src/app/interfaces/battle';
+import { BattleMove, MovesCatalog } from 'src/app/interfaces/move';
 import { BattleSessionService } from 'src/app/services/battle/battle-session.service';
+import { BattleService } from 'src/app/services/battle/battle.service';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Subscription, distinctUntilChanged, firstValueFrom } from 'rxjs';
 
-export type BattleWorkspaceStep = 'room' | 'team';
+export type BattleMenuPanel =
+  | 'commands'
+  | 'fight'
+  | 'bag'
+  | 'pokemon'
+  | 'end-fight';
+
+export type BattleWorkspaceStep = 'room' | 'team' | 'moves' | 'battle';
 
 @Component({
   selector: 'app-battle-workspace',
@@ -19,7 +28,7 @@ export type BattleWorkspaceStep = 'room' | 'team';
 })
 export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   readonly levelOptions = Array.from({ length: 100 }, (_, i) => i + 1);
-  readonly generationOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  readonly teamSizeOptions = [1, 2, 3, 4, 5, 6];
 
   roomMode: 'choose' | 'create' | 'join' = 'choose';
   joinRoomKey = '';
@@ -30,18 +39,24 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   socketConnected = false;
   creatingRoom = false;
   joiningRoom = false;
+  lockingTeam = false;
+  teamLockError = '';
   inviteUrl = '';
+  battleMenuPanel: BattleMenuPanel = 'commands';
 
   battleConfigForm: FormGroup;
   movesCatalog: MovesCatalog | null = null;
   pokedexSlice: Pokemon[] = [];
   itemChoices: Item[] = [];
+  moveSetupPokemonId: string | null = null;
 
   private subs = new Subscription();
   private autoJoinAttempted = false;
+  private lastCombatTurn = 0;
 
   constructor(
     public session: BattleSessionService,
+    private battleService: BattleService,
     private pokemonService: PokemonService,
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -49,7 +64,7 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   ) {
     this.battleConfigForm = this.fb.group({
       level: [50, [Validators.required]],
-      generation: [null as number | null],
+      teamSize: [6, [Validators.required, Validators.min(1), Validators.max(6)]],
       useItems: [false],
     });
   }
@@ -69,8 +84,13 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
       this.session.phase$.pipe(distinctUntilChanged()).subscribe((phase) => {
         if (phase === 'setupTeam') {
           this.workspaceStep = 'team';
-          this.cdr.markForCheck();
+        } else if (phase === 'setupMoves') {
+          this.workspaceStep = 'moves';
+          this.ensureMoveSetupPokemon();
+        } else if (phase === 'active' || phase === 'finished') {
+          this.workspaceStep = 'battle';
         }
+        this.cdr.markForCheck();
       })
     );
 
@@ -92,12 +112,44 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     this.subs.add(
       this.session.countdownSeconds$.subscribe(() => this.cdr.markForCheck())
     );
+    this.subs.add(
+      this.session.playerCount$.subscribe(() => this.cdr.markForCheck())
+    );
+    this.subs.add(
+      this.session.maxPlayers$.subscribe(() => this.cdr.markForCheck())
+    );
+    this.subs.add(
+      this.session.role$.subscribe(() => this.cdr.markForCheck())
+    );
+    this.subs.add(
+      this.session.combatState$.subscribe((combat) => {
+        if (combat && combat.turn !== this.lastCombatTurn) {
+          this.lastCombatTurn = combat.turn;
+          this.battleMenuPanel = 'commands';
+        }
+        if (combat?.winnerId) {
+          this.battleMenuPanel = 'commands';
+        }
+        if (
+          combat &&
+          (combat.battleStarted || combat.awaitingMoves.length > 0)
+        ) {
+          this.workspaceStep = 'battle';
+        }
+        this.cdr.markForCheck();
+      })
+    );
+    this.subs.add(
+      this.session.availableMoves$.subscribe(() => this.cdr.markForCheck())
+    );
 
     firstValueFrom(this.pokemonService.getMovesCatalog()).then((c) => {
       this.movesCatalog = c;
     });
     this.pokemonService.getPokedex().subscribe((list) => {
-      this.pokedexSlice = list.slice(0, 200);
+      this.pokedexSlice = list.filter(
+        (p) => Number(p.id) <= GEN1_POKEMON_COUNT
+      );
     });
     this.session.loadRandomItemsForPicker().then((items) => {
       this.itemChoices = items;
@@ -108,7 +160,6 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
-    this.session.reset();
   }
 
   get playerCount(): number {
@@ -138,6 +189,10 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   markReady(): void {
     this.session.setReady();
     this.cdr.markForCheck();
+  }
+
+  get teamSizeLimit(): number {
+    return this.session.battleConfig$.value?.teamSize ?? 6;
   }
 
   applyServerUrl(): void {
@@ -188,11 +243,10 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     const v = this.battleConfigForm.value;
     const payload: BattleConfigEventPayload = {
       level: v.level,
-      generation: v.generation,
+      teamSize: v.teamSize,
       useItems: v.useItems,
       itemQuantity: v.useItems ? 6 : 0,
       maxPlayers: 2,
-      teamSize: 6,
       format: 'singles',
     };
 
@@ -219,15 +273,14 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
       this.joinError = 'Enter a room code.';
       return;
     }
-    if (!this.socketConnected) {
-      this.joinError = 'Connect to the battle server before joining.';
-      return;
-    }
 
     this.joiningRoom = true;
     try {
+      await this.session.waitForServer();
+      this.socketConnected = true;
       await this.session.joinRoom(key);
       this.joinRoomKey = key;
+      this.roomMode = 'choose';
     } catch (err) {
       this.joinError = err instanceof Error ? err.message : 'Join failed.';
     } finally {
@@ -255,7 +308,166 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     if (step === 'team' && !this.session.matchStarted$.value) {
       return;
     }
+    if (
+      step === 'moves' &&
+      this.session.phase$.value !== 'setupMoves' &&
+      this.session.phase$.value !== 'active' &&
+      this.session.phase$.value !== 'finished' &&
+      !this.session.canProceedToMoveSetup()
+    ) {
+      return;
+    }
+    if (
+      step === 'battle' &&
+      this.session.phase$.value !== 'active' &&
+      this.session.phase$.value !== 'finished'
+    ) {
+      return;
+    }
     this.workspaceStep = step;
+    if (step === 'moves') {
+      this.ensureMoveSetupPokemon();
+    }
+  }
+
+  proceedToMoveSetup(): void {
+    this.session.proceedToMoveSetup();
+    this.workspaceStep = 'moves';
+    this.ensureMoveSetupPokemon();
+    this.cdr.markForCheck();
+  }
+
+  ensureMoveSetupPokemon(): void {
+    const team = this.session.selectedTeam$.value;
+    if (!team.length) {
+      this.moveSetupPokemonId = null;
+      return;
+    }
+    const current = this.moveSetupPokemonId;
+    if (!current || !team.some((p) => String(p.id) === current)) {
+      this.moveSetupPokemonId = String(team[0]!.id);
+    }
+  }
+
+  selectMoveSetupPokemon(pokemon: Pokemon): void {
+    this.moveSetupPokemonId = String(pokemon.id);
+    this.cdr.markForCheck();
+  }
+
+  get moveSetupPokemon(): Pokemon | null {
+    const id = this.moveSetupPokemonId;
+    if (!id) {
+      return null;
+    }
+    return (
+      this.session.selectedTeam$.value.find((p) => String(p.id) === id) ??
+      null
+    );
+  }
+
+  eligibleMovesFor(pokemon: Pokemon): BattleMove[] {
+    if (!this.movesCatalog) {
+      return [];
+    }
+    const level = this.session.battleConfig$.value?.level ?? 50;
+    return this.battleService.getEligibleMoves(pokemon, level, this.movesCatalog);
+  }
+
+  selectedMoveCount(pokemonId: string): number {
+    return this.session.selectedMovesByPokemon$.value[pokemonId]?.length ?? 0;
+  }
+
+  isMoveSelected(pokemonId: string, moveId: number): boolean {
+    return (
+      this.session.selectedMovesByPokemon$.value[pokemonId]?.includes(moveId) ??
+      false
+    );
+  }
+
+  toggleMoveSelection(pokemonId: string, moveId: number): void {
+    this.session.toggleMoveForPokemon(pokemonId, moveId);
+    this.cdr.markForCheck();
+  }
+
+  canProceedToMoves(): boolean {
+    return this.session.canProceedToMoveSetup();
+  }
+
+  allMovesConfigured(): boolean {
+    return this.session.allTeamMovesConfigured();
+  }
+
+  backToTeamSetup(): void {
+    if (this.session.teamLocked$.value) {
+      return;
+    }
+    this.session.phase$.next('setupTeam');
+    this.workspaceStep = 'team';
+    this.cdr.markForCheck();
+  }
+
+  async confirmTeam(): Promise<void> {
+    this.teamLockError = '';
+    this.lockingTeam = true;
+    try {
+      await this.session.confirmTeam();
+    } catch (err) {
+      this.teamLockError =
+        err instanceof Error ? err.message : 'Could not lock in team.';
+    } finally {
+      this.lockingTeam = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  selectMove(moveId: number): void {
+    const move = this.session.availableMoves$.value.find((m) => m.id === moveId);
+    if (move && move.currentPp <= 0) {
+      return;
+    }
+    this.session.submitMove(moveId);
+    this.battleMenuPanel = 'commands';
+    this.cdr.markForCheck();
+  }
+
+  openBattleMenu(panel: BattleMenuPanel): void {
+    if (!this.session.isAwaitingLocalMove()) {
+      return;
+    }
+    this.battleMenuPanel = panel;
+    this.cdr.markForCheck();
+  }
+
+  backToBattleCommands(): void {
+    this.battleMenuPanel = 'commands';
+    this.cdr.markForCheck();
+  }
+
+  confirmEndFight(): void {
+    this.session.forfeitMatch();
+    this.battleMenuPanel = 'commands';
+    this.cdr.markForCheck();
+  }
+
+  itemsEnabled(): boolean {
+    return !!this.session.battleConfig$.value?.useItems;
+  }
+
+  battlePrompt(): string {
+    const combat = this.session.combatState$.value;
+    if (combat?.message) {
+      return combat.message;
+    }
+    if (this.session.isAwaitingLocalMove()) {
+      return `What will ${this.session.getActivePokemonName()} do?`;
+    }
+    return 'Waiting for the opponent…';
+  }
+
+  isLocalWinner(): boolean {
+    const combat = this.session.combatState$.value;
+    const selfId = this.session.getLocalSocketId();
+    return !!combat?.winnerId && combat.winnerId === selfId;
   }
 
   isPokemonSelected(p: Pokemon): boolean {
@@ -265,6 +477,9 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   togglePokemon(p: Pokemon): void {
+    if (this.session.teamLocked$.value) {
+      return;
+    }
     this.session.toggleTeamMember(p);
   }
 
@@ -283,7 +498,7 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     this.roomMode = 'join';
 
     const attemptJoin = () => {
-      if (this.autoJoinAttempted || !this.socketConnected) {
+      if (this.autoJoinAttempted) {
         return;
       }
       this.autoJoinAttempted = true;
@@ -296,7 +511,9 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
       this.subs.add(
         this.session.onConnectionChange().subscribe((connected) => {
           this.socketConnected = connected;
-          attemptJoin();
+          if (connected) {
+            attemptJoin();
+          }
         })
       );
     }

@@ -66,5 +66,9 @@
     <p>Choose your team to see your lead Pokémon here.</p>
   </div>
   }
+
+  @if (vm.message) {
+  <div class="battle-stage-message" aria-live="polite">{{ vm.message }}</div>
+  }
 </div>
 }

@@ -12,6 +12,9 @@ import {
   BattleConfigEventPayload,
   BattleCountdownPayload,
   BattleReadyStatePayload,
+  BattleStateUpdatePayload,
+  BattleActiveView,
+  BattleCombatMove,
   GameEventEnvelope,
   isGameEventEnvelope,
 } from 'src/app/interfaces/battle-event';
@@ -19,6 +22,7 @@ import { JoinRoomResponse } from 'src/app/interfaces/battle';
 import { SocketService } from '../socket/socket.service';
 import { PokemonService } from '../pokemon/pokemon.service';
 import { ItemService } from '../items/item.service';
+import { BattleService } from './battle.service';
 import { firstValueFrom } from 'rxjs';
 
 export type BattleRole = 'host' | 'guest' | null;
@@ -32,7 +36,8 @@ export type BattleWorkspacePhase =
   | 'setupTeam'
   | 'setupMoves'
   | 'setupItems'
-  | 'active';
+  | 'active'
+  | 'finished';
 
 export interface BattleStagePokemon {
   name: string;
@@ -72,15 +77,26 @@ export class BattleSessionService {
     null
   );
 
+  readonly combatState$ = new BehaviorSubject<BattleStateUpdatePayload | null>(
+    null
+  );
+  readonly teamLocked$ = new BehaviorSubject<boolean>(false);
+  readonly availableMoves$ = new BehaviorSubject<BattleCombatMove[]>([]);
+
   private gameEventSub: Subscription | null = null;
   private playerJoinedSub: Subscription | null = null;
   private playerLeftSub: Subscription | null = null;
 
   readonly playerStage$: Observable<BattleStagePokemon | null> = combineLatest([
+    this.combatState$,
     this.selectedTeam$,
     this.battleConfig$,
   ]).pipe(
-    map(([team, cfg]) => {
+    map(([combat, team, cfg]) => {
+      const self = this.getSelfActive(combat);
+      if (self) {
+        return this.activeToStage(self);
+      }
       const lead = team[0];
       if (!lead) {
         return null;
@@ -88,6 +104,14 @@ export class BattleSessionService {
       return this.toStagePokemon(lead, cfg?.level ?? 50);
     })
   );
+
+  readonly opponentStage$: Observable<BattleStagePokemon | null> =
+    this.combatState$.pipe(
+      map((combat) => {
+        const foe = this.getOpponentActive(combat);
+        return foe ? this.activeToStage(foe) : null;
+      })
+    );
 
   readonly allPlayersConnected$: Observable<boolean> = combineLatest([
     this.playerCount$,
@@ -104,10 +128,17 @@ export class BattleSessionService {
   constructor(
     private readonly socket: SocketService,
     private readonly pokemonService: PokemonService,
-    private readonly itemService: ItemService
+    private readonly itemService: ItemService,
+    private readonly battleService: BattleService
   ) {
     this.playerJoinedSub = this.socket.onPlayerJoined().subscribe(() => {
       this.syncPlayerCountFromRoom();
+    });
+
+    this.socket.onConnectionChange().subscribe((connected) => {
+      if (connected) {
+        this.rejoinRoomIfNeeded();
+      }
     });
 
     this.playerLeftSub = this.socket.onPlayerLeft().subscribe((id) => {
@@ -128,12 +159,6 @@ export class BattleSessionService {
 
     this.gameEventSub = this.socket.onGameEvent().subscribe((event) => {
       this.handleGameEvent(event);
-    });
-
-    this.pokemonService.getPokemonByName('pidgey').subscribe((poke) => {
-      if (poke) {
-        this.opponentPreview$.next(this.toStagePokemon(poke, 17));
-      }
     });
   }
 
@@ -177,6 +202,10 @@ export class BattleSessionService {
     this.selectedTeam$.next([]);
     this.selectedItems$.next([]);
     this.selectedMovesByPokemon$.next({});
+    this.combatState$.next(null);
+    this.teamLocked$.next(false);
+    this.availableMoves$.next([]);
+    this.opponentPreview$.next(null);
   }
 
   setReady(): void {
@@ -241,32 +270,48 @@ export class BattleSessionService {
   }
 
   joinRoom(roomKey: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.socket.joinRoom(roomKey, (response: JoinRoomResponse) => {
-        if (response.error) {
-          reject(new Error(response.error));
-          return;
-        }
-        this.applyJoinSnapshot(response, 'guest');
-        if (response.matchStarted || response.readyForTeamSelect) {
-          this.applyMatchStarted();
-        } else {
-          this.applyReadySnapshot(response);
-        }
-        resolve();
-      });
-    });
+    const trimmed = roomKey.trim();
+    if (!trimmed) {
+      return Promise.reject(new Error('Enter a room code.'));
+    }
+
+    return this.waitForServer().then(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          this.socket.joinRoom(trimmed, (response: JoinRoomResponse) => {
+            if (response.error) {
+              reject(new Error(response.error));
+              return;
+            }
+            if (!response.success && !response.roomKey) {
+              reject(new Error('Could not join room.'));
+              return;
+            }
+            this.applyJoinSnapshot(response, 'guest');
+            if (response.matchStarted || response.readyForTeamSelect) {
+              this.applyMatchStarted();
+            } else {
+              this.applyReadySnapshot(response);
+            }
+            resolve();
+          });
+        })
+    );
   }
 
   toggleTeamMember(pokemon: Pokemon): void {
-    if (!this.matchStarted$.value) {
+    if (!this.matchStarted$.value || this.teamLocked$.value) {
       return;
     }
+    const maxTeam = this.battleConfig$.value?.teamSize ?? 6;
     const cur = [...this.selectedTeam$.value];
     const idx = cur.findIndex((p) => String(p.id) === String(pokemon.id));
     if (idx >= 0) {
       cur.splice(idx, 1);
-    } else if (cur.length < 6) {
+      const moves = { ...this.selectedMovesByPokemon$.value };
+      delete moves[String(pokemon.id)];
+      this.selectedMovesByPokemon$.next(moves);
+    } else if (cur.length < maxTeam) {
       cur.push(pokemon);
     }
     this.selectedTeam$.next(cur);
@@ -276,6 +321,54 @@ export class BattleSessionService {
     const next = { ...this.selectedMovesByPokemon$.value };
     next[pokemonId] = moveIds.slice(0, 4);
     this.selectedMovesByPokemon$.next(next);
+  }
+
+  toggleMoveForPokemon(pokemonId: string, moveId: number): void {
+    if (this.teamLocked$.value) {
+      return;
+    }
+    const cur = [...(this.selectedMovesByPokemon$.value[pokemonId] ?? [])];
+    const idx = cur.indexOf(moveId);
+    if (idx >= 0) {
+      cur.splice(idx, 1);
+    } else if (cur.length < 4) {
+      cur.push(moveId);
+    }
+    this.setMovesForPokemon(pokemonId, cur);
+  }
+
+  proceedToMoveSetup(): void {
+    if (!this.matchStarted$.value || this.teamLocked$.value) {
+      return;
+    }
+    const team = this.selectedTeam$.value;
+    const teamSize = this.battleConfig$.value?.teamSize ?? 6;
+    if (team.length < 1 || team.length > teamSize) {
+      return;
+    }
+    this.phase$.next('setupMoves');
+  }
+
+  allTeamMovesConfigured(): boolean {
+    const team = this.selectedTeam$.value;
+    if (team.length === 0) {
+      return false;
+    }
+    const movesByPokemon = this.selectedMovesByPokemon$.value;
+    return team.every(
+      (p) => (movesByPokemon[String(p.id)]?.length ?? 0) === 4
+    );
+  }
+
+  canProceedToMoveSetup(): boolean {
+    const team = this.selectedTeam$.value;
+    const teamSize = this.battleConfig$.value?.teamSize ?? 6;
+    return (
+      !this.teamLocked$.value &&
+      this.matchStarted$.value &&
+      team.length >= 1 &&
+      team.length <= teamSize
+    );
   }
 
   toggleItem(item: Item): void {
@@ -293,6 +386,214 @@ export class BattleSessionService {
     return firstValueFrom(this.itemService.getRandomItems());
   }
 
+  async confirmTeam(): Promise<void> {
+    const roomKey = this.roomKey$.value;
+    const team = this.selectedTeam$.value;
+    const level = this.battleConfig$.value?.level ?? 50;
+    const teamSize = this.battleConfig$.value?.teamSize ?? 6;
+
+    if (!roomKey) {
+      throw new Error('No active room.');
+    }
+    if (!this.matchStarted$.value) {
+      throw new Error('Wait for the match countdown to finish.');
+    }
+    if (team.length < 1 || team.length > teamSize) {
+      throw new Error(`Pick between 1 and ${teamSize} Pokémon.`);
+    }
+    if (this.teamLocked$.value) {
+      return;
+    }
+    if (!this.allTeamMovesConfigured()) {
+      throw new Error('Choose exactly 4 moves for each Pokémon on your team.');
+    }
+
+    const battlers = await this.battleService.buildCombatTeam(
+      team,
+      level,
+      this.selectedMovesByPokemon$.value
+    );
+    if (!this.connected) {
+      throw new Error('Not connected to the battle server.');
+    }
+    const envelope: GameEventEnvelope = {
+      type: 'battle:teamLock',
+      version: 1,
+      payload: { battlers },
+    };
+    this.socket.sendGameEvent(roomKey, envelope);
+    this.teamLocked$.next(true);
+  }
+
+  submitMove(moveId: number): void {
+    const roomKey = this.roomKey$.value;
+    const combat = this.combatState$.value;
+    const selfId = this.socket.getSocketId();
+    if (!roomKey || !combat || !selfId) {
+      return;
+    }
+    if (!combat.awaitingMoves.includes(selfId)) {
+      return;
+    }
+
+    const envelope: GameEventEnvelope = {
+      type: 'battle:turn',
+      version: 1,
+      payload: {
+        actorId: selfId,
+        moveId,
+        targetSlot: 0,
+        turnNumber: combat.turn,
+      },
+    };
+    this.socket.sendGameEvent(roomKey, envelope);
+  }
+
+  forfeitMatch(): void {
+    const roomKey = this.roomKey$.value;
+    if (!roomKey || this.combatState$.value?.winnerId) {
+      return;
+    }
+
+    const envelope: GameEventEnvelope = {
+      type: 'battle:forfeit',
+      version: 1,
+      payload: {},
+    };
+    this.socket.sendGameEvent(roomKey, envelope);
+  }
+
+  getActivePokemonName(): string {
+    const combat = this.combatState$.value;
+    const selfId = this.socket.getSocketId();
+    if (!combat || !selfId) {
+      return 'your Pokémon';
+    }
+    const active = combat.actives[selfId];
+    if (!active) {
+      return 'your Pokémon';
+    }
+    return active.displayName || active.name;
+  }
+
+  isAwaitingLocalMove(): boolean {
+    const selfId = this.socket.getSocketId();
+    const combat = this.combatState$.value;
+    return !!selfId && !!combat?.awaitingMoves.includes(selfId);
+  }
+
+  getOpponentId(): string | null {
+    const combat = this.combatState$.value;
+    const selfId = this.socket.getSocketId();
+    if (!combat || !selfId) {
+      return null;
+    }
+    return Object.keys(combat.actives).find((id) => id !== selfId) ?? null;
+  }
+
+  private getSelfActive(
+    combat: BattleStateUpdatePayload | null
+  ): BattleActiveView | null {
+    const selfId = this.socket.getSocketId();
+    if (!combat || !selfId) {
+      return null;
+    }
+    return combat.actives[selfId] ?? null;
+  }
+
+  private getOpponentActive(
+    combat: BattleStateUpdatePayload | null
+  ): BattleActiveView | null {
+    const selfId = this.socket.getSocketId();
+    if (!combat || !selfId) {
+      return null;
+    }
+    const opponentId = Object.keys(combat.actives).find((id) => id !== selfId);
+    if (!opponentId) {
+      return null;
+    }
+    return combat.actives[opponentId] ?? null;
+  }
+
+  private activeToStage(active: BattleActiveView): BattleStagePokemon {
+    return {
+      name: active.name,
+      level: active.level,
+      spriteFront: active.frontSprite,
+      spriteBack: active.backSprite,
+      currentHp: active.currentHp,
+      maxHp: active.maxHp,
+    };
+  }
+
+  private applyCombatState(payload: BattleStateUpdatePayload): void {
+    this.combatState$.next(payload);
+
+    const selfId = this.socket.getSocketId();
+    if (selfId && payload.lockedPlayers.includes(selfId)) {
+      this.teamLocked$.next(true);
+    }
+
+    const foe = this.getOpponentActive(payload);
+    if (foe) {
+      this.opponentPreview$.next(this.activeToStage(foe));
+    }
+
+    if (payload.winnerId) {
+      this.phase$.next('finished');
+      return;
+    }
+
+    if (this.isBattleLive(payload)) {
+      this.phase$.next('active');
+      this.refreshAvailableMoves(payload);
+    }
+  }
+
+  private isBattleLive(payload: BattleStateUpdatePayload): boolean {
+    if (payload.battleStarted) {
+      return true;
+    }
+    if (payload.awaitingMoves.length > 0) {
+      return true;
+    }
+    const activeCount = Object.values(payload.actives).filter(Boolean).length;
+    const playersNeeded = Math.max(this.maxPlayers$.value, 2);
+    return payload.turn >= 1 && activeCount >= playersNeeded;
+  }
+
+  private refreshAvailableMoves(payload: BattleStateUpdatePayload): void {
+    const selfId = this.socket.getSocketId();
+    if (!selfId || !payload.awaitingMoves.includes(selfId)) {
+      this.availableMoves$.next([]);
+      return;
+    }
+
+    const selfActive = payload.actives[selfId];
+    if (!selfActive?.moves?.length) {
+      this.availableMoves$.next([]);
+      return;
+    }
+
+    this.availableMoves$.next(selfActive.moves);
+  }
+
+  private rejoinRoomIfNeeded(): void {
+    const key = this.roomKey$.value;
+    if (!key) {
+      return;
+    }
+    this.socket.joinRoom(key, (response: JoinRoomResponse) => {
+      if (response.error) {
+        return;
+      }
+      this.updateRoomSnapshot(response);
+      if (response.matchStarted || response.readyForTeamSelect) {
+        this.applyMatchStarted();
+      }
+    });
+  }
+
   private applyJoinSnapshot(
     response: JoinRoomResponse,
     role: BattleRole
@@ -301,17 +602,7 @@ export class BattleSessionService {
     if (response.roomKey) {
       this.roomKey$.next(response.roomKey);
     }
-    if (response.users) {
-      this.playerCount$.next(response.users.length);
-    } else if (response.playerCount != null) {
-      this.playerCount$.next(response.playerCount);
-    }
-    if (response.maxPlayers != null) {
-      this.maxPlayers$.next(response.maxPlayers);
-    }
-    if (response.battleConfig) {
-      this.battleConfig$.next(this.mapServerConfig(response.battleConfig));
-    }
+    this.updateRoomSnapshot(response);
     this.applyReadySnapshot(response);
   }
 
@@ -321,20 +612,32 @@ export class BattleSessionService {
       return;
     }
     this.socket.joinRoom(key, (response: JoinRoomResponse) => {
-      if (response.success) {
-        if (response.users) {
-          this.playerCount$.next(response.users.length);
-        }
-        if (response.maxPlayers != null) {
-          this.maxPlayers$.next(response.maxPlayers);
-        }
-        if (response.matchStarted || response.readyForTeamSelect) {
-          this.applyMatchStarted();
-        } else {
-          this.applyReadySnapshot(response);
-        }
+      if (response.error) {
+        return;
+      }
+      this.updateRoomSnapshot(response);
+      if (response.matchStarted || response.readyForTeamSelect) {
+        this.applyMatchStarted();
+      } else {
+        this.applyReadySnapshot(response);
       }
     });
+  }
+
+  private updateRoomSnapshot(response: JoinRoomResponse): void {
+    if (response.users?.length) {
+      this.playerCount$.next(response.users.length);
+    } else if (response.playerCount != null) {
+      this.playerCount$.next(response.playerCount);
+    } else if (response.success) {
+      this.playerCount$.next(Math.max(1, this.playerCount$.value));
+    }
+    if (response.maxPlayers != null) {
+      this.maxPlayers$.next(response.maxPlayers);
+    }
+    if (response.battleConfig) {
+      this.battleConfig$.next(this.mapServerConfig(response.battleConfig));
+    }
   }
 
   private handleGameEvent(event: unknown): void {
@@ -344,10 +647,9 @@ export class BattleSessionService {
 
     if (event.type === 'battle:config') {
       this.battleConfig$.next(event.payload as BattleConfigEventPayload);
-      if (this.maxPlayers$.value < 1) {
-        this.maxPlayers$.next(
-          (event.payload as BattleConfigEventPayload).maxPlayers ?? 2
-        );
+      const cfg = event.payload as BattleConfigEventPayload;
+      if (cfg.maxPlayers != null) {
+        this.maxPlayers$.next(cfg.maxPlayers);
       }
       return;
     }
@@ -355,6 +657,12 @@ export class BattleSessionService {
     if (event.type === 'battle:readyState') {
       const payload = event.payload as BattleReadyStatePayload;
       this.readyPlayerIds$.next(payload.readyPlayerIds ?? []);
+      if (payload.playerCount != null) {
+        this.playerCount$.next(payload.playerCount);
+      }
+      if (payload.maxPlayers != null) {
+        this.maxPlayers$.next(payload.maxPlayers);
+      }
       if (this.allPlayersConnectedFromState() && !this.matchStarted$.value) {
         this.phase$.next('readyQueue');
       }
@@ -372,6 +680,11 @@ export class BattleSessionService {
       this.clearCountdownTimer();
       this.countdownSeconds$.next(null);
       this.applyMatchStarted();
+      return;
+    }
+
+    if (event.type === 'battle:stateUpdate') {
+      this.applyCombatState(event.payload as BattleStateUpdatePayload);
     }
   }
 
@@ -440,7 +753,6 @@ export class BattleSessionService {
     }
     return {
       level: config.level,
-      generation: config.generation,
       useItems: config.useItems,
       itemQuantity: config.itemQuantity,
       teamSize: config.teamSize,

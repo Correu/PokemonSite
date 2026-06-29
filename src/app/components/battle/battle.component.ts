@@ -67,7 +67,6 @@ export class BattleComponent implements OnInit, OnDestroy {
       itemQuantity: [6],
       format: ['singles' as BattleFormat, Validators.required],
       maxPlayers: [2, Validators.required],
-      generation: [null as number | null],
     });
   }
 
@@ -470,7 +469,6 @@ export class BattleComponent implements OnInit, OnDestroy {
       itemQuantity: useItems ? formValue.itemQuantity : 0,
       format: formValue.format,
       maxPlayers: formValue.maxPlayers,
-      generation: formValue.generation,
     };
   }
 
@@ -482,7 +480,6 @@ export class BattleComponent implements OnInit, OnDestroy {
       itemQuantity: 6,
       format: 'singles',
       maxPlayers: 2,
-      generation: null,
     });
   }
 }
