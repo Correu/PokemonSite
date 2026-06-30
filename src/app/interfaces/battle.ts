@@ -4,6 +4,8 @@ export type BattlePhase = 'idle' | 'lobby' | 'waiting' | 'teamSelect' | 'active'
 /** Original 151 — battle roster is always Generation I. */
 export const GEN1_POKEMON_COUNT = 151;
 
+export type BattleItemType = 'healing' | 'stat';
+
 export interface BattleConfig {
   level: number;
   teamSize: number;
@@ -11,6 +13,10 @@ export interface BattleConfig {
   itemQuantity: number;
   format: BattleFormat;
   maxPlayers: number;
+  allowedItemTypes?: BattleItemType[];
+  itemSlotCount?: number;
+  itemStackLimit?: number;
+  totalItemPool?: number;
 }
 
 export interface BattleBattler {

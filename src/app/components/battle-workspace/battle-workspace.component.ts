@@ -3,11 +3,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { Item } from 'src/app/interfaces/item';
-import { BattleConfigEventPayload } from 'src/app/interfaces/battle-event';
+import { BattleConfigEventPayload, BattleItemType } from 'src/app/interfaces/battle-event';
 import { GEN1_POKEMON_COUNT } from 'src/app/interfaces/battle';
 import { BattleMove, MovesCatalog } from 'src/app/interfaces/move';
 import { BattleSessionService } from 'src/app/services/battle/battle-session.service';
 import { BattleService } from 'src/app/services/battle/battle.service';
+import { ItemService } from 'src/app/services/items/item.service';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 import { Subscription, distinctUntilChanged, firstValueFrom } from 'rxjs';
 
@@ -18,7 +19,7 @@ export type BattleMenuPanel =
   | 'pokemon'
   | 'end-fight';
 
-export type BattleWorkspaceStep = 'room' | 'team' | 'moves' | 'battle';
+export type BattleWorkspaceStep = 'room' | 'team' | 'moves' | 'items' | 'battle';
 
 @Component({
   selector: 'app-battle-workspace',
@@ -29,6 +30,10 @@ export type BattleWorkspaceStep = 'room' | 'team' | 'moves' | 'battle';
 export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   readonly levelOptions = Array.from({ length: 100 }, (_, i) => i + 1);
   readonly teamSizeOptions = [1, 2, 3, 4, 5, 6];
+
+  readonly itemSlotOptions = [1, 2, 3, 4, 5, 6];
+  readonly itemStackOptions = [1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 99];
+  readonly totalPoolOptions = [1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50, 99];
 
   roomMode: 'choose' | 'create' | 'join' = 'choose';
   joinRoomKey = '';
@@ -47,7 +52,7 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   battleConfigForm: FormGroup;
   movesCatalog: MovesCatalog | null = null;
   pokedexSlice: Pokemon[] = [];
-  itemChoices: Item[] = [];
+  eligibleBattleItems: Item[] = [];
   moveSetupPokemonId: string | null = null;
 
   private subs = new Subscription();
@@ -58,6 +63,7 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     public session: BattleSessionService,
     private battleService: BattleService,
     private pokemonService: PokemonService,
+    private itemService: ItemService,
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
@@ -66,6 +72,11 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
       level: [50, [Validators.required]],
       teamSize: [6, [Validators.required, Validators.min(1), Validators.max(6)]],
       useItems: [false],
+      allowHealing: [true],
+      allowStat: [true],
+      itemSlotCount: [6, [Validators.min(1), Validators.max(6)]],
+      itemStackLimit: [3, [Validators.min(1), Validators.max(99)]],
+      totalItemPool: [10, [Validators.min(1), Validators.max(99)]],
     });
   }
 
@@ -87,6 +98,9 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
         } else if (phase === 'setupMoves') {
           this.workspaceStep = 'moves';
           this.ensureMoveSetupPokemon();
+        } else if (phase === 'setupItems') {
+          this.workspaceStep = 'items';
+          void this.refreshEligibleBattleItems();
         } else if (phase === 'active' || phase === 'finished') {
           this.workspaceStep = 'battle';
         }
@@ -143,6 +157,18 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
       this.session.availableMoves$.subscribe(() => this.cdr.markForCheck())
     );
 
+    this.subs.add(
+      this.session.selectedBagItems$.subscribe(() => this.cdr.markForCheck())
+    );
+    this.subs.add(
+      this.session.heldItemsByPokemon$.subscribe(() => this.cdr.markForCheck())
+    );
+    this.subs.add(
+      this.session.battleConfig$.subscribe(() => {
+        void this.refreshEligibleBattleItems();
+      })
+    );
+
     firstValueFrom(this.pokemonService.getMovesCatalog()).then((c) => {
       this.movesCatalog = c;
     });
@@ -151,9 +177,7 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
         (p) => Number(p.id) <= GEN1_POKEMON_COUNT
       );
     });
-    this.session.loadRandomItemsForPicker().then((items) => {
-      this.itemChoices = items;
-    });
+    void this.refreshEligibleBattleItems();
 
     this.tryAutoJoinFromUrl();
   }
@@ -241,11 +265,29 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
 
     this.creatingRoom = true;
     const v = this.battleConfigForm.value;
+    const allowedItemTypes: BattleItemType[] = [];
+    if (v.allowHealing) {
+      allowedItemTypes.push('healing');
+    }
+    if (v.allowStat) {
+      allowedItemTypes.push('stat');
+    }
+    if (v.useItems && allowedItemTypes.length === 0) {
+      this.createError = 'Select at least one item type when items are enabled.';
+      this.creatingRoom = false;
+      this.cdr.markForCheck();
+      return;
+    }
+
     const payload: BattleConfigEventPayload = {
       level: v.level,
       teamSize: v.teamSize,
       useItems: v.useItems,
-      itemQuantity: v.useItems ? 6 : 0,
+      itemQuantity: v.useItems ? v.itemSlotCount : 0,
+      itemSlotCount: v.useItems ? v.itemSlotCount : 0,
+      itemStackLimit: v.useItems ? v.itemStackLimit : 0,
+      totalItemPool: v.useItems ? v.totalItemPool : 0,
+      allowedItemTypes: v.useItems ? allowedItemTypes : [],
       maxPlayers: 2,
       format: 'singles',
     };
@@ -311,9 +353,19 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     if (
       step === 'moves' &&
       this.session.phase$.value !== 'setupMoves' &&
+      this.session.phase$.value !== 'setupItems' &&
       this.session.phase$.value !== 'active' &&
       this.session.phase$.value !== 'finished' &&
       !this.session.canProceedToMoveSetup()
+    ) {
+      return;
+    }
+    if (
+      step === 'items' &&
+      this.session.phase$.value !== 'setupItems' &&
+      this.session.phase$.value !== 'active' &&
+      this.session.phase$.value !== 'finished' &&
+      !this.session.canProceedToItemSetup()
     ) {
       return;
     }
@@ -328,6 +380,105 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     if (step === 'moves') {
       this.ensureMoveSetupPokemon();
     }
+    if (step === 'items') {
+      void this.refreshEligibleBattleItems();
+    }
+  }
+
+  proceedToItemSetup(): void {
+    this.session.proceedToItemSetup();
+    this.workspaceStep = 'items';
+    void this.refreshEligibleBattleItems();
+    this.cdr.markForCheck();
+  }
+
+  async refreshEligibleBattleItems(): Promise<void> {
+    if (!this.session.itemsEnabled()) {
+      this.eligibleBattleItems = [];
+      return;
+    }
+    this.eligibleBattleItems = await this.session.loadEligibleBattleItems();
+    this.cdr.markForCheck();
+  }
+
+  itemRulesSummary(): string {
+    const rules = this.session.getItemRules();
+    const types = rules.allowedItemTypes
+      .map((t) => (t === 'healing' ? 'Healing' : 'Stat boosts'))
+      .join(', ');
+    return `${types} · ${rules.itemSlotCount} slots · max ${rules.itemStackLimit} each · ${rules.totalItemPool} total uses`;
+  }
+
+  bagItemQuantity(itemId: number): number {
+    return this.session.getBagItemQuantity(itemId);
+  }
+
+  bagSlotsUsed(): number {
+    return this.session.getBagSlotsUsed();
+  }
+
+  bagTotalUses(): number {
+    return this.session.getBagTotalUses();
+  }
+
+  canIncreaseBagItem(item: Item): boolean {
+    const rules = this.session.getItemRules();
+    const current = this.bagItemQuantity(item.id);
+    if (current >= rules.itemStackLimit) {
+      return false;
+    }
+    if (current === 0 && this.bagSlotsUsed() >= rules.itemSlotCount) {
+      return false;
+    }
+    return this.bagTotalUses() < rules.totalItemPool;
+  }
+
+  increaseBagItem(item: Item): void {
+    this.session.setBagItemQuantity(item.id, this.bagItemQuantity(item.id) + 1);
+    this.cdr.markForCheck();
+  }
+
+  decreaseBagItem(item: Item): void {
+    this.session.setBagItemQuantity(item.id, this.bagItemQuantity(item.id) - 1);
+    this.cdr.markForCheck();
+  }
+
+  holdableBagItems(): Item[] {
+    return this.eligibleBattleItems.filter(
+      (item) =>
+        this.bagItemQuantity(item.id) > 0 && this.itemService.isHoldable(item)
+    );
+  }
+
+  setHeldItem(pokemonId: string, itemId: number | null): void {
+    this.session.setHeldItemForPokemon(pokemonId, itemId);
+    this.cdr.markForCheck();
+  }
+
+  getHeldItemId(pokemonId: string): number | null {
+    return this.session.getHeldItemForPokemon(pokemonId);
+  }
+
+  canProceedToItems(): boolean {
+    return this.session.canProceedToItemSetup();
+  }
+
+  allItemsConfigured(): boolean {
+    return this.session.allItemsConfigured();
+  }
+
+  backToMoveSetup(): void {
+    if (this.session.teamLocked$.value) {
+      return;
+    }
+    this.session.phase$.next('setupMoves');
+    this.workspaceStep = 'moves';
+    this.cdr.markForCheck();
+  }
+
+  itemEffectSnippet(item: Item): string {
+    const entry = item.effect_entries?.find((e) => e.language?.name === 'en');
+    return entry?.short_effect ?? '';
   }
 
   proceedToMoveSetup(): void {
@@ -373,6 +524,18 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     return this.battleService.getEligibleMoves(pokemon, level, this.movesCatalog);
   }
 
+  maxMovesFor(pokemon: Pokemon): number {
+    if (!this.movesCatalog) {
+      return 4;
+    }
+    const level = this.session.battleConfig$.value?.level ?? 50;
+    return this.battleService.maxSelectableMoves(
+      pokemon,
+      level,
+      this.movesCatalog
+    );
+  }
+
   selectedMoveCount(pokemonId: string): number {
     return this.session.selectedMovesByPokemon$.value[pokemonId]?.length ?? 0;
   }
@@ -385,8 +548,16 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   toggleMoveSelection(pokemonId: string, moveId: number): void {
-    this.session.toggleMoveForPokemon(pokemonId, moveId);
+    const pokemon = this.session.selectedTeam$.value.find(
+      (p) => String(p.id) === pokemonId
+    );
+    const max = pokemon ? this.maxMovesFor(pokemon) : 4;
+    this.session.toggleMoveForPokemon(pokemonId, moveId, max);
     this.cdr.markForCheck();
+  }
+
+  canSelectMoreMoves(pokemon: Pokemon): boolean {
+    return this.selectedMoveCount(String(pokemon.id)) < this.maxMovesFor(pokemon);
   }
 
   canProceedToMoves(): boolean {
@@ -450,7 +621,7 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   itemsEnabled(): boolean {
-    return !!this.session.battleConfig$.value?.useItems;
+    return this.session.itemsEnabled();
   }
 
   battlePrompt(): string {

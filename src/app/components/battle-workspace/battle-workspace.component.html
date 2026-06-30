@@ -22,12 +22,23 @@
     <button
       type="button"
       class="nav-chip"
-      [disabled]="!canProceedToMoves() && (session.phase$ | async) !== 'setupMoves' && (session.phase$ | async) !== 'active' && (session.phase$ | async) !== 'finished'"
+      [disabled]="!canProceedToMoves() && (session.phase$ | async) !== 'setupMoves' && (session.phase$ | async) !== 'setupItems' && (session.phase$ | async) !== 'active' && (session.phase$ | async) !== 'finished'"
       [class.active]="workspaceStep === 'moves'"
       (click)="goStep('moves')"
     >
       Moves
     </button>
+    @if (itemsEnabled()) {
+    <button
+      type="button"
+      class="nav-chip"
+      [disabled]="!canProceedToItems() && (session.phase$ | async) !== 'setupItems' && (session.phase$ | async) !== 'active' && (session.phase$ | async) !== 'finished'"
+      [class.active]="workspaceStep === 'items'"
+      (click)="goStep('items')"
+    >
+      Items
+    </button>
+    }
     @let phase = session.phase$ | async;
     <button
       type="button"
@@ -112,6 +123,42 @@
       <div class="bw-toggle">
         <mat-slide-toggle formControlName="useItems">Items allowed</mat-slide-toggle>
       </div>
+      @if (battleConfigForm.value.useItems) {
+      <div class="bw-item-host-panel">
+        <p class="bw-subtitle">Item types allowed</p>
+        <div class="bw-item-type-toggles">
+          <mat-checkbox formControlName="allowHealing">Healing</mat-checkbox>
+          <mat-checkbox formControlName="allowStat">Stat boosts</mat-checkbox>
+        </div>
+        <mat-form-field appearance="outline" class="bw-field">
+          <mat-label>Item slots (distinct types)</mat-label>
+          <mat-select formControlName="itemSlotCount">
+            @for (n of itemSlotOptions; track n) {
+            <mat-option [value]="n">{{ n }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="bw-field">
+          <mat-label>Max per item</mat-label>
+          <mat-select formControlName="itemStackLimit">
+            @for (n of itemStackOptions; track n) {
+            <mat-option [value]="n">{{ n }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="bw-field">
+          <mat-label>Total item uses</mat-label>
+          <mat-select formControlName="totalItemPool">
+            @for (n of totalPoolOptions; track n) {
+            <mat-option [value]="n">{{ n }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <p class="bw-hint">
+          Combined quantity across all selected items cannot exceed the total item uses.
+        </p>
+      </div>
+      }
       @if (createError) {
       <p class="bw-error">{{ createError }}</p>
       }
@@ -255,7 +302,7 @@
       <mat-icon>check_circle</mat-icon>
       <div>
         <strong>Match started</strong>
-        <p>Choose the Pokémon you want to battle with.</p>
+        <p>Choose up to {{ teamSizeLimit }} Pokémon for your team (fewer is fine).</p>
       </div>
     </div>
 
@@ -322,7 +369,7 @@
       <mat-icon>sports_martial_arts</mat-icon>
       <div>
         <strong>Choose your moves</strong>
-        <p>Pick 4 moves for each Pokémon on your team.</p>
+        <p>Pick up to 4 moves per Pokémon (fewer is fine if not enough are available).</p>
       </div>
     </div>
 
@@ -336,14 +383,14 @@
         (click)="selectMoveSetupPokemon(p)"
       >
         <span>{{ p.name | titlecase }}</span>
-        <span class="bw-move-setup-count">{{ selectedMoveCount(p.id + '') }}/4</span>
+        <span class="bw-move-setup-count">{{ selectedMoveCount(p.id + '') }}/{{ maxMovesFor(p) }}</span>
       </button>
       }
     </div>
 
     @if (moveSetupPokemon; as pokemon) {
     <h3 class="bw-subtitle">
-      {{ pokemon.name | titlecase }} — moves ({{ selectedMoveCount(pokemon.id + '') }}/4)
+      {{ pokemon.name | titlecase }} — moves ({{ selectedMoveCount(pokemon.id + '') }}/{{ maxMovesFor(pokemon) }})
     </h3>
     <div class="bw-move-setup-grid">
       @for (move of eligibleMovesFor(pokemon); track move.id) {
@@ -353,7 +400,7 @@
         [class.bw-move-setup-btn--selected]="isMoveSelected(pokemon.id + '', move.id)"
         [disabled]="
           !isMoveSelected(pokemon.id + '', move.id) &&
-          selectedMoveCount(pokemon.id + '') >= 4
+          !canSelectMoreMoves(pokemon)
         "
         (click)="toggleMoveSelection(pokemon.id + '', move.id)"
       >
@@ -383,10 +430,12 @@
         type="button"
         class="bw-full-btn"
         [disabled]="lockingTeam || !allMovesConfigured()"
-        (click)="confirmTeam()"
+        (click)="itemsEnabled() ? proceedToItemSetup() : confirmTeam()"
       >
         @if (lockingTeam) {
         Locking in…
+        } @else if (itemsEnabled()) {
+        Continue to items
         } @else {
         Lock in team
         }
@@ -413,6 +462,114 @@
     }
     } @else {
     <p class="bw-hint">Select Pokémon on the team tab first.</p>
+    }
+  </section>
+  }
+
+  @if (workspaceStep === 'items') {
+  <section class="bw-section">
+    <div class="match-status-banner match-status-banner--ready">
+      <mat-icon>backpack</mat-icon>
+      <div>
+        <strong>Choose your items</strong>
+        <p>{{ itemRulesSummary() }}</p>
+      </div>
+    </div>
+
+    <p class="bw-hint">
+      Slots: {{ bagSlotsUsed() }}/{{ session.getItemRules().itemSlotCount }}
+      · Total uses: {{ bagTotalUses() }}/{{ session.getItemRules().totalItemPool }}
+    </p>
+
+    <div class="bw-item-setup-grid">
+      @for (item of eligibleBattleItems; track item.id) {
+      <div class="bw-item-setup-card">
+        @if (item.sprites?.default) {
+        <img class="bw-item-sprite" [src]="item.sprites.default" [alt]="item.name" />
+        }
+        <div class="bw-item-setup-info">
+          <span class="bw-item-name">{{ item.name | titlecase }}</span>
+          <span class="bw-item-meta">{{ item.category.name | titlecase }}</span>
+          @if (itemEffectSnippet(item)) {
+          <span class="bw-item-effect">{{ itemEffectSnippet(item) }}</span>
+          }
+        </div>
+        <div class="bw-item-qty-controls">
+          <button
+            mat-icon-button
+            type="button"
+            [disabled]="bagItemQuantity(item.id) <= 0"
+            (click)="decreaseBagItem(item)"
+          >
+            <mat-icon>remove</mat-icon>
+          </button>
+          <span class="bw-item-qty">{{ bagItemQuantity(item.id) }}</span>
+          <button
+            mat-icon-button
+            type="button"
+            [disabled]="!canIncreaseBagItem(item)"
+            (click)="increaseBagItem(item)"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+
+    <h3 class="bw-subtitle">Held items (per Pokémon)</h3>
+    <p class="bw-hint">Assign a held item from your bag for status interactions during battle.</p>
+    <div class="bw-held-item-list">
+      @for (p of session.selectedTeam$ | async; track p.id) {
+      <div class="bw-held-item-row">
+        <span class="bw-held-pokemon">{{ p.name | titlecase }}</span>
+        <mat-form-field appearance="outline" class="bw-held-select">
+          <mat-label>Held item</mat-label>
+          <mat-select
+            [value]="getHeldItemId(p.id + '')"
+            (selectionChange)="setHeldItem(p.id + '', $event.value)"
+          >
+            <mat-option [value]="null">None</mat-option>
+            @for (item of holdableBagItems(); track item.id) {
+            <mat-option [value]="item.id">{{ item.name | titlecase }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+    </div>
+
+    @if (!(session.teamLocked$ | async)) {
+    <div class="bw-move-setup-actions">
+      <button mat-button type="button" (click)="backToMoveSetup()">
+        ← Back to moves
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        class="bw-full-btn"
+        [disabled]="lockingTeam || !allItemsConfigured()"
+        (click)="confirmTeam()"
+      >
+        @if (lockingTeam) {
+        Locking in…
+        } @else {
+        Lock in team
+        }
+      </button>
+    </div>
+    @if (teamLockError) {
+    <p class="bw-error">{{ teamLockError }}</p>
+    }
+    } @else if ((session.phase$ | async) === 'active' || (session.phase$ | async) === 'finished') {
+    <p class="bw-hint bw-hint--success">
+      Both teams are in — head to the Fight tab!
+    </p>
+    } @else {
+    <p class="bw-hint">
+      Team locked — waiting for opponent to lock in…
+    </p>
     }
   </section>
   }
@@ -512,10 +669,15 @@
                 Items are disabled for this match.
                 }
               </p>
-              @if (itemsEnabled() && itemChoices.length) {
+              @if (itemsEnabled() && eligibleBattleItems.length) {
               <ul class="bw-skeleton-list">
-                @for (item of itemChoices; track item.name) {
-                <li>{{ item.name | titlecase }}</li>
+                @for (item of eligibleBattleItems; track item.name) {
+                <li>
+                  {{ item.name | titlecase }}
+                  @if (bagItemQuantity(item.id) > 0) {
+                  <span class="bw-skeleton-tag">×{{ bagItemQuantity(item.id) }}</span>
+                  }
+                </li>
                 }
               </ul>
               }

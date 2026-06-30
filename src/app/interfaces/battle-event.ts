@@ -1,3 +1,5 @@
+export type BattleItemType = 'healing' | 'stat';
+
 export interface BattleConfigEventPayload {
   level: number;
   itemQuantity: number;
@@ -5,6 +7,10 @@ export interface BattleConfigEventPayload {
   teamSize: number;
   maxPlayers?: number;
   format?: 'singles' | 'doubles';
+  allowedItemTypes?: BattleItemType[];
+  itemSlotCount?: number;
+  itemStackLimit?: number;
+  totalItemPool?: number;
 }
 
 export interface BattleTurnEventPayload {
@@ -76,10 +82,21 @@ export interface BattleCombatBattler {
     speed: number;
   };
   moves: BattleCombatMove[];
+  heldItem?: {
+    id: number;
+    name: string;
+  } | null;
+}
+
+export interface BattleBagItem {
+  id: number;
+  name: string;
+  quantity: number;
 }
 
 export interface BattleTeamLockPayload {
   battlers: BattleCombatBattler[];
+  bagItems?: BattleBagItem[];
 }
 
 export interface BattleActiveView {

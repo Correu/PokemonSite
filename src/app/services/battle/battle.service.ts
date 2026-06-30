@@ -110,15 +110,7 @@ export class BattleService {
     selectedMoveIds?: number[]
   ): BattleCombatBattler {
     const base = this.createBattler(pokemon, level);
-    const eligibleIds = this.getEligibleMoveIds(pokemon, level, catalog);
-    let moveIds: number[];
-
-    if (selectedMoveIds?.length === 4) {
-      const valid = selectedMoveIds.filter((id) => eligibleIds.includes(id));
-      moveIds = valid.length === 4 ? valid : this.pickMoveIds(pokemon, level, catalog);
-    } else {
-      moveIds = this.pickMoveIds(pokemon, level, catalog);
-    }
+    const moveIds = this.resolveMoveIds(pokemon, level, catalog, selectedMoveIds);
 
     const moves = moveIds
       .map((id) => catalog.byId[String(id)])
@@ -145,6 +137,30 @@ export class BattleService {
       stats: this.extractStats(pokemon, level),
       moves,
     };
+  }
+
+  /** Up to 4 moves; uses player selection when provided, else all eligible moves available. */
+  resolveMoveIds(
+    pokemon: Pokemon,
+    level: number,
+    catalog: MovesCatalog,
+    selectedMoveIds?: number[]
+  ): number[] {
+    const eligibleIds = this.getEligibleMoveIds(pokemon, level, catalog);
+    const maxMoves = Math.min(4, eligibleIds.length);
+
+    if (selectedMoveIds?.length) {
+      const valid = selectedMoveIds.filter((id) => eligibleIds.includes(id));
+      if (valid.length > 0) {
+        return valid.slice(0, maxMoves || 4);
+      }
+    }
+
+    return eligibleIds.slice(0, 4);
+  }
+
+  maxSelectableMoves(pokemon: Pokemon, level: number, catalog: MovesCatalog): number {
+    return Math.min(4, this.getEligibleMoveIds(pokemon, level, catalog).length);
   }
 
   toCombatMove(move: BattleMove): BattleCombatMove {

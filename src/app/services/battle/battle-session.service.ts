@@ -7,7 +7,6 @@ import {
   map,
 } from 'rxjs';
 import { Pokemon } from 'src/app/interfaces/pokemon';
-import { Item } from 'src/app/interfaces/item';
 import {
   BattleConfigEventPayload,
   BattleCountdownPayload,
@@ -15,6 +14,7 @@ import {
   BattleStateUpdatePayload,
   BattleActiveView,
   BattleCombatMove,
+  BattleBagItem,
   GameEventEnvelope,
   isGameEventEnvelope,
 } from 'src/app/interfaces/battle-event';
@@ -68,7 +68,10 @@ export class BattleSessionService {
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
 
   readonly selectedTeam$ = new BehaviorSubject<Pokemon[]>([]);
-  readonly selectedItems$ = new BehaviorSubject<Item[]>([]);
+  readonly selectedBagItems$ = new BehaviorSubject<Record<number, number>>({});
+  readonly heldItemsByPokemon$ = new BehaviorSubject<Record<string, number | null>>(
+    {}
+  );
   readonly selectedMovesByPokemon$ = new BehaviorSubject<
     Record<string, number[]>
   >({});
@@ -200,7 +203,8 @@ export class BattleSessionService {
     this.countdownSeconds$.next(null);
     this.battleConfig$.next(null);
     this.selectedTeam$.next([]);
-    this.selectedItems$.next([]);
+    this.selectedBagItems$.next({});
+    this.heldItemsByPokemon$.next({});
     this.selectedMovesByPokemon$.next({});
     this.combatState$.next(null);
     this.teamLocked$.next(false);
@@ -311,6 +315,9 @@ export class BattleSessionService {
       const moves = { ...this.selectedMovesByPokemon$.value };
       delete moves[String(pokemon.id)];
       this.selectedMovesByPokemon$.next(moves);
+      const held = { ...this.heldItemsByPokemon$.value };
+      delete held[String(pokemon.id)];
+      this.heldItemsByPokemon$.next(held);
     } else if (cur.length < maxTeam) {
       cur.push(pokemon);
     }
@@ -323,15 +330,16 @@ export class BattleSessionService {
     this.selectedMovesByPokemon$.next(next);
   }
 
-  toggleMoveForPokemon(pokemonId: string, moveId: number): void {
+  toggleMoveForPokemon(pokemonId: string, moveId: number, maxMoves = 4): void {
     if (this.teamLocked$.value) {
       return;
     }
+    const cap = Math.min(4, Math.max(0, maxMoves));
     const cur = [...(this.selectedMovesByPokemon$.value[pokemonId] ?? [])];
     const idx = cur.indexOf(moveId);
     if (idx >= 0) {
       cur.splice(idx, 1);
-    } else if (cur.length < 4) {
+    } else if (cur.length < cap) {
       cur.push(moveId);
     }
     this.setMovesForPokemon(pokemonId, cur);
@@ -355,9 +363,10 @@ export class BattleSessionService {
       return false;
     }
     const movesByPokemon = this.selectedMovesByPokemon$.value;
-    return team.every(
-      (p) => (movesByPokemon[String(p.id)]?.length ?? 0) === 4
-    );
+    return team.every((p) => {
+      const count = movesByPokemon[String(p.id)]?.length ?? 0;
+      return count <= 4;
+    });
   }
 
   canProceedToMoveSetup(): boolean {
@@ -371,19 +380,154 @@ export class BattleSessionService {
     );
   }
 
-  toggleItem(item: Item): void {
-    const cur = [...this.selectedItems$.value];
-    const idx = cur.findIndex((i) => i.name === item.name);
-    if (idx >= 0) {
-      cur.splice(idx, 1);
-    } else if (cur.length < 6) {
-      cur.push(item);
+  proceedToItemSetup(): void {
+    if (!this.matchStarted$.value || this.teamLocked$.value) {
+      return;
     }
-    this.selectedItems$.next(cur);
+    if (!this.allTeamMovesConfigured()) {
+      return;
+    }
+    if (!this.itemsEnabled()) {
+      return;
+    }
+    this.phase$.next('setupItems');
   }
 
-  async loadRandomItemsForPicker(): Promise<Item[]> {
-    return firstValueFrom(this.itemService.getRandomItems());
+  itemsEnabled(): boolean {
+    return !!this.battleConfig$.value?.useItems;
+  }
+
+  getItemRules() {
+    const cfg = this.battleConfig$.value;
+    return {
+      itemSlotCount: cfg?.itemSlotCount ?? cfg?.itemQuantity ?? 6,
+      itemStackLimit: cfg?.itemStackLimit ?? 3,
+      totalItemPool: cfg?.totalItemPool ?? 10,
+      allowedItemTypes: cfg?.allowedItemTypes ?? ['healing', 'stat'],
+    };
+  }
+
+  getBagItemQuantity(itemId: number): number {
+    return this.selectedBagItems$.value[itemId] ?? 0;
+  }
+
+  getBagSlotsUsed(): number {
+    return Object.values(this.selectedBagItems$.value).filter((q) => q > 0).length;
+  }
+
+  getBagTotalUses(): number {
+    return Object.values(this.selectedBagItems$.value).reduce(
+      (sum, q) => sum + q,
+      0
+    );
+  }
+
+  setBagItemQuantity(itemId: number, quantity: number): void {
+    if (this.teamLocked$.value) {
+      return;
+    }
+    const rules = this.getItemRules();
+    const next = { ...this.selectedBagItems$.value };
+    const clamped = Math.max(0, Math.min(quantity, rules.itemStackLimit));
+
+    if (clamped === 0) {
+      delete next[itemId];
+    } else {
+      const slotsUsed = Object.entries(next).filter(
+        ([id, q]) => q > 0 && Number(id) !== itemId
+      ).length;
+      if (!(itemId in next) || next[itemId] === 0) {
+        if (slotsUsed >= rules.itemSlotCount) {
+          return;
+        }
+      }
+      const otherTotal = Object.entries(next).reduce(
+        (sum, [id, q]) => (Number(id) === itemId ? sum : sum + q),
+        0
+      );
+      if (otherTotal + clamped > rules.totalItemPool) {
+        return;
+      }
+      next[itemId] = clamped;
+    }
+
+    this.selectedBagItems$.next(next);
+    this.syncHeldItemsWithBag(next);
+  }
+
+  setHeldItemForPokemon(pokemonId: string, itemId: number | null): void {
+    if (this.teamLocked$.value) {
+      return;
+    }
+    const next = { ...this.heldItemsByPokemon$.value };
+    if (itemId === null) {
+      delete next[pokemonId];
+    } else {
+      const bagQty = this.selectedBagItems$.value[itemId] ?? 0;
+      if (bagQty < 1) {
+        return;
+      }
+      next[pokemonId] = itemId;
+    }
+    this.heldItemsByPokemon$.next(next);
+  }
+
+  getHeldItemForPokemon(pokemonId: string): number | null {
+    return this.heldItemsByPokemon$.value[pokemonId] ?? null;
+  }
+
+  allItemsConfigured(): boolean {
+    if (!this.itemsEnabled()) {
+      return true;
+    }
+    const rules = this.getItemRules();
+    const bag = this.selectedBagItems$.value;
+    const slots = Object.values(bag).filter((q) => q > 0).length;
+    const total = Object.values(bag).reduce((sum, q) => sum + q, 0);
+    if (slots > rules.itemSlotCount) {
+      return false;
+    }
+    if (total > rules.totalItemPool) {
+      return false;
+    }
+    for (const qty of Object.values(bag)) {
+      if (qty > rules.itemStackLimit) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  canProceedToItemSetup(): boolean {
+    return (
+      this.itemsEnabled() &&
+      !this.teamLocked$.value &&
+      this.allTeamMovesConfigured()
+    );
+  }
+
+  private syncHeldItemsWithBag(bag: Record<number, number>): void {
+    const held = { ...this.heldItemsByPokemon$.value };
+    let changed = false;
+    for (const [pokemonId, itemId] of Object.entries(held)) {
+      if (itemId === null || itemId === undefined) {
+        continue;
+      }
+      if ((bag[itemId] ?? 0) < 1) {
+        delete held[pokemonId];
+        changed = true;
+      }
+    }
+    if (changed) {
+      this.heldItemsByPokemon$.next(held);
+    }
+  }
+
+  async loadEligibleBattleItems() {
+    const rules = this.getItemRules();
+    return firstValueFrom(
+      this.itemService.getBattleItemsByTypes(rules.allowedItemTypes)
+    );
   }
 
   async confirmTeam(): Promise<void> {
@@ -405,21 +549,57 @@ export class BattleSessionService {
       return;
     }
     if (!this.allTeamMovesConfigured()) {
-      throw new Error('Choose exactly 4 moves for each Pokémon on your team.');
+      throw new Error('Move selection is invalid.');
     }
+    if (!this.allItemsConfigured()) {
+      throw new Error('Item loadout exceeds match limits.');
+    }
+
+    const catalog = await firstValueFrom(this.itemService.getBattleCatalog());
+    const catalogById = new Map(catalog.map((i) => [i.id, i]));
 
     const battlers = await this.battleService.buildCombatTeam(
       team,
       level,
       this.selectedMovesByPokemon$.value
     );
+
+    const heldByPokemon = this.heldItemsByPokemon$.value;
+    for (const battler of battlers) {
+      const heldId = heldByPokemon[battler.speciesId];
+      if (heldId) {
+        const item = catalogById.get(heldId);
+        battler.heldItem = item
+          ? { id: item.id, name: item.name }
+          : null;
+      } else {
+        battler.heldItem = null;
+      }
+    }
+
+    const bagItems: BattleBagItem[] = Object.entries(
+      this.selectedBagItems$.value
+    )
+      .filter(([, qty]) => qty > 0)
+      .map(([id, quantity]) => {
+        const item = catalogById.get(Number(id));
+        return {
+          id: Number(id),
+          name: item?.name ?? String(id),
+          quantity,
+        };
+      });
+
     if (!this.connected) {
       throw new Error('Not connected to the battle server.');
     }
     const envelope: GameEventEnvelope = {
       type: 'battle:teamLock',
       version: 1,
-      payload: { battlers },
+      payload: {
+        battlers,
+        bagItems: this.itemsEnabled() ? bagItems : undefined,
+      },
     };
     this.socket.sendGameEvent(roomKey, envelope);
     this.teamLocked$.next(true);
@@ -754,10 +934,14 @@ export class BattleSessionService {
     return {
       level: config.level,
       useItems: config.useItems,
-      itemQuantity: config.itemQuantity,
+      itemQuantity: config.itemSlotCount ?? config.itemQuantity,
       teamSize: config.teamSize,
       maxPlayers: config.maxPlayers,
       format: config.format,
+      allowedItemTypes: config.allowedItemTypes ?? (config.useItems ? ['healing', 'stat'] : []),
+      itemSlotCount: config.itemSlotCount ?? config.itemQuantity ?? (config.useItems ? 6 : 0),
+      itemStackLimit: config.itemStackLimit ?? (config.useItems ? 3 : 0),
+      totalItemPool: config.totalItemPool ?? (config.useItems ? 10 : 0),
     };
   }
 
