@@ -22,22 +22,33 @@
     <button
       type="button"
       class="nav-chip"
-      [disabled]="!canProceedToMoves() && (session.phase$ | async) !== 'setupMoves' && (session.phase$ | async) !== 'setupItems' && (session.phase$ | async) !== 'active' && (session.phase$ | async) !== 'finished'"
+      [disabled]="
+        !canProceedToMoves() &&
+        (session.phase$ | async) !== 'setupMoves' &&
+        (session.phase$ | async) !== 'setupItems' &&
+        (session.phase$ | async) !== 'active' &&
+        (session.phase$ | async) !== 'finished'
+      "
       [class.active]="workspaceStep === 'moves'"
       (click)="goStep('moves')"
     >
       Moves
     </button>
     @if (itemsEnabled()) {
-    <button
-      type="button"
-      class="nav-chip"
-      [disabled]="!canProceedToItems() && (session.phase$ | async) !== 'setupItems' && (session.phase$ | async) !== 'active' && (session.phase$ | async) !== 'finished'"
-      [class.active]="workspaceStep === 'items'"
-      (click)="goStep('items')"
-    >
-      Items
-    </button>
+      <button
+        type="button"
+        class="nav-chip"
+        [disabled]="
+          !canProceedToItems() &&
+          (session.phase$ | async) !== 'setupItems' &&
+          (session.phase$ | async) !== 'active' &&
+          (session.phase$ | async) !== 'finished'
+        "
+        [class.active]="workspaceStep === 'items'"
+        (click)="goStep('items')"
+      >
+        Items
+      </button>
     }
     @let phase = session.phase$ | async;
     <button
@@ -51,691 +62,787 @@
     </button>
   </nav>
 
-  @if (workspaceStep === 'room') {
-  <section class="bw-section">
-    <div class="socket-server-panel">
-      <p class="socket-server-title">1. Connect to battle server</p>
-      <mat-form-field appearance="outline" class="bw-field">
-        <mat-label>Socket.IO URL</mat-label>
-        <input matInput [(ngModel)]="battleServerUrl" name="socketUrl" />
-      </mat-form-field>
-      <button mat-stroked-button type="button" class="bw-full-btn" (click)="applyServerUrl()">
-        Apply and reconnect
-      </button>
-      <p
-        class="socket-connection-status"
-        [class.socket-connection-status--ok]="socketConnected"
-      >
-        {{
-          socketConnected
-            ? 'Connected — you can host or join a match'
-            : 'Not connected — start PokemonSiteServer, then apply URL above'
-        }}
-      </p>
-    </div>
-
-    @if (roomMode === 'choose') {
-    <h2 class="bw-title">Battle</h2>
-    <p class="bw-lead">Host a match and share a link, or join with a room code.</p>
-    <div class="bw-actions">
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        [disabled]="!socketConnected"
-        (click)="selectCreate()"
-      >
-        Host match
-      </button>
-      <button
-        mat-raised-button
-        color="accent"
-        type="button"
-        [disabled]="!socketConnected"
-        (click)="selectJoin()"
-      >
-        Join match
-      </button>
-    </div>
-    }
-
-    @if (roomMode === 'create') {
-    <button mat-button type="button" (click)="backToChoose()">Back</button>
-    <h3 class="bw-subtitle">2. Match settings</h3>
-    <p class="bw-lead">Generation I roster (original 151 Pokémon).</p>
-    <form [formGroup]="battleConfigForm" class="bw-form">
-      <mat-form-field appearance="outline" class="bw-field">
-        <mat-label>Level</mat-label>
-        <mat-select formControlName="level">
-          @for (lv of levelOptions; track lv) {
-          <mat-option [value]="lv">{{ lv }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="bw-field">
-        <mat-label>Pokémon per player</mat-label>
-        <mat-select formControlName="teamSize">
-          @for (size of teamSizeOptions; track size) {
-          <mat-option [value]="size">{{ size }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <div class="bw-toggle">
-        <mat-slide-toggle formControlName="useItems">Items allowed</mat-slide-toggle>
-      </div>
-      @if (battleConfigForm.value.useItems) {
-      <div class="bw-item-host-panel">
-        <p class="bw-subtitle">Item types allowed</p>
-        <div class="bw-item-type-toggles">
-          <mat-checkbox formControlName="allowHealing">Healing</mat-checkbox>
-          <mat-checkbox formControlName="allowStat">Stat boosts</mat-checkbox>
-        </div>
+  @if (workspaceStep === "room") {
+    <section class="bw-section">
+      <div class="socket-server-panel">
+        <p class="socket-server-title">1. Connect to battle server</p>
         <mat-form-field appearance="outline" class="bw-field">
-          <mat-label>Item slots (distinct types)</mat-label>
-          <mat-select formControlName="itemSlotCount">
-            @for (n of itemSlotOptions; track n) {
-            <mat-option [value]="n">{{ n }}</mat-option>
-            }
-          </mat-select>
+          <mat-label>Socket.IO URL</mat-label>
+          <input matInput [(ngModel)]="battleServerUrl" name="socketUrl" />
         </mat-form-field>
-        <mat-form-field appearance="outline" class="bw-field">
-          <mat-label>Max per item</mat-label>
-          <mat-select formControlName="itemStackLimit">
-            @for (n of itemStackOptions; track n) {
-            <mat-option [value]="n">{{ n }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="bw-field">
-          <mat-label>Total item uses</mat-label>
-          <mat-select formControlName="totalItemPool">
-            @for (n of totalPoolOptions; track n) {
-            <mat-option [value]="n">{{ n }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <p class="bw-hint">
-          Combined quantity across all selected items cannot exceed the total item uses.
+        <button
+          mat-stroked-button
+          type="button"
+          class="bw-full-btn"
+          (click)="applyServerUrl()"
+        >
+          Apply and reconnect
+        </button>
+        <p
+          class="socket-connection-status"
+          [class.socket-connection-status--ok]="socketConnected"
+        >
+          {{
+            socketConnected
+              ? "Connected — you can host or join a match"
+              : "Not connected — start PokemonSiteServer, then apply URL above"
+          }}
         </p>
       </div>
+
+      @if (roomMode === "choose") {
+        <h2 class="bw-title">Battle</h2>
+        <p class="bw-lead">
+          Host a match and share a link, or join with a room code.
+        </p>
+        <div class="bw-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            [disabled]="!socketConnected"
+            (click)="selectCreate()"
+          >
+            Host match
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            type="button"
+            [disabled]="!socketConnected"
+            (click)="selectJoin()"
+          >
+            Join match
+          </button>
+        </div>
       }
-      @if (createError) {
-      <p class="bw-error">{{ createError }}</p>
-      }
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        (click)="submitCreateRoom()"
-        [disabled]="!battleConfigForm.valid || creatingRoom"
-      >
-        @if (creatingRoom) {
-        Creating room…
-        } @else {
-        Start match and create room
-        }
-      </button>
-    </form>
-    }
 
-    @if (roomMode === 'join' && !(session.roomKey$ | async)) {
-    <button mat-button type="button" (click)="backToChoose()">Back</button>
-    <h3 class="bw-subtitle">Join with room code</h3>
-    <mat-form-field appearance="outline" class="bw-field">
-      <mat-label>Room code</mat-label>
-      <input matInput [(ngModel)]="joinRoomKey" name="joinKey" />
-    </mat-form-field>
-    @if (joinError) {
-    <p class="bw-error">{{ joinError }}</p>
-    }
-    <button
-      mat-raised-button
-      color="accent"
-      type="button"
-      (click)="tryJoin()"
-      [disabled]="joiningRoom"
-    >
-      @if (joiningRoom) {
-      Joining…
-      } @else {
-      Join room
-      }
-    </button>
-    }
-
-    @if (session.roomKey$ | async; as rk) {
-    @if (rk) {
-    <div class="bw-roombox">
-      <h3 class="bw-subtitle">3. Invite your opponent</h3>
-      <p class="bw-hint">
-        Share the link or room code below. When both players are in the room,
-        each player must press <strong>Ready</strong>. A short countdown starts
-        when everyone is ready, then Pokémon selection opens.
-      </p>
-
-      <mat-form-field appearance="outline" class="bw-field">
-        <mat-label>Room code</mat-label>
-        <input matInput [value]="rk" readonly />
-      </mat-form-field>
-      <button mat-stroked-button type="button" (click)="copyRoomCode()">
-        Copy room code
-      </button>
-
-      <mat-form-field appearance="outline" class="bw-field">
-        <mat-label>Invite link</mat-label>
-        <input matInput [value]="inviteUrl" readonly />
-      </mat-form-field>
-      <button mat-stroked-button type="button" (click)="copyInvite()">
-        Copy invite link
-      </button>
-
-      @let playerCount = session.playerCount$ | async;
-      @let maxPlayers = session.maxPlayers$ | async;
-      @let countdownSecs = session.countdownSeconds$ | async;
-
-      <div
-        class="match-status-banner"
-        [class.match-status-banner--ready]="allPlayersConnected"
-      >
-        <mat-icon>{{ allPlayersConnected ? 'check_circle' : 'hourglass_top' }}</mat-icon>
-        <div>
-          @if (countdownSecs !== null && countdownSecs > 0) {
-          <strong>Match starting in {{ countdownSecs }}…</strong>
-          <p>Get ready — Pokémon selection opens next.</p>
-          } @else if (!allPlayersConnected) {
-          <strong>
-            @if ((session.role$ | async) === 'host') {
-            Waiting for opponent…
-            } @else {
-            Waiting for all players…
-            }
-          </strong>
-          <p>Players {{ playerCount }} / {{ maxPlayers }}</p>
-          } @else if (readyCount >= (maxPlayers ?? 0)) {
-          <strong>Everyone is ready!</strong>
-          <p>Starting countdown…</p>
-          } @else if (allPlayersConnected) {
-          <strong>Ready up</strong>
-          <p>Ready {{ readyCount }} / {{ maxPlayers }}</p>
-          } @else {
-          <strong>Both players connected!</strong>
-          <p>Press Ready when you are set to battle.</p>
+      @if (roomMode === "create") {
+        <button mat-button type="button" (click)="backToChoose()">Back</button>
+        <h3 class="bw-subtitle">2. Match settings</h3>
+        <p class="bw-lead">Generation I roster (original 151 Pokémon).</p>
+        <form [formGroup]="battleConfigForm" class="bw-form">
+          <mat-form-field appearance="outline" class="bw-field">
+            <mat-label>Level</mat-label>
+            <mat-select formControlName="level">
+              @for (lv of levelOptions; track lv) {
+                <mat-option [value]="lv">{{ lv }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="bw-field">
+            <mat-label>Pokémon per player</mat-label>
+            <mat-select formControlName="teamSize">
+              @for (size of teamSizeOptions; track size) {
+                <mat-option [value]="size">{{ size }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <div class="bw-toggle">
+            <mat-slide-toggle formControlName="useItems"
+              >Items allowed</mat-slide-toggle
+            >
+          </div>
+          @if (battleConfigForm.value.useItems) {
+            <div class="bw-item-host-panel">
+              <p class="bw-subtitle">Item types allowed</p>
+              <div class="bw-item-type-toggles">
+                <mat-checkbox formControlName="allowHealing"
+                  >Healing</mat-checkbox
+                >
+                <mat-checkbox formControlName="allowStat"
+                  >Stat boosts</mat-checkbox
+                >
+              </div>
+              <mat-form-field appearance="outline" class="bw-field">
+                <mat-label>Item slots (distinct types)</mat-label>
+                <mat-select formControlName="itemSlotCount">
+                  @for (n of itemSlotOptions; track n) {
+                    <mat-option [value]="n">{{ n }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="bw-field">
+                <mat-label>Max per item</mat-label>
+                <mat-select formControlName="itemStackLimit">
+                  @for (n of itemStackOptions; track n) {
+                    <mat-option [value]="n">{{ n }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="bw-field">
+                <mat-label>Total item uses</mat-label>
+                <mat-select formControlName="totalItemPool">
+                  @for (n of totalPoolOptions; track n) {
+                    <mat-option [value]="n">{{ n }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <p class="bw-hint">
+                Combined quantity across all selected items cannot exceed the
+                total item uses.
+              </p>
+            </div>
           }
+          @if (createError) {
+            <p class="bw-error">{{ createError }}</p>
+          }
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="submitCreateRoom()"
+            [disabled]="!battleConfigForm.valid || creatingRoom"
+          >
+            @if (creatingRoom) {
+              Creating room…
+            } @else {
+              Start match and create room
+            }
+          </button>
+        </form>
+      }
+
+      @if (roomMode === "join" && !(session.roomKey$ | async)) {
+        <button mat-button type="button" (click)="backToChoose()">Back</button>
+        <h3 class="bw-subtitle">Join with room code</h3>
+        <mat-form-field appearance="outline" class="bw-field">
+          <mat-label>Room code</mat-label>
+          <input matInput [(ngModel)]="joinRoomKey" name="joinKey" />
+        </mat-form-field>
+        @if (joinError) {
+          <p class="bw-error">{{ joinError }}</p>
+        }
+        <button
+          mat-raised-button
+          color="accent"
+          type="button"
+          (click)="tryJoin()"
+          [disabled]="joiningRoom"
+        >
+          @if (joiningRoom) {
+            Joining…
+          } @else {
+            Join room
+          }
+        </button>
+      }
+
+      @if (session.roomKey$ | async; as rk) {
+        @if (rk) {
+          <div class="bw-roombox">
+            <h3 class="bw-subtitle">3. Invite your opponent</h3>
+            <p class="bw-hint">
+              Share the link or room code below. When both players are in the
+              room, each player must press <strong>Ready</strong>. A short
+              countdown starts when everyone is ready, then Pokémon selection
+              opens.
+            </p>
+
+            <mat-form-field appearance="outline" class="bw-field">
+              <mat-label>Room code</mat-label>
+              <input matInput [value]="rk" readonly />
+            </mat-form-field>
+            <button mat-stroked-button type="button" (click)="copyRoomCode()">
+              Copy room code
+            </button>
+
+            <mat-form-field appearance="outline" class="bw-field">
+              <mat-label>Invite link</mat-label>
+              <input matInput [value]="inviteUrl" readonly />
+            </mat-form-field>
+            <button mat-stroked-button type="button" (click)="copyInvite()">
+              Copy invite link
+            </button>
+
+            @let playerCount = session.playerCount$ | async;
+            @let maxPlayers = session.maxPlayers$ | async;
+            @let countdownSecs = session.countdownSeconds$ | async;
+
+            <div
+              class="match-status-banner"
+              [class.match-status-banner--ready]="allPlayersConnected"
+            >
+              <mat-icon>{{
+                allPlayersConnected ? "check_circle" : "hourglass_top"
+              }}</mat-icon>
+              <div>
+                @if (countdownSecs !== null && countdownSecs > 0) {
+                  <strong>Match starting in {{ countdownSecs }}…</strong>
+                  <p>Get ready — Pokémon selection opens next.</p>
+                } @else if (!allPlayersConnected) {
+                  <strong>
+                    @if ((session.role$ | async) === "host") {
+                      Waiting for opponent…
+                    } @else {
+                      Waiting for all players…
+                    }
+                  </strong>
+                  <p>Players {{ playerCount }} / {{ maxPlayers }}</p>
+                } @else if (readyCount >= (maxPlayers ?? 0)) {
+                  <strong>Everyone is ready!</strong>
+                  <p>Starting countdown…</p>
+                } @else if (allPlayersConnected) {
+                  <strong>Ready up</strong>
+                  <p>Ready {{ readyCount }} / {{ maxPlayers }}</p>
+                } @else {
+                  <strong>Both players connected!</strong>
+                  <p>Press Ready when you are set to battle.</p>
+                }
+              </div>
+            </div>
+
+            @if (showReadyPanel && !(session.matchStarted$ | async)) {
+              @if (countdownSecs === null || countdownSecs <= 0) {
+                <div class="ready-panel">
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="button"
+                    class="bw-full-btn"
+                    [disabled]="session.isLocalReady()"
+                    (click)="markReady()"
+                  >
+                    @if (session.isLocalReady()) {
+                      You are ready
+                    } @else {
+                      Ready up
+                    }
+                  </button>
+                </div>
+              } @else {
+                <p class="ready-countdown" aria-live="polite">
+                  {{ countdownSecs }}
+                </p>
+              }
+            }
+
+            @if (session.matchStarted$ | async) {
+              <p class="bw-hint bw-hint--success">
+                Match is ready — go to the Pokémon tab.
+              </p>
+            }
+          </div>
+        }
+      }
+    </section>
+  }
+
+  @if (workspaceStep === "team") {
+    <section class="bw-section">
+      <div class="match-status-banner match-status-banner--ready">
+        <mat-icon>check_circle</mat-icon>
+        <div>
+          <strong>Match started</strong>
+          <p>
+            Choose up to {{ teamSizeLimit }} Pokémon for your team (fewer is
+            fine).
+          </p>
         </div>
       </div>
 
-      @if (showReadyPanel && !(session.matchStarted$ | async)) {
-      @if (countdownSecs === null || countdownSecs <= 0) {
-      <div class="ready-panel">
+      <h3 class="bw-subtitle">
+        Your team ({{ (session.selectedTeam$ | async)?.length ?? 0 }}/{{
+          teamSizeLimit
+        }})
+      </h3>
+      <div class="bw-pokegrid">
+        @for (p of pokedexSlice; track p.id) {
+          <mat-card
+            class="bw-pokecard"
+            [class.bw-pokecard--on]="isPokemonSelected(p)"
+            (click)="togglePokemon(p)"
+          >
+            <mat-card-content>
+              @if (p.sprites.front_default) {
+                <img
+                  class="bw-mini-sprite"
+                  [src]="p.sprites.front_default"
+                  [alt]="p.name"
+                />
+              }
+              <div class="bw-poke-name">{{ p.name | titlecase }}</div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+
+      @if (!(session.teamLocked$ | async)) {
         <button
           mat-raised-button
           color="primary"
           type="button"
           class="bw-full-btn"
-          [disabled]="session.isLocalReady()"
-          (click)="markReady()"
+          [disabled]="!canProceedToMoves()"
+          (click)="proceedToMoveSetup()"
         >
-          @if (session.isLocalReady()) {
-          You are ready
-          } @else {
-          Ready up
-          }
+          Continue to moves
         </button>
-      </div>
-      } @else {
-      <p class="ready-countdown" aria-live="polite">{{ countdownSecs }}</p>
-      }
-      }
-
-      @if ((session.matchStarted$ | async)) {
-      <p class="bw-hint bw-hint--success">Match is ready — go to the Pokémon tab.</p>
-      }
-    </div>
-    }
-    }
-  </section>
-  }
-
-  @if (workspaceStep === 'team') {
-  <section class="bw-section">
-    <div class="match-status-banner match-status-banner--ready">
-      <mat-icon>check_circle</mat-icon>
-      <div>
-        <strong>Match started</strong>
-        <p>Choose up to {{ teamSizeLimit }} Pokémon for your team (fewer is fine).</p>
-      </div>
-    </div>
-
-    <h3 class="bw-subtitle">
-      Your team ({{ (session.selectedTeam$ | async)?.length ?? 0 }}/{{ teamSizeLimit }})
-    </h3>
-    <div class="bw-pokegrid">
-      @for (p of pokedexSlice; track p.id) {
-      <mat-card
-        class="bw-pokecard"
-        [class.bw-pokecard--on]="isPokemonSelected(p)"
-        (click)="togglePokemon(p)"
-      >
-        <mat-card-content>
-          @if (p.sprites.front_default) {
-          <img
-            class="bw-mini-sprite"
-            [src]="p.sprites.front_default"
-            [alt]="p.name"
-          />
-          }
-          <div class="bw-poke-name">{{ p.name | titlecase }}</div>
-        </mat-card-content>
-      </mat-card>
-      }
-    </div>
-
-    @if (!(session.teamLocked$ | async)) {
-    <button
-      mat-raised-button
-      color="primary"
-      type="button"
-      class="bw-full-btn"
-      [disabled]="!canProceedToMoves()"
-      (click)="proceedToMoveSetup()"
-    >
-      Continue to moves
-    </button>
-    @if (teamLockError) {
-    <p class="bw-error">{{ teamLockError }}</p>
-    }
-    } @else if ((session.phase$ | async) === 'active' || (session.phase$ | async) === 'finished') {
-    <p class="bw-hint bw-hint--success">
-      @if ((session.phase$ | async) === 'finished') {
-      Battle over — see results on the Fight tab.
-      } @else {
-      Both teams are in — head to the Fight tab!
-      }
-    </p>
-    } @else {
-    <p class="bw-hint">
-      Team locked — waiting for opponent to lock in…
-      @if (session.combatState$ | async; as combat) {
-      <span class="bw-hint-sub">({{ combat.lockedPlayers.length }} locked in)</span>
-      }
-    </p>
-    }
-  </section>
-  }
-
-  @if (workspaceStep === 'moves') {
-  <section class="bw-section">
-    <div class="match-status-banner match-status-banner--ready">
-      <mat-icon>sports_martial_arts</mat-icon>
-      <div>
-        <strong>Choose your moves</strong>
-        <p>Pick up to 4 moves per Pokémon (fewer is fine if not enough are available).</p>
-      </div>
-    </div>
-
-    @if ((session.selectedTeam$ | async)?.length) {
-    <div class="bw-move-setup-roster">
-      @for (p of session.selectedTeam$ | async; track p.id) {
-      <button
-        type="button"
-        class="bw-move-setup-tab"
-        [class.bw-move-setup-tab--active]="moveSetupPokemonId === (p.id + '')"
-        (click)="selectMoveSetupPokemon(p)"
-      >
-        <span>{{ p.name | titlecase }}</span>
-        <span class="bw-move-setup-count">{{ selectedMoveCount(p.id + '') }}/{{ maxMovesFor(p) }}</span>
-      </button>
-      }
-    </div>
-
-    @if (moveSetupPokemon; as pokemon) {
-    <h3 class="bw-subtitle">
-      {{ pokemon.name | titlecase }} — moves ({{ selectedMoveCount(pokemon.id + '') }}/{{ maxMovesFor(pokemon) }})
-    </h3>
-    <div class="bw-move-setup-grid">
-      @for (move of eligibleMovesFor(pokemon); track move.id) {
-      <button
-        type="button"
-        class="bw-move-setup-btn"
-        [class.bw-move-setup-btn--selected]="isMoveSelected(pokemon.id + '', move.id)"
-        [disabled]="
-          !isMoveSelected(pokemon.id + '', move.id) &&
-          !canSelectMoreMoves(pokemon)
-        "
-        (click)="toggleMoveSelection(pokemon.id + '', move.id)"
-      >
-        <span class="bw-move-name">{{ move.name | titlecase }}</span>
-        <span class="bw-move-meta-row">
-          @if (move.type) {
-          <span class="bw-move-type">{{ move.type | titlecase }}</span>
-          }
-          @if (move.power) {
-          <span class="bw-move-meta">Pow {{ move.power }}</span>
-          }
-          <span class="bw-move-meta">PP {{ move.pp }}</span>
-        </span>
-      </button>
-      }
-    </div>
-    }
-
-    @if (!(session.teamLocked$ | async)) {
-    <div class="bw-move-setup-actions">
-      <button mat-button type="button" (click)="backToTeamSetup()">
-        ← Back to team
-      </button>
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        class="bw-full-btn"
-        [disabled]="lockingTeam || !allMovesConfigured()"
-        (click)="itemsEnabled() ? proceedToItemSetup() : confirmTeam()"
-      >
-        @if (lockingTeam) {
-        Locking in…
-        } @else if (itemsEnabled()) {
-        Continue to items
-        } @else {
-        Lock in team
+        @if (teamLockError) {
+          <p class="bw-error">{{ teamLockError }}</p>
         }
-      </button>
-    </div>
-    @if (teamLockError) {
-    <p class="bw-error">{{ teamLockError }}</p>
-    }
-    } @else if ((session.phase$ | async) === 'active' || (session.phase$ | async) === 'finished') {
-    <p class="bw-hint bw-hint--success">
-      @if ((session.phase$ | async) === 'finished') {
-      Battle over — see results on the Fight tab.
+      } @else if (
+        (session.phase$ | async) === "active" ||
+        (session.phase$ | async) === "finished"
+      ) {
+        <p class="bw-hint bw-hint--success">
+          @if ((session.phase$ | async) === "finished") {
+            Battle over — see results on the Fight tab.
+          } @else {
+            Both teams are in — head to the Fight tab!
+          }
+        </p>
       } @else {
-      Both teams are in — head to the Fight tab!
+        <p class="bw-hint">
+          Team locked — waiting for opponent to lock in…
+          @if (session.combatState$ | async; as combat) {
+            <span class="bw-hint-sub"
+              >({{ combat.lockedPlayers.length }} locked in)</span
+            >
+          }
+        </p>
       }
-    </p>
-    } @else {
-    <p class="bw-hint">
-      Team locked — waiting for opponent to lock in…
-      @if (session.combatState$ | async; as combat) {
-      <span class="bw-hint-sub">({{ combat.lockedPlayers.length }} locked in)</span>
-      }
-    </p>
-    }
-    } @else {
-    <p class="bw-hint">Select Pokémon on the team tab first.</p>
-    }
-  </section>
+    </section>
   }
 
-  @if (workspaceStep === 'items') {
-  <section class="bw-section">
-    <div class="match-status-banner match-status-banner--ready">
-      <mat-icon>backpack</mat-icon>
-      <div>
-        <strong>Choose your items</strong>
-        <p>{{ itemRulesSummary() }}</p>
-      </div>
-    </div>
-
-    <p class="bw-hint">
-      Slots: {{ bagSlotsUsed() }}/{{ session.getItemRules().itemSlotCount }}
-      · Total uses: {{ bagTotalUses() }}/{{ session.getItemRules().totalItemPool }}
-    </p>
-
-    <div class="bw-item-setup-grid">
-      @for (item of eligibleBattleItems; track item.id) {
-      <div class="bw-item-setup-card">
-        @if (item.sprites?.default) {
-        <img class="bw-item-sprite" [src]="item.sprites.default" [alt]="item.name" />
-        }
-        <div class="bw-item-setup-info">
-          <span class="bw-item-name">{{ item.name | titlecase }}</span>
-          <span class="bw-item-meta">{{ item.category.name | titlecase }}</span>
-          @if (itemEffectSnippet(item)) {
-          <span class="bw-item-effect">{{ itemEffectSnippet(item) }}</span>
-          }
-        </div>
-        <div class="bw-item-qty-controls">
-          <button
-            mat-icon-button
-            type="button"
-            [disabled]="bagItemQuantity(item.id) <= 0"
-            (click)="decreaseBagItem(item)"
-          >
-            <mat-icon>remove</mat-icon>
-          </button>
-          <span class="bw-item-qty">{{ bagItemQuantity(item.id) }}</span>
-          <button
-            mat-icon-button
-            type="button"
-            [disabled]="!canIncreaseBagItem(item)"
-            (click)="increaseBagItem(item)"
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+  @if (workspaceStep === "moves") {
+    <section class="bw-section">
+      <div class="match-status-banner match-status-banner--ready">
+        <mat-icon>sports_martial_arts</mat-icon>
+        <div>
+          <strong>Choose your moves</strong>
+          <p>
+            Pick up to 4 moves per Pokémon (fewer is fine if not enough are
+            available).
+          </p>
         </div>
       </div>
-      }
-    </div>
 
-    <h3 class="bw-subtitle">Held items (per Pokémon)</h3>
-    <p class="bw-hint">Assign a held item from your bag for status interactions during battle.</p>
-    <div class="bw-held-item-list">
-      @for (p of session.selectedTeam$ | async; track p.id) {
-      <div class="bw-held-item-row">
-        <span class="bw-held-pokemon">{{ p.name | titlecase }}</span>
-        <mat-form-field appearance="outline" class="bw-held-select">
-          <mat-label>Held item</mat-label>
-          <mat-select
-            [value]="getHeldItemId(p.id + '')"
-            (selectionChange)="setHeldItem(p.id + '', $event.value)"
-          >
-            <mat-option [value]="null">None</mat-option>
-            @for (item of holdableBagItems(); track item.id) {
-            <mat-option [value]="item.id">{{ item.name | titlecase }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
-      }
-    </div>
-
-    @if (!(session.teamLocked$ | async)) {
-    <div class="bw-move-setup-actions">
-      <button mat-button type="button" (click)="backToMoveSetup()">
-        ← Back to moves
-      </button>
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        class="bw-full-btn"
-        [disabled]="lockingTeam || !allItemsConfigured()"
-        (click)="confirmTeam()"
-      >
-        @if (lockingTeam) {
-        Locking in…
-        } @else {
-        Lock in team
-        }
-      </button>
-    </div>
-    @if (teamLockError) {
-    <p class="bw-error">{{ teamLockError }}</p>
-    }
-    } @else if ((session.phase$ | async) === 'active' || (session.phase$ | async) === 'finished') {
-    <p class="bw-hint bw-hint--success">
-      Both teams are in — head to the Fight tab!
-    </p>
-    } @else {
-    <p class="bw-hint">
-      Team locked — waiting for opponent to lock in…
-    </p>
-    }
-  </section>
-  }
-
-  @if (workspaceStep === 'battle') {
-  <section class="bw-section bw-battle-panel">
-    @let combat = session.combatState$ | async;
-
-    @if (combat?.winnerId) {
-    <div class="match-status-banner match-status-banner--ready">
-      <mat-icon>{{ isLocalWinner() ? 'emoji_events' : 'sentiment_dissatisfied' }}</mat-icon>
-      <div>
-        <strong>{{ isLocalWinner() ? 'You win!' : 'You lost…' }}</strong>
-        <p>{{ combat?.message }}</p>
-      </div>
-    </div>
-    } @else {
-    <div class="bw-battle-command-panel">
-      <div class="bw-battle-message-box">
-        <p>{{ battlePrompt() }}</p>
-      </div>
-
-      @if (session.isAwaitingLocalMove()) {
-        @switch (battleMenuPanel) {
-          @case ('commands') {
-            <div class="bw-battle-action-grid">
-              <button
-                type="button"
-                class="bw-battle-action-btn bw-battle-action-btn--fight"
-                (click)="openBattleMenu('fight')"
+      @if ((session.selectedTeam$ | async)?.length) {
+        <div class="bw-move-setup-roster">
+          @for (p of session.selectedTeam$ | async; track p.id) {
+            <button
+              type="button"
+              class="bw-move-setup-tab"
+              [class.bw-move-setup-tab--active]="
+                moveSetupPokemonId === p.id + ''
+              "
+              (click)="selectMoveSetupPokemon(p)"
+            >
+              <span>{{ p.name | titlecase }}</span>
+              <span class="bw-move-setup-count"
+                >{{ selectedMoveCount(p.id + "") }}/{{ maxMovesFor(p) }}</span
               >
-                Fight
-              </button>
-              <button
-                type="button"
-                class="bw-battle-action-btn bw-battle-action-btn--bag"
-                (click)="openBattleMenu('bag')"
-              >
-                Bag
-              </button>
-              <button
-                type="button"
-                class="bw-battle-action-btn bw-battle-action-btn--pokemon"
-                (click)="openBattleMenu('pokemon')"
-              >
-                Pokémon
-              </button>
-              <button
-                type="button"
-                class="bw-battle-action-btn bw-battle-action-btn--end"
-                (click)="openBattleMenu('end-fight')"
-              >
-                End fight
-              </button>
-            </div>
+            </button>
           }
-          @case ('fight') {
-            <div class="bw-battle-submenu">
-              <button mat-button type="button" (click)="backToBattleCommands()">
-                ← Back
-              </button>
-              <h3 class="bw-subtitle">Choose a move</h3>
-              <div class="bw-movegrid">
-                @for (move of session.availableMoves$ | async; track move.id) {
-                <button
-                  mat-stroked-button
-                  type="button"
-                  class="bw-move-btn"
-                  [disabled]="move.currentPp <= 0"
-                  (click)="selectMove(move.id)"
-                >
-                  <span class="bw-move-name">{{ move.name | titlecase }}</span>
-                  <span class="bw-move-meta-row">
-                    @if (move.type) {
-                    <span class="bw-move-type">{{ move.type | titlecase }}</span>
-                    }
-                    @if (move.power) {
-                    <span class="bw-move-meta">Pow {{ move.power }}</span>
-                    }
-                    <span class="bw-move-meta">PP {{ move.currentPp }}/{{ move.maxPp }}</span>
-                  </span>
-                </button>
-                }
-              </div>
-            </div>
-          }
-          @case ('bag') {
-            <div class="bw-battle-submenu">
-              <button mat-button type="button" (click)="backToBattleCommands()">
-                ← Back
-              </button>
-              <h3 class="bw-subtitle">Bag</h3>
-              <p class="bw-hint bw-skeleton-note">
-                @if (itemsEnabled()) {
-                Item use during battle is coming soon. Your pre-battle items will apply here.
-                } @else {
-                Items are disabled for this match.
-                }
-              </p>
-              @if (itemsEnabled() && eligibleBattleItems.length) {
-              <ul class="bw-skeleton-list">
-                @for (item of eligibleBattleItems; track item.name) {
-                <li>
-                  {{ item.name | titlecase }}
-                  @if (bagItemQuantity(item.id) > 0) {
-                  <span class="bw-skeleton-tag">×{{ bagItemQuantity(item.id) }}</span>
+        </div>
+
+        @if (moveSetupPokemon; as pokemon) {
+          <h3 class="bw-subtitle">
+            {{ pokemon.name | titlecase }} — moves ({{
+              selectedMoveCount(pokemon.id + "")
+            }}/{{ maxMovesFor(pokemon) }})
+          </h3>
+          <div class="bw-move-setup-grid">
+            @for (move of eligibleMovesFor(pokemon); track move.id) {
+              <button
+                type="button"
+                class="bw-move-setup-btn"
+                [class.bw-move-setup-btn--selected]="
+                  isMoveSelected(pokemon.id + '', move.id)
+                "
+                [disabled]="
+                  !isMoveSelected(pokemon.id + '', move.id) &&
+                  !canSelectMoreMoves(pokemon)
+                "
+                (click)="toggleMoveSelection(pokemon.id + '', move.id)"
+              >
+                <span class="bw-move-name">{{ move.name | titlecase }}</span>
+                <span class="bw-move-meta-row">
+                  @if (move.type) {
+                    <span class="bw-move-type">{{
+                      move.type | titlecase
+                    }}</span>
                   }
-                </li>
-                }
-              </ul>
+                  @if (move.power) {
+                    <span class="bw-move-meta">Pow {{ move.power }}</span>
+                  }
+                  <span class="bw-move-meta">PP {{ move.pp }}</span>
+                </span>
+              </button>
+            }
+          </div>
+        }
+
+        @if (!(session.teamLocked$ | async)) {
+          <div class="bw-move-setup-actions">
+            <button mat-button type="button" (click)="backToTeamSetup()">
+              ← Back to team
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              class="bw-full-btn"
+              [disabled]="lockingTeam || !allMovesConfigured()"
+              (click)="itemsEnabled() ? proceedToItemSetup() : confirmTeam()"
+            >
+              @if (lockingTeam) {
+                Locking in…
+              } @else if (itemsEnabled()) {
+                Continue to items
+              } @else {
+                Lock in team
+              }
+            </button>
+          </div>
+          @if (teamLockError) {
+            <p class="bw-error">{{ teamLockError }}</p>
+          }
+        } @else if (
+          (session.phase$ | async) === "active" ||
+          (session.phase$ | async) === "finished"
+        ) {
+          <p class="bw-hint bw-hint--success">
+            @if ((session.phase$ | async) === "finished") {
+              Battle over — see results on the Fight tab.
+            } @else {
+              Both teams are in — head to the Fight tab!
+            }
+          </p>
+        } @else {
+          <p class="bw-hint">
+            Team locked — waiting for opponent to lock in…
+            @if (session.combatState$ | async; as combat) {
+              <span class="bw-hint-sub"
+                >({{ combat.lockedPlayers.length }} locked in)</span
+              >
+            }
+          </p>
+        }
+      } @else {
+        <p class="bw-hint">Select Pokémon on the team tab first.</p>
+      }
+    </section>
+  }
+
+  @if (workspaceStep === "items") {
+    <section class="bw-section">
+      <div class="match-status-banner match-status-banner--ready">
+        <mat-icon>backpack</mat-icon>
+        <div>
+          <strong>Choose your items</strong>
+          <p>{{ itemRulesSummary() }}</p>
+        </div>
+      </div>
+
+      <p class="bw-hint">
+        Slots: {{ bagSlotsUsed() }}/{{ session.getItemRules().itemSlotCount }} ·
+        Total uses: {{ bagTotalUses() }}/{{
+          session.getItemRules().totalItemPool
+        }}
+      </p>
+
+      <div class="bw-item-setup-grid">
+        @for (item of eligibleBattleItems; track item.id) {
+          <div class="bw-item-setup-card">
+            @if (item.sprites.default) {
+              <img
+                class="bw-item-sprite"
+                [src]="item.sprites.default"
+                [alt]="item.name"
+              />
+            }
+            <div class="bw-item-setup-info">
+              <span class="bw-item-name">{{ item.name | titlecase }}</span>
+              <span class="bw-item-meta">{{
+                item.category.name | titlecase
+              }}</span>
+              @if (itemEffectSnippet(item)) {
+                <span class="bw-item-effect">{{
+                  itemEffectSnippet(item)
+                }}</span>
               }
             </div>
-          }
-          @case ('pokemon') {
-            <div class="bw-battle-submenu">
-              <button mat-button type="button" (click)="backToBattleCommands()">
-                ← Back
+            <div class="bw-item-qty-controls">
+              <button
+                mat-icon-button
+                type="button"
+                [disabled]="bagItemQuantity(item.id) <= 0"
+                (click)="decreaseBagItem(item)"
+              >
+                <mat-icon>remove</mat-icon>
               </button>
-              <h3 class="bw-subtitle">Pokémon</h3>
-              <p class="bw-hint bw-skeleton-note">
-                Switching Pokémon mid-battle is coming soon.
-              </p>
-              <ul class="bw-skeleton-list">
-                @for (p of session.selectedTeam$ | async; track p.id) {
-                <li>
-                  {{ p.name | titlecase }}
-                  <span class="bw-skeleton-tag">Switch — soon</span>
-                </li>
-                }
-              </ul>
-            </div>
-          }
-          @case ('end-fight') {
-            <div class="bw-battle-submenu">
-              <button mat-button type="button" (click)="backToBattleCommands()">
-                ← Back
+              <span class="bw-item-qty">{{ bagItemQuantity(item.id) }}</span>
+              <button
+                mat-icon-button
+                type="button"
+                [disabled]="!canIncreaseBagItem(item)"
+                (click)="increaseBagItem(item)"
+              >
+                <mat-icon>add</mat-icon>
               </button>
-              <h3 class="bw-subtitle">End fight?</h3>
-              <p class="bw-hint">
-                If you end the fight now, your opponent wins by forfeit.
-              </p>
-              <div class="bw-actions">
-                <button
-                  mat-raised-button
-                  color="warn"
-                  type="button"
-                  (click)="confirmEndFight()"
-                >
-                  End fight
-                </button>
-                <button
-                  mat-stroked-button
-                  type="button"
-                  (click)="backToBattleCommands()"
-                >
-                  Keep battling
-                </button>
-              </div>
             </div>
-          }
+          </div>
         }
+      </div>
+
+      <h3 class="bw-subtitle">Held items (per Pokémon)</h3>
+      <p class="bw-hint">
+        Assign a held item from your bag for status interactions during battle.
+      </p>
+      <div class="bw-held-item-list">
+        @for (p of session.selectedTeam$ | async; track p.id) {
+          <div class="bw-held-item-row">
+            <span class="bw-held-pokemon">{{ p.name | titlecase }}</span>
+            <mat-form-field appearance="outline" class="bw-held-select">
+              <mat-label>Held item</mat-label>
+              <mat-select
+                [value]="getHeldItemId(p.id + '')"
+                (selectionChange)="setHeldItem(p.id + '', $event.value)"
+              >
+                <mat-option [value]="null">None</mat-option>
+                @for (item of holdableBagItems(); track item.id) {
+                  <mat-option [value]="item.id">{{
+                    item.name | titlecase
+                  }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        }
+      </div>
+
+      @if (!(session.teamLocked$ | async)) {
+        <div class="bw-move-setup-actions">
+          <button mat-button type="button" (click)="backToMoveSetup()">
+            ← Back to moves
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            class="bw-full-btn"
+            [disabled]="lockingTeam || !allItemsConfigured()"
+            (click)="confirmTeam()"
+          >
+            @if (lockingTeam) {
+              Locking in…
+            } @else {
+              Lock in team
+            }
+          </button>
+        </div>
+        @if (teamLockError) {
+          <p class="bw-error">{{ teamLockError }}</p>
+        }
+      } @else if (
+        (session.phase$ | async) === "active" ||
+        (session.phase$ | async) === "finished"
+      ) {
+        <p class="bw-hint bw-hint--success">
+          Both teams are in — head to the Fight tab!
+        </p>
       } @else {
-        <p class="bw-hint">Waiting for opponent's move…</p>
+        <p class="bw-hint">Team locked — waiting for opponent to lock in…</p>
       }
-    </div>
-    }
-  </section>
+    </section>
+  }
+
+  @if (workspaceStep === "battle") {
+    <section class="bw-section bw-battle-panel">
+      @let combat = session.combatState$ | async;
+
+      @if (combat?.winnerId) {
+        <div class="match-status-banner match-status-banner--ready">
+          <mat-icon>{{
+            isLocalWinner() ? "emoji_events" : "sentiment_dissatisfied"
+          }}</mat-icon>
+          <div>
+            <strong>{{ isLocalWinner() ? "You win!" : "You lost…" }}</strong>
+            <p>{{ combat?.message }}</p>
+          </div>
+        </div>
+      } @else {
+        <div class="bw-battle-command-panel">
+          <div class="bw-battle-message-box">
+            <p>{{ battlePrompt() }}</p>
+          </div>
+
+          @if (session.isAwaitingLocalMove()) {
+            @switch (battleMenuPanel) {
+              @case ("commands") {
+                <div class="bw-battle-action-grid">
+                  <button
+                    type="button"
+                    class="bw-battle-action-btn bw-battle-action-btn--fight"
+                    (click)="openBattleMenu('fight')"
+                  >
+                    Fight
+                  </button>
+                  <button
+                    type="button"
+                    class="bw-battle-action-btn bw-battle-action-btn--bag"
+                    (click)="openBattleMenu('bag')"
+                  >
+                    Bag
+                  </button>
+                  <button
+                    type="button"
+                    class="bw-battle-action-btn bw-battle-action-btn--pokemon"
+                    (click)="openBattleMenu('pokemon')"
+                  >
+                    Pokémon
+                  </button>
+                  <button
+                    type="button"
+                    class="bw-battle-action-btn bw-battle-action-btn--end"
+                    (click)="openBattleMenu('end-fight')"
+                  >
+                    End fight
+                  </button>
+                </div>
+              }
+              @case ("fight") {
+                <div class="bw-battle-submenu">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="backToBattleCommands()"
+                  >
+                    ← Back
+                  </button>
+                  <h3 class="bw-subtitle">Choose a move</h3>
+                  <div class="bw-movegrid">
+                    @for (
+                      move of session.availableMoves$ | async;
+                      track move.id
+                    ) {
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        class="bw-move-btn"
+                        [disabled]="move.currentPp <= 0"
+                        (click)="selectMove(move.id)"
+                      >
+                        <span class="bw-move-name">{{
+                          move.name | titlecase
+                        }}</span>
+                        <span class="bw-move-meta-row">
+                          @if (move.type) {
+                            <span class="bw-move-type">{{
+                              move.type | titlecase
+                            }}</span>
+                          }
+                          @if (move.power) {
+                            <span class="bw-move-meta"
+                              >Pow {{ move.power }}</span
+                            >
+                          }
+                          <span class="bw-move-meta"
+                            >PP {{ move.currentPp }}/{{ move.maxPp }}</span
+                          >
+                        </span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              @case ("bag") {
+                <div class="bw-battle-submenu">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="backToBattleCommands()"
+                  >
+                    ← Back
+                  </button>
+                  <h3 class="bw-subtitle">Bag</h3>
+                  <p class="bw-hint bw-skeleton-note">
+                    @if (itemsEnabled()) {
+                      Item use during battle is coming soon. Your pre-battle
+                      items will apply here.
+                    } @else {
+                      Items are disabled for this match.
+                    }
+                  </p>
+                  @if (itemsEnabled() && eligibleBattleItems.length) {
+                    <ul class="bw-skeleton-list">
+                      @for (item of eligibleBattleItems; track item.name) {
+                        <li>
+                          {{ item.name | titlecase }}
+                          @if (bagItemQuantity(item.id) > 0) {
+                            <span class="bw-skeleton-tag"
+                              >×{{ bagItemQuantity(item.id) }}</span
+                            >
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              }
+              @case ("pokemon") {
+                <div class="bw-battle-submenu">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="backToBattleCommands()"
+                  >
+                    ← Back
+                  </button>
+                  <h3 class="bw-subtitle">Pokémon</h3>
+                  <p class="bw-hint bw-skeleton-note">
+                    Switching Pokémon mid-battle is coming soon.
+                  </p>
+                  <ul class="bw-skeleton-list">
+                    @for (p of session.selectedTeam$ | async; track p.id) {
+                      <li>
+                        {{ p.name | titlecase }}
+                        <span class="bw-skeleton-tag">Switch — soon</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+              @case ("end-fight") {
+                <div class="bw-battle-submenu">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="backToBattleCommands()"
+                  >
+                    ← Back
+                  </button>
+                  <h3 class="bw-subtitle">End fight?</h3>
+                  <p class="bw-hint">
+                    If you end the fight now, your opponent wins by forfeit.
+                  </p>
+                  <div class="bw-actions">
+                    <button
+                      mat-raised-button
+                      color="warn"
+                      type="button"
+                      (click)="confirmEndFight()"
+                    >
+                      End fight
+                    </button>
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      (click)="backToBattleCommands()"
+                    >
+                      Keep battling
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          } @else {
+            <p class="bw-hint">Waiting for opponent's move…</p>
+          }
+        </div>
+      }
+    </section>
   }
 </div>

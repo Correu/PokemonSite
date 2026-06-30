@@ -4,20 +4,21 @@
   <div class="battle-stage-field"></div>
 
   @if (vm.foe) {
-  <div class="battle-stage-foe-wrap">
-    <div class="battle-hud battle-hud--foe">
-      <div class="battle-hud-name">
-        {{ vm.foe.name | titlecase }}
-        <span class="battle-hud-level">Lv. {{ vm.foe.level }}</span>
-      </div>
-      <div class="battle-hud-hpbar">
-        <div
-          class="battle-hud-hpfill"
-          [style.width.%]="(vm.foe.currentHp / vm.foe.maxHp) * 100"
-        ></div>
-      </div>
+  <div class="battle-hud battle-hud--foe">
+    <div class="battle-hud-name">
+      {{ vm.foe.name | titlecase }}
+      <span class="battle-hud-level">Lv. {{ vm.foe.level }}</span>
     </div>
-    <div class="battle-stage-grass battle-stage-grass--foe"></div>
+    <div class="battle-hud-hpbar">
+      <div
+        class="battle-hud-hpfill"
+        [style.width.%]="(vm.foe.currentHp / vm.foe.maxHp) * 100"
+      ></div>
+    </div>
+  </div>
+
+  <div class="battle-stage-spot battle-stage-spot--foe">
+    <div class="battle-stage-grass" aria-hidden="true"></div>
     @if (vm.foe.spriteFront) {
     <img
       class="battle-stage-sprite battle-stage-sprite--foe"
@@ -29,21 +30,7 @@
   }
 
   @if (vm.player) {
-  <div class="battle-stage-player-wrap">
-    <div class="battle-stage-grass battle-stage-grass--player"></div>
-    @if (vm.player.spriteBack) {
-    <img
-      class="battle-stage-sprite battle-stage-sprite--player"
-      [src]="vm.player.spriteBack"
-      [alt]="vm.player.name"
-    />
-    } @else if (vm.player.spriteFront) {
-    <img
-      class="battle-stage-sprite battle-stage-sprite--player"
-      [src]="vm.player.spriteFront"
-      [alt]="vm.player.name"
-    />
-    }
+  <div class="battle-stage-spot battle-stage-spot--player">
     <div class="battle-hud battle-hud--player">
       <div class="battle-hud-name">
         {{ vm.player.name | titlecase }}
@@ -60,15 +47,25 @@
       </div>
       <div class="battle-hud-expbar" aria-hidden="true"></div>
     </div>
+    <div class="battle-stage-grass" aria-hidden="true"></div>
+    @if (vm.player.spriteBack) {
+    <img
+      class="battle-stage-sprite battle-stage-sprite--player"
+      [src]="vm.player.spriteBack"
+      [alt]="vm.player.name"
+    />
+    } @else if (vm.player.spriteFront) {
+    <img
+      class="battle-stage-sprite battle-stage-sprite--player"
+      [src]="vm.player.spriteFront"
+      [alt]="vm.player.name"
+    />
+    }
   </div>
   } @else {
   <div class="battle-stage-placeholder">
     <p>Choose your team to see your lead Pokémon here.</p>
   </div>
-  }
-
-  @if (vm.message) {
-  <div class="battle-stage-message" aria-live="polite">{{ vm.message }}</div>
   }
 </div>
 }

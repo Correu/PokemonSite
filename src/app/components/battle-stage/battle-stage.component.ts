@@ -12,12 +12,10 @@ export class BattleStageComponent {
   readonly vm$ = combineLatest([
     this.session.playerStage$,
     this.session.opponentStage$,
-    this.session.combatState$,
   ]).pipe(
-    map(([player, foe, combat]) => ({
+    map(([player, foe]) => ({
       player,
       foe,
-      message: combat?.message ?? '',
     }))
   );
 
