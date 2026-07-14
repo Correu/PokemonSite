@@ -45,7 +45,7 @@
                 </div>
               </div>
 
-              <ng-container *ngIf="selectedPokemon$ | async as selectedPokemon">
+              <ng-container *ngIf="selectedEntryDetail$ | async as entry">
                 <div class="kanto-main-lcd">
                   <div class="kanto-lcd-bezel">
                     <div class="kanto-lcd-dots" aria-hidden="true">
@@ -54,14 +54,14 @@
                     <div class="kanto-lcd-screen">
                       <div class="kanto-sprite-wrap">
                         <img
-                          [src]="selectedPokemon.sprites.front_default"
-                          [alt]="selectedPokemon.name"
+                          [src]="entry.pokemon.sprites.front_default"
+                          [alt]="entry.pokemon.name"
                           class="kanto-sprite"
                         />
                       </div>
                       <div class="kanto-name-bar">
-                        {{ selectedPokemon.name | uppercase }} #{{
-                          selectedPokemon.id
+                        {{ entry.pokemon.name | uppercase }} #{{
+                          entry.pokemon.id
                         }}
                       </div>
                     </div>
@@ -74,7 +74,7 @@
 
                 <div class="kanto-left-details">
                   <div class="pokedex-entry-types">
-                    @for (type of selectedPokemon.types; track type) {
+                    @for (type of entry.pokemon.types; track type) {
                     <span
                       class="type-badge"
                       [class]="'type-' + type.type.name"
@@ -88,49 +88,28 @@
                       <div class="pokedex-entry-stats">
                         <span class="stat-line">
                           <strong>Weight</strong>
-                          {{
-                            (selectedPokemon.weight / 4.536).toFixed(1)
-                          }}
+                          {{ (entry.pokemon.weight / 4.536).toFixed(1) }}
                           lbs
                         </span>
-                        @if (selectedPokemon.height) {
+                        @if (entry.pokemon.height) {
                         <span class="stat-line">
                           <strong>Height</strong>
                           {{
-                            (selectedPokemon.height * 0.328084).toFixed(1)
+                            (entry.pokemon.height * 0.328084).toFixed(1)
                           }}
                           ft
                         </span>
                         }
                         <span class="stat-line">
                           <strong>Base EXP</strong>
-                          {{ selectedPokemon.base_experience }}
+                          {{ entry.pokemon.base_experience }}
                         </span>
                       </div>
-
-                      @if (selectedPokemon.abilities.length) {
-                      <div class="pokedex-entry-abilities">
-                        <div class="section-title">Abilities</div>
-                        <ul>
-                          @for (
-                            ability of selectedPokemon.abilities;
-                            track ability
-                          ) {
-                          <li>
-                            {{ ability.ability.name | titlecase }}
-                            @if (ability.is_hidden) {
-                            <span class="ability-tag">Hidden</span>
-                            }
-                          </li>
-                          }
-                        </ul>
-                      </div>
-                      }
                     </div>
 
                     <div class="pokedex-entry-stats-block">
                       <div class="section-title">Base Stats</div>
-                      @for (stat of selectedPokemon.stats; track stat) {
+                      @for (stat of entry.pokemon.stats; track stat) {
                       <div class="stat-row">
                         <div class="stat-name">
                           {{ stat.stat.name | uppercase }}
@@ -148,6 +127,62 @@
                       }
                     </div>
                   </div>
+
+                  @if (entry.abilities.length) {
+                  <div class="pokedex-entry-abilities">
+                    <div class="section-title">Abilities</div>
+                    <ul>
+                      @for (ability of entry.abilities; track ability.name) {
+                      <li class="ability-row">
+                        <div class="ability-heading">
+                          <span class="ability-name">{{
+                            ability.name | titlecase
+                          }}</span>
+                          @if (ability.isHidden) {
+                          <span class="ability-tag">Hidden</span>
+                          }
+                        </div>
+                        @if (ability.effect) {
+                        <p class="ability-effect">{{ ability.effect }}</p>
+                        }
+                      </li>
+                      }
+                    </ul>
+                  </div>
+                  }
+
+                  @if (entry.moves.length) {
+                  <div class="pokedex-entry-moves">
+                    <div class="section-title">Moves (Level-up)</div>
+                    <ul>
+                      @for (move of entry.moves; track move.moveId) {
+                      <li class="move-row">
+                        <div class="move-heading">
+                          <span class="move-level">Lv. {{ move.level }}</span>
+                          <span class="move-name">{{
+                            move.name | titlecase
+                          }}</span>
+                          @if (move.type) {
+                          <span
+                            [class]="
+                              'type-badge type-badge--sm type-' + move.type
+                            "
+                          >
+                            {{ move.type | titlecase }}
+                          </span>
+                          }
+                          <span class="move-power">
+                            {{ move.power != null ? move.power : '—' }}
+                          </span>
+                        </div>
+                        @if (move.effect) {
+                        <p class="move-effect">{{ move.effect }}</p>
+                        }
+                      </li>
+                      }
+                    </ul>
+                  </div>
+                  }
                 </div>
               </ng-container>
 

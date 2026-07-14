@@ -414,9 +414,10 @@
 }
 
 .kanto-left-details {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 8px 4px;
   background: rgba(0, 0, 0, 0.12);
   border-radius: 8px;
@@ -737,28 +738,54 @@
   margin-right: 4px;
 }
 
-.pokedex-entry-abilities {
+.pokedex-entry-abilities,
+.pokedex-entry-moves {
   font-size: 0.75rem;
   color: #cfd8dc;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.pokedex-entry-abilities .section-title {
+.pokedex-entry-abilities .section-title,
+.pokedex-entry-moves .section-title {
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   color: #fff;
 }
 
-.pokedex-entry-abilities ul {
+.pokedex-entry-abilities ul,
+.pokedex-entry-moves ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.pokedex-entry-abilities li {
+.ability-row,
+.move-row {
+  margin-bottom: 8px;
+}
+
+.ability-heading,
+.move-heading {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 2px;
+}
+
+.ability-name,
+.move-name {
+  color: #fff;
+  font-weight: 600;
+}
+
+.ability-effect,
+.move-effect {
+  margin: 3px 0 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: #b0bec5;
 }
 
 .ability-tag {
@@ -769,6 +796,25 @@
   background: rgba(156, 39, 176, 0.35);
   color: #e1bee7;
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.move-level {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.65rem;
+  color: #90a4ae;
+  min-width: 2.6rem;
+}
+
+.move-power {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.65rem;
+  color: #eceff1;
+}
+
+.type-badge--sm {
+  padding: 1px 6px;
+  font-size: 0.58rem;
 }
 
 .section-title {

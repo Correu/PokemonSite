@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
 import { Pokemon } from '../../interfaces/pokemon';
 import { BattleMove, MovesCatalog } from '../../interfaces/move';
+import { AbilitiesCatalog, CatalogAbility } from '../../interfaces/ability';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ export class PokemonService {
   private pokemonJson = 'assets/data/pokemon.json';
   private typeJson = 'assets/data/types.json';
   private movesJson = 'assets/data/moves.json';
+  private abilitiesJson = 'assets/data/abilities.json';
 
   battleLoad!: boolean;
   pokedexLoad!: boolean;
@@ -19,6 +21,7 @@ export class PokemonService {
   playerTeam: Pokemon[] = [];
   enemyTeam: Pokemon[] = [];
   private movesCatalogCache: MovesCatalog | null = null;
+  private abilitiesCatalogCache: AbilitiesCatalog | null = null;
 
   private readonly selectedPokedexSubject = new BehaviorSubject<
     Pokemon | undefined
@@ -108,5 +111,23 @@ export class PokemonService {
 
   getMoveById(id: number): Observable<BattleMove | undefined> {
     return this.getMovesCatalog().pipe(map((catalog) => catalog.byId[String(id)]));
+  }
+
+  getAbilitiesCatalog(): Observable<AbilitiesCatalog> {
+    if (this.abilitiesCatalogCache) {
+      return of(this.abilitiesCatalogCache);
+    }
+
+    return this.http.get<AbilitiesCatalog>(this.abilitiesJson).pipe(
+      tap((catalog) => {
+        this.abilitiesCatalogCache = catalog;
+      })
+    );
+  }
+
+  getAbilityByName(name: string): Observable<CatalogAbility | undefined> {
+    return this.getAbilitiesCatalog().pipe(
+      map((catalog) => catalog.byName[name])
+    );
   }
 }

@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
+import { CatalogAbility } from 'src/app/interfaces/ability';
+import { BattleMove } from 'src/app/interfaces/move';
+import { Pokemon } from 'src/app/interfaces/pokemon';
 import { PokedexAccessService } from 'src/app/services/pokedex-access/pokedex-access.service';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 
@@ -11,6 +15,27 @@ export interface PokedexNavTab {
   route: string | null;
   exact?: boolean;
   disabled?: boolean;
+}
+
+export interface PokedexAbilityDetail {
+  name: string;
+  isHidden: boolean;
+  effect: string;
+}
+
+export interface PokedexMoveDetail {
+  moveId: number;
+  level: number;
+  name: string;
+  type: string | null;
+  power: number | null;
+  effect: string;
+}
+
+export interface PokedexEntryDetail {
+  pokemon: Pokemon;
+  abilities: PokedexAbilityDetail[];
+  moves: PokedexMoveDetail[];
 }
 
 @Component({
@@ -26,6 +51,23 @@ export class PokedexShellComponent implements OnInit {
   modeLabel = 'Dex';
 
   readonly selectedPokemon$ = this.pokemonService.selectedPokedexPokemon$;
+
+  readonly selectedEntryDetail$: Observable<PokedexEntryDetail | undefined> =
+    this.selectedPokemon$.pipe(
+      switchMap((pokemon) => {
+        if (!pokemon) {
+          return of(undefined);
+        }
+        return combineLatest([
+          this.pokemonService.getAbilitiesCatalog(),
+          this.pokemonService.getMovesCatalog(),
+        ]).pipe(
+          map(([abilitiesCatalog, movesCatalog]) =>
+            this.buildEntryDetail(pokemon, abilitiesCatalog.byName, movesCatalog.byId)
+          )
+        );
+      })
+    );
 
   readonly navTabs: PokedexNavTab[] = [
     { id: 'list', label: 'Dex', route: '', exact: true },
@@ -56,6 +98,51 @@ export class PokedexShellComponent implements OnInit {
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => this.syncRouteMode());
     this.syncRouteMode();
+  }
+
+  private buildEntryDetail(
+    pokemon: Pokemon,
+    abilitiesByName: Record<string, CatalogAbility>,
+    movesById: Record<string, BattleMove>
+  ): PokedexEntryDetail {
+    const abilities: PokedexAbilityDetail[] = (pokemon.abilities ?? []).map(
+      (entry) => {
+        const name = entry.ability?.name ?? '';
+        const catalog = abilitiesByName[name];
+        return {
+          name,
+          isHidden: !!entry.is_hidden,
+          effect: catalog?.effect ?? '',
+        };
+      }
+    );
+
+    const levelUpByMoveId = new Map<number, number>();
+    for (const learn of pokemon.moves ?? []) {
+      if (learn.method !== 'level-up') {
+        continue;
+      }
+      const existing = levelUpByMoveId.get(learn.moveId);
+      if (existing === undefined || learn.level > existing) {
+        levelUpByMoveId.set(learn.moveId, learn.level);
+      }
+    }
+
+    const moves: PokedexMoveDetail[] = [...levelUpByMoveId.entries()]
+      .map(([moveId, level]) => {
+        const catalog = movesById[String(moveId)];
+        return {
+          moveId,
+          level,
+          name: catalog?.name ?? `move-${moveId}`,
+          type: catalog?.type ?? null,
+          power: catalog?.power ?? null,
+          effect: catalog?.effect ?? '',
+        };
+      })
+      .sort((a, b) => a.level - b.level || a.moveId - b.moveId);
+
+    return { pokemon, abilities, moves };
   }
 
   private syncRouteMode(): void {
