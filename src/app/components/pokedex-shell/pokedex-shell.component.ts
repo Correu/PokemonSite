@@ -32,10 +32,16 @@ export interface PokedexMoveDetail {
   effect: string;
 }
 
+export interface PokedexMoveGroup {
+  method: string;
+  label: string;
+  moves: PokedexMoveDetail[];
+}
+
 export interface PokedexEntryDetail {
   pokemon: Pokemon;
   abilities: PokedexAbilityDetail[];
-  moves: PokedexMoveDetail[];
+  moveGroups: PokedexMoveGroup[];
 }
 
 @Component({
@@ -100,6 +106,14 @@ export class PokedexShellComponent implements OnInit {
     this.syncRouteMode();
   }
 
+  private readonly moveMethodConfig: Array<{ method: string; label: string }> = [
+    { method: 'level-up',    label: 'Level Up' },
+    { method: 'machine',     label: 'TM / HM' },
+    { method: 'egg',         label: 'Egg Moves' },
+    { method: 'tutor',       label: 'Move Tutor' },
+    { method: 'form-change', label: 'Form Change' },
+  ];
+
   private buildEntryDetail(
     pokemon: Pokemon,
     abilitiesByName: Record<string, CatalogAbility>,
@@ -117,32 +131,45 @@ export class PokedexShellComponent implements OnInit {
       }
     );
 
-    const levelUpByMoveId = new Map<number, number>();
+    // Group learnset entries by method, deduplicating by moveId.
+    // For level-up, keep the highest level seen. For all other methods, level is irrelevant.
+    const byMethod = new Map<string, Map<number, number>>();
     for (const learn of pokemon.moves ?? []) {
-      if (learn.method !== 'level-up') {
-        continue;
+      if (!byMethod.has(learn.method)) {
+        byMethod.set(learn.method, new Map());
       }
-      const existing = levelUpByMoveId.get(learn.moveId);
+      const group = byMethod.get(learn.method)!;
+      const existing = group.get(learn.moveId);
       if (existing === undefined || learn.level > existing) {
-        levelUpByMoveId.set(learn.moveId, learn.level);
+        group.set(learn.moveId, learn.level);
       }
     }
 
-    const moves: PokedexMoveDetail[] = [...levelUpByMoveId.entries()]
-      .map(([moveId, level]) => {
-        const catalog = movesById[String(moveId)];
-        return {
-          moveId,
-          level,
-          name: catalog?.name ?? `move-${moveId}`,
-          type: catalog?.type ?? null,
-          power: catalog?.power ?? null,
-          effect: catalog?.effect ?? '',
-        };
-      })
-      .sort((a, b) => a.level - b.level || a.moveId - b.moveId);
+    const moveGroups: PokedexMoveGroup[] = this.moveMethodConfig
+      .filter(({ method }) => byMethod.has(method))
+      .map(({ method, label }) => {
+        const entries = [...byMethod.get(method)!.entries()];
+        const moves: PokedexMoveDetail[] = entries
+          .map(([moveId, level]) => {
+            const catalog = movesById[String(moveId)];
+            return {
+              moveId,
+              level,
+              name: catalog?.name ?? `move-${moveId}`,
+              type: catalog?.type ?? null,
+              power: catalog?.power ?? null,
+              effect: catalog?.effect ?? '',
+            };
+          })
+          .sort(
+            method === 'level-up'
+              ? (a, b) => a.level - b.level || a.name.localeCompare(b.name)
+              : (a, b) => a.name.localeCompare(b.name)
+          );
+        return { method, label, moves };
+      });
 
-    return { pokemon, abilities, moves };
+    return { pokemon, abilities, moveGroups };
   }
 
   private syncRouteMode(): void {

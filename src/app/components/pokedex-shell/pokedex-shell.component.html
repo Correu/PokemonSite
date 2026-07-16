@@ -151,36 +151,42 @@
                   </div>
                   }
 
-                  @if (entry.moves.length) {
+                  @if (entry.moveGroups.length) {
                   <div class="pokedex-entry-moves">
-                    <div class="section-title">Moves (Level-up)</div>
-                    <ul>
-                      @for (move of entry.moves; track move.moveId) {
-                      <li class="move-row">
-                        <div class="move-heading">
-                          <span class="move-level">Lv. {{ move.level }}</span>
-                          <span class="move-name">{{
-                            move.name | titlecase
-                          }}</span>
-                          @if (move.type) {
-                          <span
-                            [class]="
-                              'type-badge type-badge--sm type-' + move.type
-                            "
-                          >
-                            {{ move.type | titlecase }}
-                          </span>
+                    @for (group of entry.moveGroups; track group.method) {
+                    <div class="move-group">
+                      <div class="section-title">{{ group.label }}</div>
+                      <ul>
+                        @for (move of group.moves; track move.moveId) {
+                        <li class="move-row">
+                          <div class="move-heading">
+                            @if (group.method === 'level-up') {
+                            <span class="move-level">Lv. {{ move.level }}</span>
+                            }
+                            <span class="move-name">{{
+                              move.name | titlecase
+                            }}</span>
+                            @if (move.type) {
+                            <span
+                              [class]="
+                                'type-badge type-badge--sm type-' + move.type
+                              "
+                            >
+                              {{ move.type | titlecase }}
+                            </span>
+                            }
+                            <span class="move-power">
+                              {{ move.power != null ? move.power : '—' }}
+                            </span>
+                          </div>
+                          @if (move.effect) {
+                          <p class="move-effect">{{ move.effect }}</p>
                           }
-                          <span class="move-power">
-                            {{ move.power != null ? move.power : '—' }}
-                          </span>
-                        </div>
-                        @if (move.effect) {
-                        <p class="move-effect">{{ move.effect }}</p>
+                        </li>
                         }
-                      </li>
-                      }
-                    </ul>
+                      </ul>
+                    </div>
+                    }
                   </div>
                   }
                 </div>
