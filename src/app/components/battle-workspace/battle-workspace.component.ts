@@ -48,6 +48,7 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
   teamLockError = '';
   inviteUrl = '';
   battleMenuPanel: BattleMenuPanel = 'commands';
+  pendingActionSubmitted = false;
 
   battleConfigForm: FormGroup;
   movesCatalog: MovesCatalog | null = null;
@@ -140,9 +141,17 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
         if (combat && combat.turn !== this.lastCombatTurn) {
           this.lastCombatTurn = combat.turn;
           this.battleMenuPanel = 'commands';
+          this.pendingActionSubmitted = false;
         }
         if (combat?.winnerId) {
           this.battleMenuPanel = 'commands';
+          this.pendingActionSubmitted = false;
+        }
+        // Reset pending flag whenever the server includes us in awaitingMoves
+        // (new turn started and we need to act again).
+        const selfId = this.session.getLocalSocketId();
+        if (selfId && combat?.awaitingMoves.includes(selfId)) {
+          this.pendingActionSubmitted = false;
         }
         if (
           combat &&
@@ -597,18 +606,25 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
     this.session.submitMove(moveId);
+    this.pendingActionSubmitted = true;
     this.battleMenuPanel = 'commands';
     this.cdr.markForCheck();
   }
 
   selectSwitch(pokemonIndex: number): void {
-    this.session.submitSwitch(pokemonIndex);
+    const sent = this.session.submitSwitch(pokemonIndex);
+    if (sent) {
+      this.pendingActionSubmitted = true;
+    }
     this.battleMenuPanel = 'commands';
     this.cdr.markForCheck();
   }
 
   selectItem(itemId: number): void {
-    this.session.submitItem(itemId);
+    const sent = this.session.submitItem(itemId);
+    if (sent) {
+      this.pendingActionSubmitted = true;
+    }
     this.battleMenuPanel = 'commands';
     this.cdr.markForCheck();
   }
@@ -648,8 +664,20 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  statusAbbrev(condition: string | null | undefined): string {
+    const map: Record<string, string> = {
+      burn: 'BRN',
+      poison: 'PSN',
+      paralysis: 'PAR',
+      sleep: 'SLP',
+      freeze: 'FRZ',
+    };
+    return condition ? (map[condition] ?? condition.toUpperCase().slice(0, 3)) : '';
+  }
+
   confirmEndFight(): void {
     this.session.forfeitMatch();
+    this.pendingActionSubmitted = true;
     this.battleMenuPanel = 'commands';
     this.cdr.markForCheck();
   }

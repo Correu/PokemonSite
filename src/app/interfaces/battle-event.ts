@@ -1,4 +1,4 @@
-export type BattleItemType = 'healing' | 'stat';
+export type BattleItemType = 'healing' | 'stat' | 'status-cure' | 'revival';
 
 export interface BattleConfigEventPayload {
   level: number;
@@ -117,6 +117,7 @@ export interface BattleActiveView {
   backSprite: string;
   isFainted: boolean;
   moves?: BattleCombatMove[];
+  statusCondition?: string | null;
 }
 
 export interface BattleTeamMember {
@@ -128,12 +129,14 @@ export interface BattleTeamMember {
   isFainted: boolean;
   isActive: boolean;
   frontSprite: string | null;
+  statusCondition?: string | null;
 }
 
 export interface BattleBagSnapshot {
   id: number;
   name: string;
   remaining: number;
+  effect?: string;
 }
 
 export interface BattleStateUpdatePayload {

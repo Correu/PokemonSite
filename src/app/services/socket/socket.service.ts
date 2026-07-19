@@ -143,6 +143,12 @@ export class SocketService {
     this.socket.emit('gameEvent', { roomId, data });
   }
 
+  leaveRoom(roomId: string): void {
+    if (this.socket.connected) {
+      this.socket.emit('leaveRoom', roomId);
+    }
+  }
+
   onGameEvent(): Observable<SocketGameEvent> {
     return this.gameEventSubject.asObservable();
   }

@@ -20,4 +20,15 @@ export class BattleStageComponent {
   );
 
   constructor(public session: BattleSessionService) {}
+
+  statusAbbrev(condition: string | null | undefined): string {
+    const map: Record<string, string> = {
+      burn: 'BRN',
+      poison: 'PSN',
+      paralysis: 'PAR',
+      sleep: 'SLP',
+      freeze: 'FRZ',
+    };
+    return condition ? (map[condition] ?? condition.toUpperCase().slice(0, 3)) : '';
+  }
 }

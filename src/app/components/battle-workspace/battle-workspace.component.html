@@ -740,7 +740,7 @@
             <p>{{ battlePrompt() }}</p>
           </div>
 
-          @if (session.isAwaitingLocalMove()) {
+          @if (session.isAwaitingLocalMove() && !pendingActionSubmitted) {
             @switch (battleMenuPanel) {
               @case ("commands") {
                 <div class="bw-battle-action-grid">
@@ -754,7 +754,7 @@
                   <button
                     type="button"
                     class="bw-battle-action-btn bw-battle-action-btn--bag"
-                    [disabled]="!itemsEnabled() || getLocalBagSnapshot().length === 0"
+                    [disabled]="!itemsEnabled() || !session.hasUsableItems()"
                     (click)="openBattleMenu('bag')"
                   >
                     Bag
@@ -762,6 +762,7 @@
                   <button
                     type="button"
                     class="bw-battle-action-btn bw-battle-action-btn--pokemon"
+                    [disabled]="!session.hasAvailableSwitches()"
                     (click)="openBattleMenu('pokemon')"
                   >
                     Pokémon
@@ -847,6 +848,9 @@
                           <span class="bw-item-name">{{
                             item.name | titlecase
                           }}</span>
+                          @if (item.effect) {
+                            <span class="bw-item-effect">{{ item.effect }}</span>
+                          }
                           <span class="bw-item-remaining"
                             >×{{ item.remaining }}</span
                           >
@@ -866,6 +870,9 @@
                     ← Back
                   </button>
                   <h3 class="bw-subtitle">Switch Pokémon</h3>
+                  @if (!session.hasAvailableSwitches()) {
+                    <p class="bw-hint">No Pokémon available to switch in.</p>
+                  }
                   <div class="bw-switch-list">
                     @for (
                       member of getLocalTeamSnapshot();
@@ -916,6 +923,12 @@
                             <span class="bw-team-status-hp-text"
                               >{{ member.currentHp }}/{{ member.maxHp }}</span
                             >
+                            @if (member.statusCondition) {
+                              <span
+                                class="battle-status-badge battle-status-badge--{{ member.statusCondition }}"
+                                >{{ statusAbbrev(member.statusCondition) }}</span
+                              >
+                            }
                           }
                         </div>
                       </button>
@@ -956,6 +969,10 @@
                 </div>
               }
             }
+          } @else if (pendingActionSubmitted) {
+            <p class="bw-hint bw-hint--submitted">
+              ✓ Action submitted — waiting for opponent…
+            </p>
           } @else {
             <p class="bw-hint">Waiting for opponent's move…</p>
           }

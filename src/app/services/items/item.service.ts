@@ -8,12 +8,11 @@ import { map, catchError, tap } from 'rxjs/operators';
 const HEALING_CATEGORIES = new Set([
   'healing',
   'medicine',
-  'pp-recovery',
-  'revival',
   'status-cures',
+  'revival',
 ]);
 
-const STAT_CATEGORIES = new Set(['stat-boosts', 'vitamins', 'species-specific']);
+const STAT_CATEGORIES = new Set(['stat-boosts']);
 
 const BATTLE_ITEM_ID_MAX = 126;
 const EXCLUDED_ITEM_NAMES = new Set(['cheri-berry']);
@@ -33,12 +32,10 @@ export class ItemService {
 
   getItemBattleType(item: Item): BattleItemType | null {
     const category = item.category?.name ?? '';
-    if (HEALING_CATEGORIES.has(category)) {
-      return 'healing';
-    }
-    if (STAT_CATEGORIES.has(category)) {
-      return 'stat';
-    }
+    if (category === 'status-cures') return 'status-cure';
+    if (category === 'revival') return 'revival';
+    if (HEALING_CATEGORIES.has(category)) return 'healing';
+    if (STAT_CATEGORIES.has(category)) return 'stat';
     return null;
   }
 

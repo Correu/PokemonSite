@@ -48,6 +48,7 @@ export interface BattleStagePokemon {
   spriteBack: string | null;
   currentHp: number;
   maxHp: number;
+  statusCondition?: string | null;
 }
 
 @Injectable({
@@ -194,6 +195,10 @@ export class BattleSessionService {
   }
 
   reset(): void {
+    const roomKey = this.roomKey$.value;
+    if (roomKey) {
+      this.socket.leaveRoom(roomKey);
+    }
     this.clearCountdownTimer();
     this.phase$.next('idle');
     this.role$.next(null);
@@ -645,15 +650,18 @@ export class BattleSessionService {
     this.socket.sendGameEvent(roomKey, envelope);
   }
 
-  submitSwitch(pokemonIndex: number): void {
+  submitSwitch(pokemonIndex: number): boolean {
     const roomKey = this.roomKey$.value;
     const combat = this.combatState$.value;
     const selfId = this.socket.getSocketId();
     if (!roomKey || !combat || !selfId) {
-      return;
+      return false;
+    }
+    if (!this.socket.connected) {
+      return false;
     }
     if (!combat.awaitingMoves.includes(selfId)) {
-      return;
+      return false;
     }
     const envelope: GameEventEnvelope = {
       type: 'battle:switch',
@@ -661,17 +669,21 @@ export class BattleSessionService {
       payload: { pokemonIndex, turnNumber: combat.turn },
     };
     this.socket.sendGameEvent(roomKey, envelope);
+    return true;
   }
 
-  submitItem(itemId: number): void {
+  submitItem(itemId: number): boolean {
     const roomKey = this.roomKey$.value;
     const combat = this.combatState$.value;
     const selfId = this.socket.getSocketId();
     if (!roomKey || !combat || !selfId) {
-      return;
+      return false;
+    }
+    if (!this.socket.connected) {
+      return false;
     }
     if (!combat.awaitingMoves.includes(selfId)) {
-      return;
+      return false;
     }
     const envelope: GameEventEnvelope = {
       type: 'battle:item',
@@ -679,6 +691,7 @@ export class BattleSessionService {
       payload: { itemId, turnNumber: combat.turn },
     };
     this.socket.sendGameEvent(roomKey, envelope);
+    return true;
   }
 
   requestRematch(): void {
@@ -698,6 +711,16 @@ export class BattleSessionService {
     const selfId = this.socket.getSocketId();
     if (!selfId) return [];
     return this.combatState$.value?.teamSnapshot?.[selfId] ?? [];
+  }
+
+  hasAvailableSwitches(): boolean {
+    return this.getLocalTeamSnapshot().some(
+      (m) => !m.isFainted && !m.isActive
+    );
+  }
+
+  hasUsableItems(): boolean {
+    return this.getLocalBagSnapshot().some((b) => b.remaining > 0);
   }
 
   getLocalBagSnapshot(): BattleBagSnapshot[] {
@@ -766,6 +789,7 @@ export class BattleSessionService {
       spriteBack: active.backSprite,
       currentHp: active.currentHp,
       maxHp: active.maxHp,
+      statusCondition: active.statusCondition ?? null,
     };
   }
 

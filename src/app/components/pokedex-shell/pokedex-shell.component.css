@@ -1050,6 +1050,18 @@
     gap: 8px;
   }
 
+  /* Battle route: hide duplicate left-panel stage; let workspace fill height */
+  .kanto-chassis--battle .kanto-left-panel {
+    display: none !important;
+  }
+  .kanto-chassis--battle .kanto-hinge {
+    display: none !important;
+  }
+  .kanto-chassis--battle .kanto-right-panel {
+    flex: 1 1 auto;
+    border-radius: clamp(6px, 1vw, 10px);
+  }
+
   /* ── RIGHT PANEL: navigation + list — on top ── */
   .kanto-right-panel {
     order: 1;
