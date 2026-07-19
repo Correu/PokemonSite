@@ -42,6 +42,10 @@ export interface BattleCountdownPayload {
 /** Client → server: toggle ready (no fields required). */
 export type BattleReadyPayload = Record<string, never>;
 
+export type BattleSwitchPayload = { pokemonIndex: number; turnNumber: number };
+export type BattleItemPayload = { itemId: number; turnNumber: number };
+export type BattleRematchPayload = Record<string, never>;
+
 export type GameEventPayload =
   | BattleConfigEventPayload
   | BattleTurnEventPayload
@@ -51,7 +55,10 @@ export type GameEventPayload =
   | BattleReadyPayload
   | BattleTeamLockPayload
   | BattleStateUpdatePayload
-  | BattleForfeitPayload;
+  | BattleForfeitPayload
+  | BattleSwitchPayload
+  | BattleItemPayload
+  | BattleRematchPayload;
 
 export interface BattleCombatMove {
   id: number;
@@ -112,11 +119,30 @@ export interface BattleActiveView {
   moves?: BattleCombatMove[];
 }
 
+export interface BattleTeamMember {
+  name: string;
+  displayName: string;
+  speciesId: string;
+  currentHp: number;
+  maxHp: number;
+  isFainted: boolean;
+  isActive: boolean;
+  frontSprite: string | null;
+}
+
+export interface BattleBagSnapshot {
+  id: number;
+  name: string;
+  remaining: number;
+}
+
 export interface BattleStateUpdatePayload {
   turn: number;
   message: string;
   actives: Record<string, BattleActiveView | null>;
   teamRemaining: Record<string, number>;
+  teamSnapshot?: Record<string, BattleTeamMember[]>;
+  bagSnapshot?: Record<string, BattleBagSnapshot[]>;
   awaitingMoves: string[];
   lockedPlayers: string[];
   winnerId: string | null;
@@ -141,7 +167,10 @@ export type GameEventType =
   | 'battle:countdown'
   | 'battle:teamLock'
   | 'battle:stateUpdate'
-  | 'battle:forfeit';
+  | 'battle:forfeit'
+  | 'battle:switch'
+  | 'battle:item'
+  | 'battle:rematch';
 
 export interface GameEventEnvelope {
   type: GameEventType;
@@ -167,7 +196,10 @@ export function isGameEventEnvelope(
       e.type === 'battle:countdown' ||
       e.type === 'battle:teamLock' ||
       e.type === 'battle:stateUpdate' ||
-      e.type === 'battle:forfeit') &&
+      e.type === 'battle:forfeit' ||
+      e.type === 'battle:switch' ||
+      e.type === 'battle:item' ||
+      e.type === 'battle:rematch') &&
     e.payload !== null &&
     typeof e.payload === 'object'
   );

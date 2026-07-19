@@ -15,6 +15,8 @@ import {
   BattleActiveView,
   BattleCombatMove,
   BattleBagItem,
+  BattleTeamMember,
+  BattleBagSnapshot,
   GameEventEnvelope,
   isGameEventEnvelope,
 } from 'src/app/interfaces/battle-event';
@@ -643,6 +645,67 @@ export class BattleSessionService {
     this.socket.sendGameEvent(roomKey, envelope);
   }
 
+  submitSwitch(pokemonIndex: number): void {
+    const roomKey = this.roomKey$.value;
+    const combat = this.combatState$.value;
+    const selfId = this.socket.getSocketId();
+    if (!roomKey || !combat || !selfId) {
+      return;
+    }
+    if (!combat.awaitingMoves.includes(selfId)) {
+      return;
+    }
+    const envelope: GameEventEnvelope = {
+      type: 'battle:switch',
+      version: 1,
+      payload: { pokemonIndex, turnNumber: combat.turn },
+    };
+    this.socket.sendGameEvent(roomKey, envelope);
+  }
+
+  submitItem(itemId: number): void {
+    const roomKey = this.roomKey$.value;
+    const combat = this.combatState$.value;
+    const selfId = this.socket.getSocketId();
+    if (!roomKey || !combat || !selfId) {
+      return;
+    }
+    if (!combat.awaitingMoves.includes(selfId)) {
+      return;
+    }
+    const envelope: GameEventEnvelope = {
+      type: 'battle:item',
+      version: 1,
+      payload: { itemId, turnNumber: combat.turn },
+    };
+    this.socket.sendGameEvent(roomKey, envelope);
+  }
+
+  requestRematch(): void {
+    const roomKey = this.roomKey$.value;
+    if (!roomKey || this.phase$.value !== 'finished') {
+      return;
+    }
+    const envelope: GameEventEnvelope = {
+      type: 'battle:rematch',
+      version: 1,
+      payload: {},
+    };
+    this.socket.sendGameEvent(roomKey, envelope);
+  }
+
+  getLocalTeamSnapshot(): BattleTeamMember[] {
+    const selfId = this.socket.getSocketId();
+    if (!selfId) return [];
+    return this.combatState$.value?.teamSnapshot?.[selfId] ?? [];
+  }
+
+  getLocalBagSnapshot(): BattleBagSnapshot[] {
+    const selfId = this.socket.getSocketId();
+    if (!selfId) return [];
+    return this.combatState$.value?.bagSnapshot?.[selfId] ?? [];
+  }
+
   getActivePokemonName(): string {
     const combat = this.combatState$.value;
     const selfId = this.socket.getSocketId();
@@ -865,6 +928,20 @@ export class BattleSessionService {
 
     if (event.type === 'battle:stateUpdate') {
       this.applyCombatState(event.payload as BattleStateUpdatePayload);
+      return;
+    }
+
+    if (event.type === 'battle:rematch') {
+      this.teamLocked$.next(false);
+      this.selectedTeam$.next([]);
+      this.selectedMovesByPokemon$.next({});
+      this.selectedBagItems$.next({});
+      this.heldItemsByPokemon$.next({});
+      this.combatState$.next(null);
+      this.availableMoves$.next([]);
+      this.opponentPreview$.next(null);
+      this.matchStarted$.next(true);
+      this.phase$.next('setupTeam');
     }
   }
 

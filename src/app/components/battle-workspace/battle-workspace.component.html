@@ -653,14 +653,85 @@
     <section class="bw-section bw-battle-panel">
       @let combat = session.combatState$ | async;
 
+      <!-- Team status bar: always visible during battle -->
+      @if (getLocalTeamSnapshot().length) {
+        <div class="bw-team-status-bar">
+          @for (member of getLocalTeamSnapshot(); track member.speciesId; let i = $index) {
+            <div
+              class="bw-team-status-card"
+              [class.bw-team-status-card--active]="member.isActive"
+              [class.bw-team-status-card--fainted]="member.isFainted"
+            >
+              @if (member.frontSprite) {
+                <img
+                  class="bw-team-status-sprite"
+                  [src]="member.frontSprite"
+                  [alt]="member.displayName || member.name"
+                />
+              }
+              <div class="bw-team-status-info">
+                <span class="bw-team-status-name">{{
+                  (member.displayName || member.name) | titlecase
+                }}</span>
+                @if (member.isFainted) {
+                  <span class="bw-team-status-fainted">Fainted</span>
+                } @else {
+                  <div class="bw-team-status-hp-bar">
+                    <div
+                      class="bw-team-status-hp-fill"
+                      [class.bw-team-status-hp-fill--low]="
+                        member.currentHp / member.maxHp < 0.25
+                      "
+                      [class.bw-team-status-hp-fill--mid]="
+                        member.currentHp / member.maxHp >= 0.25 &&
+                        member.currentHp / member.maxHp < 0.5
+                      "
+                      [style.width.%]="
+                        (member.currentHp / member.maxHp) * 100
+                      "
+                    ></div>
+                  </div>
+                  <span class="bw-team-status-hp-text"
+                    >{{ member.currentHp }}/{{ member.maxHp }}</span
+                  >
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
       @if (combat?.winnerId) {
-        <div class="match-status-banner match-status-banner--ready">
-          <mat-icon>{{
-            isLocalWinner() ? "emoji_events" : "sentiment_dissatisfied"
-          }}</mat-icon>
-          <div>
-            <strong>{{ isLocalWinner() ? "You win!" : "You lost…" }}</strong>
-            <p>{{ combat?.message }}</p>
+        <!-- End screen -->
+        <div class="bw-end-screen">
+          <div
+            class="match-status-banner"
+            [class.match-status-banner--ready]="isLocalWinner()"
+          >
+            <mat-icon>{{
+              isLocalWinner() ? "emoji_events" : "sentiment_dissatisfied"
+            }}</mat-icon>
+            <div>
+              <strong>{{ isLocalWinner() ? "You win!" : "You lost…" }}</strong>
+              <p>{{ combat?.message }}</p>
+            </div>
+          </div>
+          <div class="bw-actions bw-end-actions">
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              (click)="requestRematch()"
+            >
+              Play Again
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="leaveRoom()"
+            >
+              Leave
+            </button>
           </div>
         </div>
       } @else {
@@ -683,6 +754,7 @@
                   <button
                     type="button"
                     class="bw-battle-action-btn bw-battle-action-btn--bag"
+                    [disabled]="!itemsEnabled() || getLocalBagSnapshot().length === 0"
                     (click)="openBattleMenu('bag')"
                   >
                     Bag
@@ -757,28 +829,30 @@
                   >
                     ← Back
                   </button>
-                  <h3 class="bw-subtitle">Bag</h3>
-                  <p class="bw-hint bw-skeleton-note">
-                    @if (itemsEnabled()) {
-                      Item use during battle is coming soon. Your pre-battle
-                      items will apply here.
-                    } @else {
-                      Items are disabled for this match.
-                    }
-                  </p>
-                  @if (itemsEnabled() && eligibleBattleItems.length) {
-                    <ul class="bw-skeleton-list">
-                      @for (item of eligibleBattleItems; track item.name) {
-                        <li>
-                          {{ item.name | titlecase }}
-                          @if (bagItemQuantity(item.id) > 0) {
-                            <span class="bw-skeleton-tag"
-                              >×{{ bagItemQuantity(item.id) }}</span
-                            >
-                          }
-                        </li>
+                  <h3 class="bw-subtitle">Use an item</h3>
+                  @if (!itemsEnabled()) {
+                    <p class="bw-hint">Items are disabled for this match.</p>
+                  } @else if (getLocalBagSnapshot().length === 0) {
+                    <p class="bw-hint">No items remaining.</p>
+                  } @else {
+                    <div class="bw-battle-item-list">
+                      @for (item of getLocalBagSnapshot(); track item.id) {
+                        <button
+                          mat-stroked-button
+                          type="button"
+                          class="bw-battle-item-btn"
+                          [disabled]="item.remaining === 0"
+                          (click)="selectItem(item.id)"
+                        >
+                          <span class="bw-item-name">{{
+                            item.name | titlecase
+                          }}</span>
+                          <span class="bw-item-remaining"
+                            >×{{ item.remaining }}</span
+                          >
+                        </button>
                       }
-                    </ul>
+                    </div>
                   }
                 </div>
               }
@@ -791,18 +865,62 @@
                   >
                     ← Back
                   </button>
-                  <h3 class="bw-subtitle">Pokémon</h3>
-                  <p class="bw-hint bw-skeleton-note">
-                    Switching Pokémon mid-battle is coming soon.
-                  </p>
-                  <ul class="bw-skeleton-list">
-                    @for (p of session.selectedTeam$ | async; track p.id) {
-                      <li>
-                        {{ p.name | titlecase }}
-                        <span class="bw-skeleton-tag">Switch — soon</span>
-                      </li>
+                  <h3 class="bw-subtitle">Switch Pokémon</h3>
+                  <div class="bw-switch-list">
+                    @for (
+                      member of getLocalTeamSnapshot();
+                      track member.speciesId;
+                      let i = $index
+                    ) {
+                      <button
+                        type="button"
+                        class="bw-switch-card"
+                        [class.bw-switch-card--active]="member.isActive"
+                        [class.bw-switch-card--fainted]="member.isFainted"
+                        [disabled]="member.isFainted || member.isActive"
+                        (click)="selectSwitch(i)"
+                      >
+                        @if (member.frontSprite) {
+                          <img
+                            class="bw-switch-sprite"
+                            [src]="member.frontSprite"
+                            [alt]="member.displayName || member.name"
+                          />
+                        }
+                        <div class="bw-switch-info">
+                          <span class="bw-switch-name">{{
+                            (member.displayName || member.name) | titlecase
+                          }}</span>
+                          @if (member.isActive) {
+                            <span class="bw-switch-badge">Active</span>
+                          } @else if (member.isFainted) {
+                            <span class="bw-switch-badge bw-switch-badge--fainted"
+                              >Fainted</span
+                            >
+                          } @else {
+                            <div class="bw-team-status-hp-bar">
+                              <div
+                                class="bw-team-status-hp-fill"
+                                [class.bw-team-status-hp-fill--low]="
+                                  member.currentHp / member.maxHp < 0.25
+                                "
+                                [class.bw-team-status-hp-fill--mid]="
+                                  member.currentHp / member.maxHp >= 0.25 &&
+                                  member.currentHp / member.maxHp < 0.5
+                                "
+                                [style.width.%]="
+                                  (member.currentHp / member.maxHp) * 100
+                                "
+                              ></div>
+                            </div>
+                            <span class="bw-team-status-hp-text"
+                              >{{ member.currentHp }}/{{ member.maxHp }}</span
+                            >
+                          }
+                        </div>
+                      </button>
                     }
-                  </ul>
+                  </div>
                 </div>
               }
               @case ("end-fight") {

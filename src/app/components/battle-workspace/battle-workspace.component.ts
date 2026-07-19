@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { Item } from 'src/app/interfaces/item';
-import { BattleConfigEventPayload, BattleItemType } from 'src/app/interfaces/battle-event';
+import { BattleConfigEventPayload, BattleItemType, BattleTeamMember, BattleBagSnapshot } from 'src/app/interfaces/battle-event';
 import { GEN1_POKEMON_COUNT } from 'src/app/interfaces/battle';
 import { BattleMove, MovesCatalog } from 'src/app/interfaces/move';
 import { BattleSessionService } from 'src/app/services/battle/battle-session.service';
@@ -599,6 +599,40 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
     this.session.submitMove(moveId);
     this.battleMenuPanel = 'commands';
     this.cdr.markForCheck();
+  }
+
+  selectSwitch(pokemonIndex: number): void {
+    this.session.submitSwitch(pokemonIndex);
+    this.battleMenuPanel = 'commands';
+    this.cdr.markForCheck();
+  }
+
+  selectItem(itemId: number): void {
+    this.session.submitItem(itemId);
+    this.battleMenuPanel = 'commands';
+    this.cdr.markForCheck();
+  }
+
+  requestRematch(): void {
+    this.session.requestRematch();
+    this.battleMenuPanel = 'commands';
+    this.cdr.markForCheck();
+  }
+
+  leaveRoom(): void {
+    this.session.reset();
+    this.workspaceStep = 'room';
+    this.roomMode = 'choose';
+    this.battleMenuPanel = 'commands';
+    this.cdr.markForCheck();
+  }
+
+  getLocalTeamSnapshot(): BattleTeamMember[] {
+    return this.session.getLocalTeamSnapshot();
+  }
+
+  getLocalBagSnapshot(): BattleBagSnapshot[] {
+    return this.session.getLocalBagSnapshot();
   }
 
   openBattleMenu(panel: BattleMenuPanel): void {
