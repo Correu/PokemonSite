@@ -90,6 +90,68 @@
         </p>
       </div>
 
+      <mat-accordion class="bw-help-accordion">
+        <mat-expansion-panel class="bw-help-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="bw-help-panel-title">
+              <mat-icon class="bw-help-icon">help_outline</mat-icon>
+              Need a server? Get started here
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <p class="bw-help-intro">
+            Battles run on a server that one player hosts. The server is free
+            and open-source — anyone can run it in minutes.
+          </p>
+
+          <a
+            mat-raised-button
+            color="primary"
+            href="https://github.com/Correu/PokemonSiteServer"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="bw-help-github-btn"
+          >
+            <mat-icon>open_in_new</mat-icon>
+            View PokemonSiteServer on GitHub
+          </a>
+
+          <ol class="bw-help-steps">
+            <li>
+              <strong>Clone and start the server</strong>
+              <pre class="bw-help-code">git clone https://github.com/Correu/PokemonSiteServer
+cd PokemonSiteServer
+npm install
+npm start</pre>
+              <span class="bw-help-note">Server starts on <code>http://localhost:3000</code></span>
+            </li>
+            <li>
+              <strong>Expose it to the internet with ngrok</strong>
+              <pre class="bw-help-code">ngrok http 3000</pre>
+              <span class="bw-help-note">
+                Copy the <code>https://xxxx.ngrok-free.app</code> URL ngrok
+                gives you and paste it into the Socket.IO URL field above.
+              </span>
+            </li>
+            <li>
+              <strong>Why ngrok and not a plain IP?</strong>
+              <span class="bw-help-note">
+                This app is served over HTTPS. Browsers block plain
+                <code>http://</code> socket connections from an HTTPS page.
+                ngrok provides a secure <code>https://</code> tunnel
+                automatically — no extra configuration needed.
+              </span>
+            </li>
+          </ol>
+
+          <p class="bw-help-footer">
+            Once you create a room, the <strong>Copy invite link</strong> button
+            embeds your server URL automatically so your opponent connects to
+            the right place without any extra setup.
+          </p>
+        </mat-expansion-panel>
+      </mat-accordion>
+
       @if (roomMode === "choose") {
         <h2 class="bw-title">Battle</h2>
         <p class="bw-lead">

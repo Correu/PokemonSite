@@ -155,6 +155,95 @@
   color: #2e7d32;
 }
 
+/* ── Help / self-hosting panel ───────────────────────────── */
+.bw-help-accordion {
+  margin-bottom: 8px;
+}
+
+.bw-help-panel {
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  background: #f3f4f6 !important;
+  box-shadow: none !important;
+}
+
+.bw-help-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.bw-help-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #1565c0;
+}
+
+.bw-help-intro {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  color: #444;
+}
+
+.bw-help-github-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+}
+
+.bw-help-steps {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bw-help-steps li {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bw-help-code {
+  margin: 4px 0 2px;
+  padding: 8px 10px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.bw-help-note {
+  font-size: 0.78rem;
+  color: #555;
+}
+
+.bw-help-note code {
+  background: #e8eaf6;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.bw-help-footer {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #555;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 10px;
+}
+
 .match-status-banner {
   display: flex;
   align-items: center;
