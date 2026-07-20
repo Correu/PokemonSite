@@ -15,13 +15,18 @@ export class PokedexAccessGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
-    if (this.pokedexAccessService.isPokedexOpened()) {
-      return true;
-    } else {
-      // Redirect to pokedex if not opened yet
-      this.router.navigate(['/']);
-      return false;
+    const joinIntent = !!route.queryParamMap.get('join')?.trim();
+
+    if (joinIntent && !this.pokedexAccessService.isPokedexOpened()) {
+      this.pokedexAccessService.markPokedexOpened();
     }
+
+    if (this.pokedexAccessService.isPokedexOpened() || joinIntent) {
+      return true;
+    }
+
+    this.router.navigate(['/']);
+    return false;
   }
 }
 

@@ -1,25 +1,13 @@
-<div
-  class="card-scroll-container"
-  #scrollContainer
-  (mousedown)="onMouseDown($event)"
-  (mousemove)="onMouseMove($event)"
-  (mouseup)="onMouseUp()"
-  (mouseleave)="onMouseUp()"
-  [class.grabbing]="isDragging"
->
-  @for (pokemon of completeList; track pokemon) {
-  <mat-card
-    class="pokemon-card"
-    [class.selected]="selectedPokemon?.id === pokemon.id"
-    (click)="updatePokemon(pokemon)"
-  >
-    <mat-card-content class="pokemon-card-content">
-      <div class="pokemon-card-sprite">
-        <img [src]="pokemon.sprites.front_default" [alt]="pokemon.name" />
-      </div>
-      <div class="pokemon-card-id">#{{ pokemon.id | number : '3.0-0' }}</div>
-      <div class="pokemon-card-name">{{ pokemon.name | titlecase }}</div>
-    </mat-card-content>
-  </mat-card>
+<div class="dex-list" #listContainer>
+  @for (pokemon of completeList; track pokemon.id) {
+    <div
+      class="dex-list-row"
+      [class.dex-list-row--selected]="selectedPokemon?.id === pokemon.id"
+      (click)="updatePokemon(pokemon)"
+    >
+      <span class="dex-list-ball"></span>
+      <span class="dex-list-id">#{{ pokemon.id | number:'3.0-0' }}</span>
+      <span class="dex-list-name">{{ pokemon.name | titlecase }}</span>
+    </div>
   }
 </div>

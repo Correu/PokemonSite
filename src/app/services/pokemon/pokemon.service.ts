@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
 import { Pokemon } from '../../interfaces/pokemon';
-import { Move } from '../../interfaces/move';
-import { DefaultList } from 'src/app/interfaces/defaultList';
+import { BattleMove, MovesCatalog } from '../../interfaces/move';
+import { AbilitiesCatalog, CatalogAbility } from '../../interfaces/ability';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +11,8 @@ import { DefaultList } from 'src/app/interfaces/defaultList';
 export class PokemonService {
   private pokemonJson = 'assets/data/pokemon.json';
   private typeJson = 'assets/data/types.json';
+  private movesJson = 'assets/data/moves.json';
+  private abilitiesJson = 'assets/data/abilities.json';
 
   battleLoad!: boolean;
   pokedexLoad!: boolean;
@@ -18,6 +20,8 @@ export class PokemonService {
 
   playerTeam: Pokemon[] = [];
   enemyTeam: Pokemon[] = [];
+  private movesCatalogCache: MovesCatalog | null = null;
+  private abilitiesCatalogCache: AbilitiesCatalog | null = null;
 
   private readonly selectedPokedexSubject = new BehaviorSubject<
     Pokemon | undefined
@@ -93,14 +97,37 @@ export class PokemonService {
     );
   }
 
-  getMoves(): Observable<DefaultList> {
-    return this.http.get<DefaultList>(
-      'https://pokeapi.co/api/v2/move/?limit=937'
+  getMovesCatalog(): Observable<MovesCatalog> {
+    if (this.movesCatalogCache) {
+      return of(this.movesCatalogCache);
+    }
+
+    return this.http.get<MovesCatalog>(this.movesJson).pipe(
+      tap((catalog) => {
+        this.movesCatalogCache = catalog;
+      })
     );
   }
 
-  getMove(name: string): Observable<Move> {
-    let url = 'https://pokeapi.co/api/v2/move/' + name;
-    return this.http.get<Move>(url);
+  getMoveById(id: number): Observable<BattleMove | undefined> {
+    return this.getMovesCatalog().pipe(map((catalog) => catalog.byId[String(id)]));
+  }
+
+  getAbilitiesCatalog(): Observable<AbilitiesCatalog> {
+    if (this.abilitiesCatalogCache) {
+      return of(this.abilitiesCatalogCache);
+    }
+
+    return this.http.get<AbilitiesCatalog>(this.abilitiesJson).pipe(
+      tap((catalog) => {
+        this.abilitiesCatalogCache = catalog;
+      })
+    );
+  }
+
+  getAbilityByName(name: string): Observable<CatalogAbility | undefined> {
+    return this.getAbilitiesCatalog().pipe(
+      map((catalog) => catalog.byName[name])
+    );
   }
 }

@@ -1,0 +1,224 @@
+.battle-stage {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+  max-height: 100%;
+  border-radius: 8px;
+  border: 3px solid #1a1a1a;
+  overflow: hidden;
+  background: #87ceeb;
+}
+
+.battle-stage-sky {
+  position: absolute;
+  inset: 0 0 42%;
+  background: linear-gradient(180deg, #b8e8ff 0%, #d8f2ff 100%);
+}
+
+.battle-stage-field {
+  position: absolute;
+  inset: 58% 0 0;
+  background: linear-gradient(180deg, #c8e6a0 0%, #e6ee9c 45%, #fff9c4 100%);
+}
+
+.battle-stage-spot {
+  position: absolute;
+}
+
+/* Foe: upper-right on grass */
+.battle-stage-spot--foe {
+  top: 18%;
+  right: 12%;
+  width: 120px;
+  height: 72px;
+  z-index: 1;
+}
+
+/* Player: lower-left on grass */
+.battle-stage-spot--player {
+  bottom: 6%;
+  left: 6%;
+  width: 200px;
+  height: 100px;
+  z-index: 2;
+}
+
+.battle-hud {
+  background: linear-gradient(145deg, #eceff1 0%, #cfd8dc 100%);
+  border: 2px solid #1a1a1a;
+  padding: 6px 10px;
+  min-width: 140px;
+  transform: skewX(-6deg);
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.battle-hud--foe {
+  position: absolute;
+  top: 6%;
+  left: 5%;
+  z-index: 3;
+}
+
+.battle-hud--player {
+  position: absolute;
+  left: calc(100% - 12px);
+  bottom: 52%;
+  z-index: 3;
+  min-width: 168px;
+}
+
+.battle-hud-name {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  text-transform: capitalize;
+}
+
+.battle-hud-level {
+  margin-left: 6px;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.battle-hud-hpbar {
+  margin-top: 4px;
+  height: 8px;
+  border-radius: 4px;
+  background: #37474f;
+  border: 1px solid #1a1a1a;
+  overflow: hidden;
+}
+
+.battle-hud-hpfill {
+  height: 100%;
+  background: linear-gradient(90deg, #66bb6a 0%, #43a047 100%);
+}
+
+.battle-hud-hpnums {
+  margin-top: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-align: right;
+  color: #263238;
+}
+
+.battle-hud-expbar {
+  margin-top: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: #90caf9;
+  border: 1px solid #1565c0;
+}
+
+.battle-stage-grass {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88%;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    #558b2f 0%,
+    #33691e 70%,
+    transparent 71%
+  );
+  opacity: 0.95;
+}
+
+.battle-stage-spot--player .battle-stage-grass {
+  left: 28%;
+  width: 72%;
+}
+
+.battle-stage-sprite {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.25));
+  pointer-events: none;
+}
+
+.battle-stage-sprite--foe {
+  width: 64px;
+  height: auto;
+  bottom: 4px;
+}
+
+.battle-stage-sprite--player {
+  width: 88px;
+  height: auto;
+  left: 28%;
+  bottom: 2px;
+}
+
+.battle-stage-placeholder {
+  position: absolute;
+  inset: auto 8px 8px 8px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px dashed #546e7a;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 0.75rem;
+  color: #37474f;
+  z-index: 2;
+}
+
+@media (max-width: 600px) {
+  .battle-stage {
+    min-height: 200px;
+  }
+
+  .battle-stage-spot--foe {
+    top: 16%;
+    right: 8%;
+    width: 100px;
+    height: 64px;
+  }
+
+  .battle-stage-spot--player {
+    bottom: 5%;
+    left: 4%;
+    width: 168px;
+    height: 88px;
+  }
+
+  .battle-hud--player {
+    min-width: 140px;
+    left: calc(100% - 20px);
+    bottom: 48%;
+  }
+
+  .battle-stage-sprite--player {
+    width: 72px;
+    bottom: 0;
+  }
+
+  .battle-stage-sprite--foe {
+    width: 52px;
+    bottom: 2px;
+  }
+}
+
+/* Status condition badges */
+.battle-status-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #fff;
+  margin-top: 3px;
+}
+
+.battle-status-badge--burn      { background: #e53935; }
+.battle-status-badge--poison    { background: #8e24aa; }
+.battle-status-badge--paralysis { background: #f9a825; color: #333; }
+.battle-status-badge--sleep     { background: #546e7a; }
+.battle-status-badge--freeze    { background: #26c6da; color: #333; }
+.battle-status-badge--confusion { background: #ff6f00; color: #fff; }
+
