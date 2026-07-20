@@ -101,7 +101,7 @@
 
           <p class="bw-help-intro">
             Battles run on a server that one player hosts. The server is free
-            and open-source — anyone can run it in minutes.
+            and open-source — run it in minutes with Node.js.
           </p>
 
           <a
@@ -116,38 +116,64 @@
             View PokemonSiteServer on GitHub
           </a>
 
-          <ol class="bw-help-steps">
-            <li>
-              <strong>Clone and start the server</strong>
-              <pre class="bw-help-code">git clone https://github.com/Correu/PokemonSiteServer
+          <!-- Step 0: clone and start (common to both paths) -->
+          <p class="bw-help-section-label">Step 1 — Start the server</p>
+          <pre class="bw-help-code">git clone https://github.com/Correu/PokemonSiteServer
 cd PokemonSiteServer
 npm install
 npm start</pre>
-              <span class="bw-help-note">Server starts on <code>http://localhost:3000</code></span>
-            </li>
-            <li>
-              <strong>Expose it to the internet with ngrok</strong>
+          <span class="bw-help-note">Server starts on <code>http://localhost:3000</code></span>
+
+          <div class="bw-help-paths">
+            <!-- Path A: Local / same network -->
+            <div class="bw-help-path">
+              <p class="bw-help-path-title">
+                <mat-icon class="bw-help-path-icon">wifi</mat-icon>
+                Option A — Same network (LAN)
+              </p>
+              <p class="bw-help-note">
+                Both players are on the same Wi-Fi or LAN. Enter
+                <code>http://localhost:3000</code> in the field above
+                (if you're on the same machine) or your local IP:
+              </p>
+              <pre class="bw-help-code"># Find your local IP (run in a separate terminal)
+ipconfig        # Windows
+ifconfig        # Mac / Linux</pre>
+              <p class="bw-help-note">
+                Use <code>http://&lt;your-LAN-IP&gt;:3000</code> as the Socket.IO URL.
+                Share the room code with your opponent — they enter the same URL.
+              </p>
+            </div>
+
+            <!-- Path B: Internet via ngrok -->
+            <div class="bw-help-path">
+              <p class="bw-help-path-title">
+                <mat-icon class="bw-help-path-icon">public</mat-icon>
+                Option B — Internet (ngrok tunnel)
+              </p>
+              <p class="bw-help-note">
+                Your opponent is on a different network.
+                Install <a href="https://ngrok.com/download" target="_blank" rel="noopener noreferrer">ngrok</a>,
+                then run:
+              </p>
               <pre class="bw-help-code">ngrok http 3000</pre>
-              <span class="bw-help-note">
-                Copy the <code>https://xxxx.ngrok-free.app</code> URL ngrok
-                gives you and paste it into the Socket.IO URL field above.
-              </span>
-            </li>
-            <li>
-              <strong>Why ngrok and not a plain IP?</strong>
-              <span class="bw-help-note">
-                This app is served over HTTPS. Browsers block plain
-                <code>http://</code> socket connections from an HTTPS page.
-                ngrok provides a secure <code>https://</code> tunnel
-                automatically — no extra configuration needed.
-              </span>
-            </li>
-          </ol>
+              <p class="bw-help-note">
+                Copy the <code>https://xxxx.ngrok-free.app</code> URL and paste it
+                into the Socket.IO URL field above.
+              </p>
+              <p class="bw-help-note bw-help-note--warn">
+                <mat-icon class="bw-help-warn-icon">warning_amber</mat-icon>
+                This app is served over HTTPS — browsers block plain
+                <code>http://</code> socket connections. ngrok provides an
+                <code>https://</code> tunnel automatically, so always use
+                Option B for internet play rather than a raw IP.
+              </p>
+            </div>
+          </div>
 
           <p class="bw-help-footer">
             Once you create a room, the <strong>Copy invite link</strong> button
-            embeds your server URL automatically so your opponent connects to
-            the right place without any extra setup.
+            embeds your server URL so your opponent connects automatically.
           </p>
         </mat-expansion-panel>
       </mat-accordion>
