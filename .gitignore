@@ -40,9 +40,4 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
-<<<<<<< HEAD
 AGENTS.md
-=======
-
-AGENTS.md
->>>>>>> c2e5ae52691bcf4021cdb347ba0c8b8c5fa9e2f3
