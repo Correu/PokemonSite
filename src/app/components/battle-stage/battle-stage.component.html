@@ -15,10 +15,15 @@
         [style.width.%]="(vm.foe.currentHp / vm.foe.maxHp) * 100"
       ></div>
     </div>
-    @if (vm.foe.statusCondition) {
-    <span class="battle-status-badge battle-status-badge--{{ vm.foe.statusCondition }}">
-      {{ statusAbbrev(vm.foe.statusCondition) }}
+    @if (vm.foe.statusConditions?.length) {
+    @for (status of vm.foe.statusConditions; track status) {
+    <span class="battle-status-badge battle-status-badge--{{ status }}">
+      {{ statusAbbrev(status) }}
     </span>
+    }
+    }
+    @if (vm.foe.confusionTurns) {
+    <span class="battle-status-badge battle-status-badge--confusion">CNF</span>
     }
   </div>
 
@@ -50,10 +55,15 @@
       <div class="battle-hud-hpnums">
         {{ vm.player.currentHp }} / {{ vm.player.maxHp }}
       </div>
-      @if (vm.player.statusCondition) {
-      <span class="battle-status-badge battle-status-badge--{{ vm.player.statusCondition }}">
-        {{ statusAbbrev(vm.player.statusCondition) }}
+      @if (vm.player.statusConditions?.length) {
+      @for (status of vm.player.statusConditions; track status) {
+      <span class="battle-status-badge battle-status-badge--{{ status }}">
+        {{ statusAbbrev(status) }}
       </span>
+      }
+      }
+      @if (vm.player.confusionTurns) {
+      <span class="battle-status-badge battle-status-badge--confusion">CNF</span>
       }
       <div class="battle-hud-expbar" aria-hidden="true"></div>
     </div>

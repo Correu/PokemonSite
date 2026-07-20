@@ -48,7 +48,8 @@ export interface BattleStagePokemon {
   spriteBack: string | null;
   currentHp: number;
   maxHp: number;
-  statusCondition?: string | null;
+  statusConditions?: string[];
+  confusionTurns?: number;
 }
 
 @Injectable({
@@ -789,7 +790,8 @@ export class BattleSessionService {
       spriteBack: active.backSprite,
       currentHp: active.currentHp,
       maxHp: active.maxHp,
-      statusCondition: active.statusCondition ?? null,
+      statusConditions: active.statusConditions ?? [],
+      confusionTurns: active.confusionTurns ?? 0,
     };
   }
 

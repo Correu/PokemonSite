@@ -923,11 +923,16 @@
                             <span class="bw-team-status-hp-text"
                               >{{ member.currentHp }}/{{ member.maxHp }}</span
                             >
-                            @if (member.statusCondition) {
-                              <span
-                                class="battle-status-badge battle-status-badge--{{ member.statusCondition }}"
-                                >{{ statusAbbrev(member.statusCondition) }}</span
-                              >
+                            @if (member.statusConditions?.length) {
+                              @for (status of member.statusConditions; track status) {
+                                <span
+                                  class="battle-status-badge battle-status-badge--{{ status }}"
+                                  >{{ statusAbbrev(status) }}</span
+                                >
+                              }
+                            }
+                            @if (member.confusionTurns) {
+                              <span class="battle-status-badge battle-status-badge--confusion">CNF</span>
                             }
                           }
                         </div>

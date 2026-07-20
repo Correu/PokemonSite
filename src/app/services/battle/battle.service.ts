@@ -134,6 +134,7 @@ export class BattleService {
       frontSprite: base.frontSprite,
       backSprite: base.backSprite,
       isFainted: false,
+      types: pokemon.types.map(t => t.type.name),
       stats: this.extractStats(pokemon, level),
       moves,
     };

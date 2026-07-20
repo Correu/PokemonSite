@@ -81,6 +81,7 @@ export interface BattleCombatBattler {
   frontSprite: string;
   backSprite: string;
   isFainted: boolean;
+  types: string[];
   stats: {
     attack: number;
     defense: number;
@@ -117,7 +118,8 @@ export interface BattleActiveView {
   backSprite: string;
   isFainted: boolean;
   moves?: BattleCombatMove[];
-  statusCondition?: string | null;
+  statusConditions?: string[];
+  confusionTurns?: number;
 }
 
 export interface BattleTeamMember {
@@ -129,7 +131,8 @@ export interface BattleTeamMember {
   isFainted: boolean;
   isActive: boolean;
   frontSprite: string | null;
-  statusCondition?: string | null;
+  statusConditions?: string[];
+  confusionTurns?: number;
 }
 
 export interface BattleBagSnapshot {

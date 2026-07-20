@@ -220,4 +220,5 @@
 .battle-status-badge--paralysis { background: #f9a825; color: #333; }
 .battle-status-badge--sleep     { background: #546e7a; }
 .battle-status-badge--freeze    { background: #26c6da; color: #333; }
+.battle-status-badge--confusion { background: #ff6f00; color: #fff; }
 
