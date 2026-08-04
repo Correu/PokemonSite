@@ -126,20 +126,6 @@ export class PokedexComponent implements OnInit, OnDestroy {
   private applyFilters(): void {
     let filtered = [...this.completeList];
 
-    if (this.selectedGeneration) {
-      const generation = this.pokemonService.generations.find(
-        (g) => g.name === this.selectedGeneration
-      );
-      if (generation) {
-        const start = generation.start;
-        const end = Math.min(
-          start + generation.quantity,
-          this.completeList.length
-        );
-        filtered = filtered.slice(start, end);
-      }
-    }
-
     if (this.selectedTypes.length > 0) {
       filtered = filtered.filter((pokemon) => {
         if (!pokemon.types) return false;

@@ -36,19 +36,7 @@ export class PokemonService {
   get selectedPokedexPokemon(): Pokemon | undefined {
     return this.selectedPokedexSubject.value;
   }
-
-  generations = [
-    { name: 'Generation 1', quantity: 151, start: 0 },
-    { name: 'Generation 2', quantity: 100, start: 151 },
-    { name: 'Generation 3', quantity: 135, start: 251 },
-    { name: 'Generation 4', quantity: 107, start: 386 },
-    { name: 'Generation 5', quantity: 156, start: 493 },
-    { name: 'Generation 6', quantity: 72, start: 649 },
-    { name: 'Generation 7', quantity: 88, start: 721 },
-    { name: 'Generation 8', quantity: 96, start: 809 },
-    { name: 'Generation 9', quantity: 120, start: 906 },
-  ];
-
+  
   constructor(private http: HttpClient) {}
 
   //returns pokedex from local json
