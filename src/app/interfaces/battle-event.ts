@@ -107,6 +107,16 @@ export interface BattleTeamLockPayload {
   bagItems?: BattleBagItem[];
 }
 
+export interface StatStages {
+  attack: number;
+  defense: number;
+  specialAttack: number;
+  specialDefense: number;
+  speed: number;
+  accuracy: number;
+  evasion: number;
+}
+
 export interface BattleActiveView {
   speciesId: string;
   name: string;
@@ -120,6 +130,7 @@ export interface BattleActiveView {
   moves?: BattleCombatMove[];
   statusConditions?: string[];
   confusionTurns?: number;
+  statStages?: StatStages;
 }
 
 export interface BattleTeamMember {

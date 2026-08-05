@@ -304,26 +304,29 @@ export class BattleService {
     return Number.isFinite(id) ? id : null;
   }
 
-  private extractStats(pokemon: Pokemon, level: number) {
-    const stat = (name: string, fallback: number) =>
-      pokemon.stats.find((s) => s.stat.name === name)?.base_stat ?? fallback;
+  private rollDv(): number {
+    return Math.floor(Math.random() * 16); // 0–15
+  }
 
-    const scale = (base: number) =>
-      Math.max(5, Math.floor(((2 * base * level) / 100) + 5));
+  private extractStats(pokemon: Pokemon, level: number) {
+    const base = (name: string) =>
+      pokemon.stats.find((s) => s.stat.name === name)?.base_stat ?? 50;
+
+    const scaleStat = (b: number) =>
+      Math.max(1, Math.floor(((b + this.rollDv()) * 2 * level) / 100) + 5);
 
     return {
-      attack: scale(stat('attack', 50)),
-      defense: scale(stat('defense', 50)),
-      specialAttack: scale(stat('special-attack', 50)),
-      specialDefense: scale(stat('special-defense', 50)),
-      speed: scale(stat('speed', 50)),
+      attack:         scaleStat(base('attack')),
+      defense:        scaleStat(base('defense')),
+      specialAttack:  scaleStat(base('special-attack')),
+      specialDefense: scaleStat(base('special-defense')),
+      speed:          scaleStat(base('speed')),
     };
   }
 
   private calculateMaxHp(pokemon: Pokemon, level: number): number {
-    const hpStat =
-      pokemon.stats.find((s) => s.stat.name === 'hp')?.base_stat ?? 50;
-    return Math.floor((2 * hpStat * level) / 100 + level + 10);
+    const b = pokemon.stats.find((s) => s.stat.name === 'hp')?.base_stat ?? 50;
+    return Math.floor(((b + this.rollDv()) * 2 * level) / 100) + level + 10;
   }
 
   private capitalize(value: string): string {

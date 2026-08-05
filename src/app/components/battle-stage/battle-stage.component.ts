@@ -31,4 +31,31 @@ export class BattleStageComponent {
     };
     return condition ? (map[condition] ?? condition.toUpperCase().slice(0, 3)) : '';
   }
+
+  readonly STAT_ABBREV: Record<string, string> = {
+    attack: 'ATK',
+    defense: 'DEF',
+    specialAttack: 'SPA',
+    specialDefense: 'SPD',
+    speed: 'SPE',
+    accuracy: 'ACC',
+    evasion: 'EVA',
+  };
+
+  activeStages(statStages: Record<string, number> | undefined): { key: string; label: string; value: number }[] {
+    if (!statStages) return [];
+    return Object.entries(statStages)
+      .filter(([, v]) => v !== 0)
+      .map(([key, value]) => ({
+        key,
+        label: this.STAT_ABBREV[key] ?? key.toUpperCase().slice(0, 3),
+        value,
+      }));
+  }
+
+  arrowPrefix(value: number): string {
+    const abs = Math.abs(value);
+    const arrow = value > 0 ? '↑' : '↓';
+    return abs >= 2 ? arrow + arrow : arrow;
+  }
 }

@@ -50,6 +50,7 @@ export interface BattleStagePokemon {
   maxHp: number;
   statusConditions?: string[];
   confusionTurns?: number;
+  statStages?: Record<string, number>;
 }
 
 @Injectable({
@@ -792,6 +793,7 @@ export class BattleSessionService {
       maxHp: active.maxHp,
       statusConditions: active.statusConditions ?? [],
       confusionTurns: active.confusionTurns ?? 0,
+      statStages: active.statStages as Record<string, number> | undefined,
     };
   }
 
