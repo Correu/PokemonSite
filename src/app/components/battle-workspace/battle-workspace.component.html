@@ -828,7 +828,66 @@ ifconfig        # Mac / Linux</pre>
             <p>{{ battlePrompt() }}</p>
           </div>
 
-          @if (session.isAwaitingLocalMove() && !pendingActionSubmitted) {
+          @if (session.isAwaitingReplacement() && !pendingActionSubmitted) {
+            <div class="bw-replacement-prompt">
+              <p class="bw-hint">Your Pokémon fainted! Choose your next Pokémon.</p>
+              <div class="bw-switch-list">
+                @for (
+                  member of getLocalTeamSnapshot();
+                  track member.speciesId;
+                  let i = $index
+                ) {
+                  <button
+                    type="button"
+                    class="bw-switch-card"
+                    [class.bw-switch-card--active]="member.isActive"
+                    [class.bw-switch-card--fainted]="member.isFainted"
+                    [disabled]="member.isFainted || member.isActive"
+                    (click)="selectSwitch(i)"
+                  >
+                    @if (member.frontSprite) {
+                      <img
+                        class="bw-switch-sprite"
+                        [src]="member.frontSprite"
+                        [alt]="member.displayName || member.name"
+                      />
+                    }
+                    <div class="bw-switch-info">
+                      <span class="bw-switch-name">{{
+                        (member.displayName || member.name) | titlecase
+                      }}</span>
+                      @if (member.isActive) {
+                        <span class="bw-switch-badge">Active</span>
+                      } @else if (member.isFainted) {
+                        <span class="bw-switch-badge bw-switch-badge--fainted"
+                          >Fainted</span
+                        >
+                      } @else {
+                        <div class="bw-team-status-hp-bar">
+                          <div
+                            class="bw-team-status-hp-fill"
+                            [class.bw-team-status-hp-fill--low]="
+                              member.currentHp / member.maxHp < 0.25
+                            "
+                            [class.bw-team-status-hp-fill--mid]="
+                              member.currentHp / member.maxHp >= 0.25 &&
+                              member.currentHp / member.maxHp < 0.5
+                            "
+                            [style.width.%]="
+                              (member.currentHp / member.maxHp) * 100
+                            "
+                          ></div>
+                        </div>
+                        <span class="bw-team-status-hp-text"
+                          >{{ member.currentHp }}/{{ member.maxHp }}</span
+                        >
+                      }
+                    </div>
+                  </button>
+                }
+              </div>
+            </div>
+          } @else if (session.isAwaitingLocalMove() && !pendingActionSubmitted) {
             @switch (battleMenuPanel) {
               @case ("commands") {
                 <div class="bw-battle-action-grid">

@@ -688,6 +688,9 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
 
   battlePrompt(): string {
     const combat = this.session.combatState$.value;
+    if (this.session.isAwaitingReplacement()) {
+      return combat?.message || 'Your Pokémon fainted! Choose your next Pokémon.';
+    }
     if (combat?.message) {
       return combat.message;
     }

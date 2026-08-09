@@ -750,6 +750,12 @@ export class BattleSessionService {
     return !!selfId && !!combat?.awaitingMoves.includes(selfId);
   }
 
+  isAwaitingReplacement(): boolean {
+    const selfId = this.socket.getSocketId();
+    const combat = this.combatState$.value;
+    return !!selfId && !!(combat?.awaitingReplacement ?? []).includes(selfId);
+  }
+
   getOpponentId(): string | null {
     const combat = this.combatState$.value;
     const selfId = this.socket.getSocketId();

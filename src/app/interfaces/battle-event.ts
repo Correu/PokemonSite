@@ -161,6 +161,7 @@ export interface BattleStateUpdatePayload {
   teamSnapshot?: Record<string, BattleTeamMember[]>;
   bagSnapshot?: Record<string, BattleBagSnapshot[]>;
   awaitingMoves: string[];
+  awaitingReplacement?: string[];
   lockedPlayers: string[];
   winnerId: string | null;
   battleStarted?: boolean;
