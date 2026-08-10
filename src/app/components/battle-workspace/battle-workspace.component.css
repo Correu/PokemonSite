@@ -534,12 +534,28 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+  width: 100%;
+}
+
+.bw-move-btn-wrap {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+.bw-move-btn-wrap .bw-move-btn,
+.bw-move-btn-wrap .bw-move-setup-btn {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 3.25rem;
+  box-sizing: border-box;
 }
 
 .bw-move-btn {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   height: auto;
   padding: 8px 10px;
   line-height: 1.2;
@@ -601,14 +617,16 @@
 
 .bw-move-setup-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
   gap: 8px;
+  width: 100%;
 }
 
 .bw-move-setup-btn {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 4px;
   border: 2px solid #90a4ae;
   border-radius: 8px;

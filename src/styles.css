@@ -31,3 +31,10 @@ app-root {
 .mat-grid-tile-content {
   display: block !important;
 }
+
+.bw-move-tooltip {
+  white-space: pre-line;
+  max-width: 280px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}

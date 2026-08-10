@@ -533,31 +533,36 @@ ifconfig        # Mac / Linux</pre>
           </h3>
           <div class="bw-move-setup-grid">
             @for (move of eligibleMovesFor(pokemon); track move.id) {
-              <button
-                type="button"
-                class="bw-move-setup-btn"
-                [class.bw-move-setup-btn--selected]="
-                  isMoveSelected(pokemon.id + '', move.id)
-                "
-                [disabled]="
-                  !isMoveSelected(pokemon.id + '', move.id) &&
-                  !canSelectMoreMoves(pokemon)
-                "
-                (click)="toggleMoveSelection(pokemon.id + '', move.id)"
+              <span
+                class="bw-move-btn-wrap"
+                [matTooltip]="getMoveTooltip(move)"
+                matTooltipClass="bw-move-tooltip"
+                matTooltipPosition="above"
+                matTooltipShowDelay="300"
               >
-                <span class="bw-move-name">{{ move.name | titlecase }}</span>
-                <span class="bw-move-meta-row">
-                  @if (move.type) {
-                    <span class="bw-move-type">{{
-                      move.type | titlecase
-                    }}</span>
-                  }
-                  @if (move.power) {
-                    <span class="bw-move-meta">Pow {{ move.power }}</span>
-                  }
-                  <span class="bw-move-meta">PP {{ move.pp }}</span>
-                </span>
-              </button>
+                <button
+                  type="button"
+                  class="bw-move-setup-btn"
+                  [class.bw-move-setup-btn--selected]="
+                    isMoveSelected(pokemon.id + '', move.id)
+                  "
+                  [disabled]="
+                    !isMoveSelected(pokemon.id + '', move.id) &&
+                    !canSelectMoreMoves(pokemon)
+                  "
+                  (click)="toggleMoveSelection(pokemon.id + '', move.id)"
+                >
+                  <span class="bw-move-name">{{ move.name | titlecase }}</span>
+                  <span class="bw-move-meta-row">
+                    @if (move.type) {
+                      <span class="bw-move-type">{{
+                        move.type | titlecase
+                      }}</span>
+                    }
+                    <span class="bw-move-meta">PP {{ move.pp }}</span>
+                  </span>
+                </button>
+              </span>
             }
           </div>
         }
@@ -938,32 +943,35 @@ ifconfig        # Mac / Linux</pre>
                       move of session.availableMoves$ | async;
                       track move.id
                     ) {
-                      <button
-                        mat-stroked-button
-                        type="button"
-                        class="bw-move-btn"
-                        [disabled]="move.currentPp <= 0"
-                        (click)="selectMove(move.id)"
+                      <span
+                        class="bw-move-btn-wrap"
+                        [matTooltip]="getMoveTooltip(move)"
+                        matTooltipClass="bw-move-tooltip"
+                        matTooltipPosition="above"
+                        matTooltipShowDelay="300"
                       >
-                        <span class="bw-move-name">{{
-                          move.name | titlecase
-                        }}</span>
-                        <span class="bw-move-meta-row">
-                          @if (move.type) {
-                            <span class="bw-move-type">{{
-                              move.type | titlecase
-                            }}</span>
-                          }
-                          @if (move.power) {
+                        <button
+                          mat-stroked-button
+                          type="button"
+                          class="bw-move-btn"
+                          [disabled]="move.currentPp <= 0"
+                          (click)="selectMove(move.id)"
+                        >
+                          <span class="bw-move-name">{{
+                            move.name | titlecase
+                          }}</span>
+                          <span class="bw-move-meta-row">
+                            @if (move.type) {
+                              <span class="bw-move-type">{{
+                                move.type | titlecase
+                              }}</span>
+                            }
                             <span class="bw-move-meta"
-                              >Pow {{ move.power }}</span
+                              >PP {{ move.currentPp }}/{{ move.maxPp }}</span
                             >
-                          }
-                          <span class="bw-move-meta"
-                            >PP {{ move.currentPp }}/{{ move.maxPp }}</span
-                          >
-                        </span>
-                      </button>
+                          </span>
+                        </button>
+                      </span>
                     }
                   </div>
                 </div>

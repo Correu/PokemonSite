@@ -3,7 +3,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { Item } from 'src/app/interfaces/item';
-import { BattleConfigEventPayload, BattleItemType, BattleTeamMember, BattleBagSnapshot } from 'src/app/interfaces/battle-event';
+import {
+  BattleCombatMove,
+  BattleConfigEventPayload,
+  BattleItemType,
+  BattleTeamMember,
+  BattleBagSnapshot,
+} from 'src/app/interfaces/battle-event';
 import { GEN1_POKEMON_COUNT } from 'src/app/interfaces/battle';
 import { BattleMove, MovesCatalog } from 'src/app/interfaces/move';
 import { BattleSessionService } from 'src/app/services/battle/battle-session.service';
@@ -598,6 +604,53 @@ export class BattleWorkspaceComponent implements OnInit, OnDestroy {
       this.lockingTeam = false;
       this.cdr.markForCheck();
     }
+  }
+
+  getMoveTooltip(move: BattleMove | BattleCombatMove): string {
+    const catalog =
+      this.movesCatalog?.byId[String(move.id)] ??
+      ('effect' in move ? move : undefined);
+    const lines: string[] = [
+      catalog?.effect ?? 'No effect data available.',
+    ];
+
+    const power = catalog?.power ?? move.power;
+    const damageClass = catalog?.damageClass ?? move.damageClass;
+    if (power != null && power > 0) {
+      lines.push(`Power: ${power}`);
+    } else {
+      lines.push('Power: —');
+    }
+
+    const accuracy = catalog?.accuracy ?? null;
+    lines.push(`Accuracy: ${accuracy != null ? `${accuracy}%` : '100%'}`);
+
+    if (damageClass) {
+      lines.push(
+        `Class: ${damageClass.charAt(0).toUpperCase()}${damageClass.slice(1)}`
+      );
+    }
+
+    const priority = catalog?.priority ?? move.priority;
+    if (priority !== 0) {
+      lines.push(`Priority: ${priority > 0 ? '+' : ''}${priority}`);
+    }
+
+    const meta = catalog?.meta;
+    if (meta?.minHits != null && meta.maxHits != null) {
+      lines.push(`Hits: ${meta.minHits}–${meta.maxHits}`);
+    }
+    if (meta?.drain) {
+      lines.push(`Drain: ${meta.drain}%`);
+    }
+    if (meta?.healing) {
+      lines.push(`Healing: ${meta.healing}%`);
+    }
+    if (meta?.ailmentChance) {
+      lines.push(`Effect chance: ${meta.ailmentChance}%`);
+    }
+
+    return lines.join('\n');
   }
 
   selectMove(moveId: number): void {
