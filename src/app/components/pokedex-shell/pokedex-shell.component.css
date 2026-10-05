@@ -1222,7 +1222,9 @@
     gap: 10px;
   }
 
-  .kanto-left-panel.shell-panel--desktop .kanto-left-panel-scroll::before {
+  .kanto-chassis:not(.kanto-chassis--battle)
+    .kanto-left-panel.shell-panel--desktop
+    .kanto-left-panel-scroll::before {
     content: 'Selected Pokémon';
     display: block;
     flex-shrink: 0;
@@ -1275,7 +1277,10 @@
     padding: 1px 6px;
   }
 
-  .kanto-chassis--battle .kanto-left-panel {
+  .kanto-chassis--battle .kanto-left-panel.shell-panel--desktop,
+  .pokedex-shell-wrapper--open
+    .kanto-chassis--battle
+    .kanto-left-panel.shell-panel--desktop {
     display: none !important;
   }
 
