@@ -5,7 +5,7 @@ import { filter, map, switchMap } from 'rxjs/operators';
 import { CatalogAbility } from 'src/app/interfaces/ability';
 import { BattleMove } from 'src/app/interfaces/move';
 import { Pokemon } from 'src/app/interfaces/pokemon';
-import { PokedexAccessService } from 'src/app/services/pokedex-access/pokedex-access.service';
+import { TypeMatchups } from 'src/app/interfaces/type-chart';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
 
 export interface PokedexNavTab {
@@ -42,6 +42,7 @@ export interface PokedexEntryDetail {
   pokemon: Pokemon;
   abilities: PokedexAbilityDetail[];
   moveGroups: PokedexMoveGroup[];
+  matchups: TypeMatchups;
 }
 
 @Component({
@@ -51,8 +52,6 @@ export interface PokedexEntryDetail {
   standalone: false,
 })
 export class PokedexShellComponent implements OnInit {
-  isContentExpanded = false;
-  isAnimating = false;
   isBattleRoute = false;
   modeLabel = 'Dex';
 
@@ -64,12 +63,19 @@ export class PokedexShellComponent implements OnInit {
         if (!pokemon) {
           return of(undefined);
         }
+        const typeNames = (pokemon.types ?? []).map((t) => t.type.name);
         return combineLatest([
           this.pokemonService.getAbilitiesCatalog(),
           this.pokemonService.getMovesCatalog(),
+          this.pokemonService.getTypeMatchups(typeNames),
         ]).pipe(
-          map(([abilitiesCatalog, movesCatalog]) =>
-            this.buildEntryDetail(pokemon, abilitiesCatalog.byName, movesCatalog.byId)
+          map(([abilitiesCatalog, movesCatalog, matchups]) =>
+            this.buildEntryDetail(
+              pokemon,
+              abilitiesCatalog.byName,
+              movesCatalog.byId,
+              matchups
+            )
           )
         );
       })
@@ -84,22 +90,11 @@ export class PokedexShellComponent implements OnInit {
   ];
 
   constructor(
-    private pokedexAccessService: PokedexAccessService,
     public pokemonService: PokemonService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    if (this.pokedexAccessService.isPokedexOpened()) {
-      this.isContentExpanded = true;
-    }
-
-    this.pokedexAccessService.pokedexOpened$.subscribe((opened) => {
-      if (opened) {
-        this.isContentExpanded = true;
-      }
-    });
-
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => this.syncRouteMode());
@@ -107,17 +102,28 @@ export class PokedexShellComponent implements OnInit {
   }
 
   private readonly moveMethodConfig: Array<{ method: string; label: string }> = [
-    { method: 'level-up',    label: 'Level Up' },
-    { method: 'machine',     label: 'TM / HM' },
-    { method: 'egg',         label: 'Egg Moves' },
-    { method: 'tutor',       label: 'Move Tutor' },
+    { method: 'level-up', label: 'Level Up' },
+    { method: 'machine', label: 'TM / HM' },
+    { method: 'egg', label: 'Egg Moves' },
+    { method: 'tutor', label: 'Move Tutor' },
     { method: 'form-change', label: 'Form Change' },
   ];
+
+  formatMultiplier(multiplier: number): string {
+    if (multiplier === 0) {
+      return '0×';
+    }
+    if (Number.isInteger(multiplier)) {
+      return `${multiplier}×`;
+    }
+    return `${multiplier}×`;
+  }
 
   private buildEntryDetail(
     pokemon: Pokemon,
     abilitiesByName: Record<string, CatalogAbility>,
-    movesById: Record<string, BattleMove>
+    movesById: Record<string, BattleMove>,
+    matchups: TypeMatchups
   ): PokedexEntryDetail {
     const abilities: PokedexAbilityDetail[] = (pokemon.abilities ?? []).map(
       (entry) => {
@@ -131,8 +137,6 @@ export class PokedexShellComponent implements OnInit {
       }
     );
 
-    // Group learnset entries by method, deduplicating by moveId.
-    // For level-up, keep the highest level seen. For all other methods, level is irrelevant.
     const byMethod = new Map<string, Map<number, number>>();
     for (const learn of pokemon.moves ?? []) {
       if (!byMethod.has(learn.method)) {
@@ -169,7 +173,7 @@ export class PokedexShellComponent implements OnInit {
         return { method, label, moves };
       });
 
-    return { pokemon, abilities, moveGroups };
+    return { pokemon, abilities, moveGroups, matchups };
   }
 
   private syncRouteMode(): void {
@@ -181,30 +185,5 @@ export class PokedexShellComponent implements OnInit {
   tabRouterLink(tab: PokedexNavTab): string | null {
     if (tab.route === null || tab.disabled) return null;
     return tab.route === '' ? '/' : `/${tab.route}`;
-  }
-
-  toggleContentExpanded(): void {
-    if (this.isAnimating) return;
-
-    if (!this.isContentExpanded) {
-      this.isAnimating = true;
-      this.pokedexAccessService.markPokedexOpened();
-      setTimeout(() => {
-        this.isContentExpanded = true;
-        setTimeout(() => {
-          this.isAnimating = false;
-        }, 550);
-      }, 50);
-    } else {
-      this.isAnimating = true;
-      this.isContentExpanded = false;
-      setTimeout(() => {
-        this.isAnimating = false;
-      }, 550);
-    }
-  }
-
-  closePokedex(): void {
-    this.toggleContentExpanded();
   }
 }

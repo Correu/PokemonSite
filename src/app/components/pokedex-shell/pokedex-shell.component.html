@@ -1,212 +1,19 @@
-<div
-  class="pokedex-shell-wrapper"
-  [class.pokedex-shell-wrapper--open]="isContentExpanded"
->
+<div class="pokedex-shell-wrapper pokedex-shell-wrapper--open">
   <div class="pokedex-outer-frame">
     <div class="pokedex-flip-container">
-      @if (!isContentExpanded) {
-      <div
-        class="pokedex-device"
-        (click)="toggleContentExpanded()"
-        role="button"
-        tabindex="0"
-        (keydown.enter)="toggleContentExpanded()"
-        (keydown.space)="$event.preventDefault(); toggleContentExpanded()"
-        [attr.aria-label]="'Open Pokedex'"
-      >
-        <div class="pokedex-device-body">
-          <div class="pokedex-device-button"></div>
-        </div>
-      </div>
-      }
-
-      <div
-        class="pokedex-content-wrapper"
-        [class.content-open]="isContentExpanded"
-      >
+      <div class="pokedex-content-wrapper content-open">
         <div
-          class="pokedex-book-content"
-          [class.content-open]="isContentExpanded"
+          class="pokedex-book-content content-open"
           role="region"
-          [attr.aria-hidden]="!isContentExpanded"
         >
           <div
-            class="pokedex-kanto-chassis"
-            [class.pokedex-kanto-chassis--open]="isContentExpanded"
+            class="pokedex-kanto-chassis pokedex-kanto-chassis--open"
             [class.kanto-chassis--battle]="isBattleRoute"
           >
             <div class="kanto-left-panel shell-panel--desktop">
-              @if (!isBattleRoute) {
-              <div class="kanto-left-header">
-                <div class="kanto-lens" aria-hidden="true"></div>
-                <div class="kanto-led-row" aria-hidden="true">
-                  <span class="kanto-led kanto-led--red"></span>
-                  <span class="kanto-led kanto-led--yellow"></span>
-                  <span class="kanto-led kanto-led--green"></span>
-                </div>
-              </div>
-
-              <ng-container *ngIf="selectedEntryDetail$ | async as entry">
-                <div class="kanto-main-lcd">
-                  <div class="kanto-lcd-bezel">
-                    <div class="kanto-lcd-dots" aria-hidden="true">
-                      <span></span><span></span>
-                    </div>
-                    <div class="kanto-lcd-screen">
-                      <div class="kanto-sprite-wrap">
-                        <img
-                          [src]="entry.pokemon.sprites.front_default"
-                          [alt]="entry.pokemon.name"
-                          class="kanto-sprite"
-                        />
-                      </div>
-                      <div class="kanto-name-bar">
-                        {{ entry.pokemon.name | uppercase }} #{{
-                          entry.pokemon.id
-                        }}
-                      </div>
-                    </div>
-                    <div class="kanto-lcd-footer" aria-hidden="true">
-                      <span class="kanto-lcd-btn"></span>
-                      <span class="kanto-lcd-grill"></span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="kanto-left-details">
-                  <div class="pokedex-entry-types">
-                    @for (type of entry.pokemon.types; track type) {
-                    <span
-                      class="type-badge"
-                      [class]="'type-' + type.type.name"
-                    >
-                      {{ type.type.name | titlecase }}
-                    </span>
-                    }
-                  </div>
-                  <div class="pokedex-entry-meta-layout">
-                    <div class="pokedex-entry-info-block">
-                      <div class="pokedex-entry-stats">
-                        <span class="stat-line">
-                          <strong>Weight</strong>
-                          {{ (entry.pokemon.weight / 4.536).toFixed(1) }}
-                          lbs
-                        </span>
-                        @if (entry.pokemon.height) {
-                        <span class="stat-line">
-                          <strong>Height</strong>
-                          {{
-                            (entry.pokemon.height * 0.328084).toFixed(1)
-                          }}
-                          ft
-                        </span>
-                        }
-                        <span class="stat-line">
-                          <strong>Base EXP</strong>
-                          {{ entry.pokemon.base_experience }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="pokedex-entry-stats-block">
-                      <div class="section-title">Base Stats</div>
-                      @for (stat of entry.pokemon.stats; track stat) {
-                      <div class="stat-row">
-                        <div class="stat-name">
-                          {{ stat.stat.name | uppercase }}
-                        </div>
-                        <div class="stat-bar">
-                          <div
-                            class="stat-bar-fill"
-                            [style.width.%]="(stat.base_stat / 255) * 100"
-                          ></div>
-                        </div>
-                        <div class="stat-value">
-                          {{ stat.base_stat }}
-                        </div>
-                      </div>
-                      }
-                    </div>
-                  </div>
-
-                  @if (entry.abilities.length) {
-                  <div class="pokedex-entry-abilities">
-                    <div class="section-title">Abilities</div>
-                    <ul>
-                      @for (ability of entry.abilities; track ability.name) {
-                      <li class="ability-row">
-                        <div class="ability-heading">
-                          <span class="ability-name">{{
-                            ability.name | titlecase
-                          }}</span>
-                          @if (ability.isHidden) {
-                          <span class="ability-tag">Hidden</span>
-                          }
-                        </div>
-                        @if (ability.effect) {
-                        <p class="ability-effect">{{ ability.effect }}</p>
-                        }
-                      </li>
-                      }
-                    </ul>
-                  </div>
-                  }
-
-                  @if (entry.moveGroups.length) {
-                  <div class="pokedex-entry-moves">
-                    @for (group of entry.moveGroups; track group.method) {
-                    <div class="move-group">
-                      <div class="section-title">{{ group.label }}</div>
-                      <ul>
-                        @for (move of group.moves; track move.moveId) {
-                        <li class="move-row">
-                          <div class="move-heading">
-                            @if (group.method === 'level-up') {
-                            <span class="move-level">Lv. {{ move.level }}</span>
-                            }
-                            <span class="move-name">{{
-                              move.name | titlecase
-                            }}</span>
-                            @if (move.type) {
-                            <span
-                              [class]="
-                                'type-badge type-badge--sm type-' + move.type
-                              "
-                            >
-                              {{ move.type | titlecase }}
-                            </span>
-                            }
-                            <span class="move-power">
-                              {{ move.power != null ? move.power : '—' }}
-                            </span>
-                          </div>
-                          @if (move.effect) {
-                          <p class="move-effect">{{ move.effect }}</p>
-                          }
-                        </li>
-                        }
-                      </ul>
-                    </div>
-                    }
-                  </div>
-                  }
-                </div>
-              </ng-container>
-
-              <div class="kanto-left-deco" aria-hidden="true">
-                <span class="kanto-deco-circle"></span>
-                <span class="kanto-deco-pills"></span>
-              </div>
-              } @else {
-              <app-battle-stage class="kanto-battle-field"></app-battle-stage>
-              }
-            </div>
-
-            <div class="kanto-hinge shell-panel--desktop" aria-hidden="true"></div>
-
-            <div class="kanto-right-panel">
-              <div class="pokedex-mobile-header shell-panel--mobile">
-                <div class="kanto-left-header">
+              <div class="kanto-left-panel-scroll">
+                @if (!isBattleRoute) {
+                <div class="kanto-left-header shell-chrome">
                   <div class="kanto-lens" aria-hidden="true"></div>
                   <div class="kanto-led-row" aria-hidden="true">
                     <span class="kanto-led kanto-led--red"></span>
@@ -214,36 +21,213 @@
                     <span class="kanto-led kanto-led--green"></span>
                   </div>
                 </div>
+
+                <ng-container *ngIf="selectedEntryDetail$ | async as entry">
+                  <div class="kanto-main-lcd">
+                    <div class="kanto-lcd-bezel">
+                      <div class="kanto-lcd-dots shell-chrome" aria-hidden="true">
+                        <span></span><span></span>
+                      </div>
+                      <div class="kanto-lcd-screen">
+                        <div class="kanto-sprite-wrap">
+                          <img
+                            [src]="entry.pokemon.sprites.front_default"
+                            [alt]="entry.pokemon.name"
+                            class="kanto-sprite"
+                          />
+                        </div>
+                        <div class="kanto-name-bar">
+                          {{ entry.pokemon.name | uppercase }} #{{
+                            entry.pokemon.id
+                          }}
+                        </div>
+                      </div>
+                      <div class="kanto-lcd-footer shell-chrome" aria-hidden="true">
+                        <span class="kanto-lcd-btn"></span>
+                        <span class="kanto-lcd-grill"></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="kanto-left-details">
+                    <div class="pokedex-entry-types">
+                      @for (type of entry.pokemon.types; track type) {
+                      <span
+                        class="type-badge"
+                        [class]="'type-' + type.type.name"
+                      >
+                        {{ type.type.name | titlecase }}
+                      </span>
+                      }
+                    </div>
+
+                    <div class="pokedex-entry-matchups">
+                      @if (entry.matchups.weakTo.length) {
+                      <div class="matchup-row">
+                        <div class="section-title">Weak to</div>
+                        <div class="matchup-chips">
+                          @for (chip of entry.matchups.weakTo; track chip.type) {
+                          <span
+                            class="type-badge type-badge--sm"
+                            [ngClass]="'type-' + chip.type"
+                          >
+                            {{ chip.type | titlecase }}
+                            <span class="matchup-mul">{{ formatMultiplier(chip.multiplier) }}</span>
+                          </span>
+                          }
+                        </div>
+                      </div>
+                      }
+                      @if (entry.matchups.strongAgainst.length) {
+                      <div class="matchup-row">
+                        <div class="section-title">Strong against</div>
+                        <div class="matchup-chips">
+                          @for (chip of entry.matchups.strongAgainst; track chip.type) {
+                          <span
+                            class="type-badge type-badge--sm"
+                            [ngClass]="'type-' + chip.type"
+                          >
+                            {{ chip.type | titlecase }}
+                            <span class="matchup-mul">{{ formatMultiplier(chip.multiplier) }}</span>
+                          </span>
+                          }
+                        </div>
+                      </div>
+                      }
+                    </div>
+
+                    <div class="pokedex-entry-meta-layout">
+                      <div class="pokedex-entry-info-block">
+                        <div class="pokedex-entry-stats">
+                          <span class="stat-line">
+                            <strong>Weight</strong>
+                            {{ (entry.pokemon.weight / 4.536).toFixed(1) }}
+                            lbs
+                          </span>
+                          @if (entry.pokemon.height) {
+                          <span class="stat-line">
+                            <strong>Height</strong>
+                            {{
+                              (entry.pokemon.height * 0.328084).toFixed(1)
+                            }}
+                            ft
+                          </span>
+                          }
+                          <span class="stat-line">
+                            <strong>Base EXP</strong>
+                            {{ entry.pokemon.base_experience }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="pokedex-entry-stats-block">
+                        <div class="section-title">Base Stats</div>
+                        @for (stat of entry.pokemon.stats; track stat) {
+                        <div class="stat-row">
+                          <div class="stat-name">
+                            {{ stat.stat.name | uppercase }}
+                          </div>
+                          <div class="stat-bar">
+                            <div
+                              class="stat-bar-fill"
+                              [style.width.%]="
+                                (stat.base_stat / 255) * 100
+                              "
+                            ></div>
+                          </div>
+                          <div class="stat-value">{{ stat.base_stat }}</div>
+                        </div>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="pokedex-entry-abilities">
+                      <div class="section-title">Abilities</div>
+                      <ul>
+                        @for (ability of entry.abilities; track ability.name) {
+                        <li class="ability-row">
+                          <div class="ability-heading">
+                            <span class="ability-name">{{
+                              ability.name | titlecase
+                            }}</span>
+                            @if (ability.isHidden) {
+                            <span class="ability-tag">Hidden</span>
+                            }
+                          </div>
+                          @if (ability.effect) {
+                          <p class="ability-effect">{{ ability.effect }}</p>
+                          }
+                        </li>
+                        }
+                      </ul>
+                    </div>
+
+                    <div class="pokedex-entry-moves">
+                      <div class="section-title">Moves</div>
+                      @for (group of entry.moveGroups; track group.method) {
+                      <div class="move-group">
+                        <div class="section-title">{{ group.label }}</div>
+                        <ul>
+                          @for (move of group.moves; track move.moveId) {
+                          <li class="move-row">
+                            <div class="move-heading">
+                              @if (group.method === 'level-up') {
+                              <span class="move-level">Lv. {{ move.level }}</span>
+                              }
+                              <span class="move-name">{{
+                                move.name | titlecase
+                              }}</span>
+                              @if (move.type) {
+                              <span
+                                [class]="
+                                  'type-badge type-badge--sm type-' + move.type
+                                "
+                              >
+                                {{ move.type | titlecase }}
+                              </span>
+                              }
+                              <span class="move-power">
+                                {{ move.power != null ? move.power : '—' }}
+                              </span>
+                            </div>
+                            @if (move.effect) {
+                            <p class="move-effect">{{ move.effect }}</p>
+                            }
+                          </li>
+                          }
+                        </ul>
+                      </div>
+                      }
+                    </div>
+                  </div>
+                </ng-container>
+
+                <div class="kanto-left-deco shell-chrome" aria-hidden="true">
+                  <span class="kanto-deco-circle"></span>
+                  <span class="kanto-deco-pills"></span>
+                </div>
+                } @else {
+                <app-battle-stage class="kanto-battle-field"></app-battle-stage>
+                }
+              </div>
+            </div>
+
+            <div class="kanto-hinge shell-panel--desktop shell-chrome" aria-hidden="true"></div>
+
+            <div class="kanto-right-panel">
+              <div class="pokedex-mobile-header shell-panel--mobile">
                 <div class="kanto-secondary-lcd">
                   <span class="kanto-secondary-label">{{ modeLabel }}</span>
                 </div>
-                <button
-                  class="pokedex-close-fab"
-                  (click)="closePokedex()"
-                  aria-label="Close Pokedex"
-                  mat-icon-button
-                  type="button"
-                >
-                  <mat-icon>close</mat-icon>
-                </button>
               </div>
 
               <div class="kanto-right-top shell-panel--desktop">
                 <div class="kanto-secondary-lcd">
                   <span class="kanto-secondary-label">{{ modeLabel }}</span>
                 </div>
-                <button
-                  class="pokedex-close-fab"
-                  (click)="closePokedex()"
-                  aria-label="Close Pokedex"
-                  mat-icon-button
-                  type="button"
-                >
-                  <mat-icon>close</mat-icon>
-                </button>
               </div>
 
-              <div class="pokedex-tab-grid">
+              <nav class="pokedex-tab-grid" aria-label="Main navigation">
                 @for (tab of navTabs; track tab.id) {
                 @if (tab.disabled || tab.route === null) {
                 <span
@@ -254,6 +238,7 @@
                 } @else {
                 <a
                   class="pokedex-tab-key"
+                  mat-stroked-button
                   [routerLink]="tabRouterLink(tab)"
                   routerLinkActive="active"
                   [routerLinkActiveOptions]="{
@@ -262,9 +247,9 @@
                   >{{ tab.label }}</a
                 >
                 } }
-              </div>
+              </nav>
 
-              <div class="kanto-nav-deco shell-panel--desktop" aria-hidden="true">
+              <div class="kanto-nav-deco shell-panel--desktop shell-chrome" aria-hidden="true">
                 <span class="kanto-mini-led"></span>
                 <span class="kanto-mini-led"></span>
                 <span class="kanto-arrow-pad"></span>
