@@ -36,14 +36,39 @@ export class PokemonService {
   readonly selectedPokedexPokemon$ =
     this.selectedPokedexSubject.asObservable();
 
+  private cryAudio: HTMLAudioElement | null = null;
+
   setPokedexSelection(pokemon: Pokemon | undefined): void {
+    const previousId = this.selectedPokedexSubject.value?.id;
     this.selectedPokedexSubject.next(pokemon);
+    if (pokemon && pokemon.id !== previousId) {
+      this.playPokemonCry(pokemon);
+    }
   }
 
   get selectedPokedexPokemon(): Pokemon | undefined {
     return this.selectedPokedexSubject.value;
   }
-  
+
+  private playPokemonCry(pokemon: Pokemon): void {
+    const url = pokemon.cries?.latest || pokemon.cries?.legacy;
+    if (!url) {
+      return;
+    }
+
+    if (this.cryAudio) {
+      this.cryAudio.pause();
+      this.cryAudio.src = '';
+      this.cryAudio = null;
+    }
+
+    const audio = new Audio(url);
+    this.cryAudio = audio;
+    void audio.play().catch(() => {
+      /* Autoplay may be blocked outside a user gesture. */
+    });
+  }
+
   constructor(private http: HttpClient) {}
 
   //returns pokedex from local json

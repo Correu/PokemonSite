@@ -238,12 +238,8 @@
   border-top: 1px solid var(--desk-border);
 }
 
-.pokedex-shell-wrapper--open .kanto-left-details {
+.pokedex-shell-wrapper--open .pokedex-entry {
   color: var(--desk-text);
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  padding: 0;
 }
 
 .pokedex-shell-wrapper--open .pokedex-entry-stats {
@@ -254,8 +250,7 @@
   color: var(--desk-text);
 }
 
-.pokedex-shell-wrapper--open .matchup-row .section-title,
-.pokedex-shell-wrapper--open .move-group .section-title {
+.pokedex-shell-wrapper--open .matchup-row .section-title {
   color: var(--desk-muted);
 }
 
@@ -607,20 +602,39 @@
   border-radius: 2px;
 }
 
-.kanto-left-details {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 8px 4px;
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  border: 2px solid rgba(0, 0, 0, 0.25);
-  scrollbar-width: none;
+.pokedex-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
 }
 
-.kanto-left-details::-webkit-scrollbar {
-  display: none;
+.pokedex-entry-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pokedex-entry-hero-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pokedex-entry-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pokedex-entry-mid-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 
 .kanto-left-deco {
@@ -932,13 +946,6 @@
   border: 2px solid rgba(0, 0, 0, 0.35);
 }
 
-.pokedex-entry-meta-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px 16px;
-  align-items: flex-start;
-}
-
 .pokedex-entry-stats {
   display: flex;
   flex-wrap: wrap;
@@ -973,25 +980,38 @@
   color: #fff;
 }
 
-/* Move method group — each subsection within the moves panel */
-.move-group {
-  padding-top: 8px;
-  margin-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+.pokedex-move-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.move-group:first-child {
-  padding-top: 0;
-  margin-top: 0;
-  border-top: none;
+.pokedex-move-panel {
+  box-shadow: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px !important;
+  background: rgba(0, 0, 0, 0.08);
 }
 
-.move-group .section-title {
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  color: #90a4ae;
-  text-transform: uppercase;
-  margin-bottom: 4px;
+.pokedex-move-panel .mat-expansion-panel-header {
+  padding: 0 12px;
+  height: 40px;
+}
+
+.pokedex-move-panel .mat-expansion-panel-header-title,
+.pokedex-move-panel .mat-expansion-panel-header-description {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pokedex-move-panel .mat-expansion-panel-header-description {
+  justify-content: flex-end;
+  margin-right: 8px;
+  opacity: 0.75;
+}
+
+.pokedex-move-panel .mat-expansion-panel-body {
+  padding: 0 12px 10px;
 }
 
 .pokedex-entry-abilities ul,
@@ -1257,14 +1277,8 @@
     max-width: none;
   }
 
-  .kanto-left-panel .kanto-left-details {
-    overflow: visible;
-    flex: none;
-  }
-
-  .kanto-left-panel .pokedex-entry-meta-layout {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+  .kanto-left-panel .pokedex-entry {
+    gap: 10px;
   }
 
   .kanto-left-panel .pokedex-entry-matchups {
@@ -1358,6 +1372,8 @@
 
   .pokedex-shell-wrapper--open .kanto-main-lcd {
     max-width: 280px;
+    flex: 0 0 280px;
+    width: 280px;
   }
 
   .pokedex-shell-wrapper--open .kanto-sprite-wrap {
@@ -1372,6 +1388,57 @@
   .pokedex-shell-wrapper--open .kanto-name-bar {
     font-size: 0.95rem;
     padding: 12px 10px;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-entry-hero {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-entry-hero-side {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 4px;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-entry-mid {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-entry-mid-left {
+    flex: 1 1 55%;
+    min-width: 0;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-entry-abilities {
+    flex: 1 1 45%;
+    min-width: 0;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-entry-moves {
+    width: 100%;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-move-panel {
+    background: var(--desk-surface-muted);
+    border: 1px solid var(--desk-border);
+    border-radius: 10px !important;
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-move-panel .mat-expansion-panel-header-title,
+  .pokedex-shell-wrapper--open .pokedex-move-panel .mat-expansion-panel-header-description {
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+    color: var(--desk-text);
+  }
+
+  .pokedex-shell-wrapper--open .pokedex-move-panel .mat-expansion-panel-header-description {
+    color: var(--desk-muted);
   }
 
   .pokedex-shell-wrapper--open .kanto-chassis--battle .kanto-left-panel-scroll {

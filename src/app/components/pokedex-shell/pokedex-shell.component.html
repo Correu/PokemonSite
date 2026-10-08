@@ -23,81 +23,85 @@
                 </div>
 
                 <ng-container *ngIf="selectedEntryDetail$ | async as entry">
-                  <div class="kanto-main-lcd">
-                    <div class="kanto-lcd-bezel">
-                      <div class="kanto-lcd-dots shell-chrome" aria-hidden="true">
-                        <span></span><span></span>
-                      </div>
-                      <div class="kanto-lcd-screen">
-                        <div class="kanto-sprite-wrap">
-                          <img
-                            [src]="entry.pokemon.sprites.front_default"
-                            [alt]="entry.pokemon.name"
-                            class="kanto-sprite"
-                          />
+                  <div class="pokedex-entry">
+                    <div class="pokedex-entry-hero">
+                      <div class="kanto-main-lcd">
+                        <div class="kanto-lcd-bezel">
+                          <div class="kanto-lcd-dots shell-chrome" aria-hidden="true">
+                            <span></span><span></span>
+                          </div>
+                          <div class="kanto-lcd-screen">
+                            <div class="kanto-sprite-wrap">
+                              <img
+                                [src]="entry.pokemon.sprites.front_default"
+                                [alt]="entry.pokemon.name"
+                                class="kanto-sprite"
+                              />
+                            </div>
+                            <div class="kanto-name-bar">
+                              {{ entry.pokemon.name | uppercase }} #{{
+                                entry.pokemon.id
+                              }}
+                            </div>
+                          </div>
+                          <div class="kanto-lcd-footer shell-chrome" aria-hidden="true">
+                            <span class="kanto-lcd-btn"></span>
+                            <span class="kanto-lcd-grill"></span>
+                          </div>
                         </div>
-                        <div class="kanto-name-bar">
-                          {{ entry.pokemon.name | uppercase }} #{{
-                            entry.pokemon.id
-                          }}
-                        </div>
                       </div>
-                      <div class="kanto-lcd-footer shell-chrome" aria-hidden="true">
-                        <span class="kanto-lcd-btn"></span>
-                        <span class="kanto-lcd-grill"></span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div class="kanto-left-details">
-                    <div class="pokedex-entry-types">
-                      @for (type of entry.pokemon.types; track type) {
-                      <span
-                        class="type-badge"
-                        [class]="'type-' + type.type.name"
-                      >
-                        {{ type.type.name | titlecase }}
-                      </span>
-                      }
-                    </div>
-
-                    <div class="pokedex-entry-matchups">
-                      @if (entry.matchups.weakTo.length) {
-                      <div class="matchup-row">
-                        <div class="section-title">Weak to</div>
-                        <div class="matchup-chips">
-                          @for (chip of entry.matchups.weakTo; track chip.type) {
+                      <div class="pokedex-entry-hero-side">
+                        <div class="pokedex-entry-types">
+                          @for (type of entry.pokemon.types; track type) {
                           <span
-                            class="type-badge type-badge--sm"
-                            [ngClass]="'type-' + chip.type"
+                            class="type-badge"
+                            [class]="'type-' + type.type.name"
                           >
-                            {{ chip.type | titlecase }}
-                            <span class="matchup-mul">{{ formatMultiplier(chip.multiplier) }}</span>
+                            {{ type.type.name | titlecase }}
                           </span>
                           }
                         </div>
-                      </div>
-                      }
-                      @if (entry.matchups.strongAgainst.length) {
-                      <div class="matchup-row">
-                        <div class="section-title">Strong against</div>
-                        <div class="matchup-chips">
-                          @for (chip of entry.matchups.strongAgainst; track chip.type) {
-                          <span
-                            class="type-badge type-badge--sm"
-                            [ngClass]="'type-' + chip.type"
-                          >
-                            {{ chip.type | titlecase }}
-                            <span class="matchup-mul">{{ formatMultiplier(chip.multiplier) }}</span>
-                          </span>
+
+                        <div class="pokedex-entry-matchups">
+                          @if (entry.matchups.weakTo.length) {
+                          <div class="matchup-row">
+                            <div class="section-title">Weak to</div>
+                            <div class="matchup-chips">
+                              @for (chip of entry.matchups.weakTo; track chip.type) {
+                              <span
+                                class="type-badge type-badge--sm"
+                                [ngClass]="'type-' + chip.type"
+                              >
+                                {{ chip.type | titlecase }}
+                                <span class="matchup-mul">{{ formatMultiplier(chip.multiplier) }}</span>
+                              </span>
+                              }
+                            </div>
+                          </div>
+                          }
+                          @if (entry.matchups.strongAgainst.length) {
+                          <div class="matchup-row">
+                            <div class="section-title">Strong against</div>
+                            <div class="matchup-chips">
+                              @for (chip of entry.matchups.strongAgainst; track chip.type) {
+                              <span
+                                class="type-badge type-badge--sm"
+                                [ngClass]="'type-' + chip.type"
+                              >
+                                {{ chip.type | titlecase }}
+                                <span class="matchup-mul">{{ formatMultiplier(chip.multiplier) }}</span>
+                              </span>
+                              }
+                            </div>
+                          </div>
                           }
                         </div>
                       </div>
-                      }
                     </div>
 
-                    <div class="pokedex-entry-meta-layout">
-                      <div class="pokedex-entry-info-block">
+                    <div class="pokedex-entry-mid">
+                      <div class="pokedex-entry-mid-left">
                         <div class="pokedex-entry-stats">
                           <span class="stat-line">
                             <strong>Weight</strong>
@@ -118,86 +122,96 @@
                             {{ entry.pokemon.base_experience }}
                           </span>
                         </div>
-                      </div>
 
-                      <div class="pokedex-entry-stats-block">
-                        <div class="section-title">Base Stats</div>
-                        @for (stat of entry.pokemon.stats; track stat) {
-                        <div class="stat-row">
-                          <div class="stat-name">
-                            {{ stat.stat.name | uppercase }}
-                          </div>
-                          <div class="stat-bar">
-                            <div
-                              class="stat-bar-fill"
-                              [style.width.%]="
-                                (stat.base_stat / 255) * 100
-                              "
-                            ></div>
-                          </div>
-                          <div class="stat-value">{{ stat.base_stat }}</div>
-                        </div>
-                        }
-                      </div>
-                    </div>
-
-                    <div class="pokedex-entry-abilities">
-                      <div class="section-title">Abilities</div>
-                      <ul>
-                        @for (ability of entry.abilities; track ability.name) {
-                        <li class="ability-row">
-                          <div class="ability-heading">
-                            <span class="ability-name">{{
-                              ability.name | titlecase
-                            }}</span>
-                            @if (ability.isHidden) {
-                            <span class="ability-tag">Hidden</span>
-                            }
-                          </div>
-                          @if (ability.effect) {
-                          <p class="ability-effect">{{ ability.effect }}</p>
-                          }
-                        </li>
-                        }
-                      </ul>
-                    </div>
-
-                    <div class="pokedex-entry-moves">
-                      <div class="section-title">Moves</div>
-                      @for (group of entry.moveGroups; track group.method) {
-                      <div class="move-group">
-                        <div class="section-title">{{ group.label }}</div>
-                        <ul>
-                          @for (move of group.moves; track move.moveId) {
-                          <li class="move-row">
-                            <div class="move-heading">
-                              @if (group.method === 'level-up') {
-                              <span class="move-level">Lv. {{ move.level }}</span>
-                              }
-                              <span class="move-name">{{
-                                move.name | titlecase
-                              }}</span>
-                              @if (move.type) {
-                              <span
-                                [class]="
-                                  'type-badge type-badge--sm type-' + move.type
-                                "
-                              >
-                                {{ move.type | titlecase }}
-                              </span>
-                              }
-                              <span class="move-power">
-                                {{ move.power != null ? move.power : '—' }}
-                              </span>
+                        <div class="pokedex-entry-stats-block">
+                          <div class="section-title">Base Stats</div>
+                          @for (stat of entry.pokemon.stats; track stat) {
+                          <div class="stat-row">
+                            <div class="stat-name">
+                              {{ stat.stat.name | uppercase }}
                             </div>
-                            @if (move.effect) {
-                            <p class="move-effect">{{ move.effect }}</p>
+                            <div class="stat-bar">
+                              <div
+                                class="stat-bar-fill"
+                                [style.width.%]="
+                                  (stat.base_stat / 255) * 100
+                                "
+                              ></div>
+                            </div>
+                            <div class="stat-value">{{ stat.base_stat }}</div>
+                          </div>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="pokedex-entry-abilities">
+                        <div class="section-title">Abilities</div>
+                        <ul>
+                          @for (ability of entry.abilities; track ability.name) {
+                          <li class="ability-row">
+                            <div class="ability-heading">
+                              <span class="ability-name">{{
+                                ability.name | titlecase
+                              }}</span>
+                              @if (ability.isHidden) {
+                              <span class="ability-tag">Hidden</span>
+                              }
+                            </div>
+                            @if (ability.effect) {
+                            <p class="ability-effect">{{ ability.effect }}</p>
                             }
                           </li>
                           }
                         </ul>
                       </div>
-                      }
+                    </div>
+
+                    <div class="pokedex-entry-moves">
+                      <div class="section-title">Moves</div>
+                      <mat-accordion multi class="pokedex-move-accordion">
+                        @for (group of entry.moveGroups; track group.method) {
+                        <mat-expansion-panel
+                          class="pokedex-move-panel"
+                          [expanded]="group.method === 'level-up'"
+                        >
+                          <mat-expansion-panel-header>
+                            <mat-panel-title>{{ group.label }}</mat-panel-title>
+                            <mat-panel-description>
+                              {{ group.moves.length }}
+                            </mat-panel-description>
+                          </mat-expansion-panel-header>
+                          <ul>
+                            @for (move of group.moves; track move.moveId) {
+                            <li class="move-row">
+                              <div class="move-heading">
+                                @if (group.method === 'level-up') {
+                                <span class="move-level">Lv. {{ move.level }}</span>
+                                }
+                                <span class="move-name">{{
+                                  move.name | titlecase
+                                }}</span>
+                                @if (move.type) {
+                                <span
+                                  [class]="
+                                    'type-badge type-badge--sm type-' + move.type
+                                  "
+                                >
+                                  {{ move.type | titlecase }}
+                                </span>
+                                }
+                                <span class="move-power">
+                                  {{ move.power != null ? move.power : '—' }}
+                                </span>
+                              </div>
+                              @if (move.effect) {
+                              <p class="move-effect">{{ move.effect }}</p>
+                              }
+                            </li>
+                            }
+                          </ul>
+                        </mat-expansion-panel>
+                        }
+                      </mat-accordion>
                     </div>
                   </div>
                 </ng-container>
