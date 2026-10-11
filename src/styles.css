@@ -2,8 +2,37 @@
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
 html {
+  --desk-bg: #eef1f4;
+  --desk-surface: #ffffff;
+  --desk-surface-muted: #f4f6f8;
+  --desk-border: #d5dde5;
+  --desk-text: #1c2430;
+  --desk-muted: #5c6b7a;
+  --desk-accent: #0f766e;
+  --desk-accent-soft: #d9f2ef;
+  --desk-accent-hover: rgba(15, 118, 110, 0.08);
+  --desk-accent-selected: rgba(15, 118, 110, 0.14);
+
   height: 100%;
   overflow: hidden;
+  color-scheme: light;
+  background: var(--desk-bg);
+  color: var(--desk-text);
+}
+
+html.theme-dark {
+  --desk-bg: #0f1419;
+  --desk-surface: #1a222c;
+  --desk-surface-muted: #151b24;
+  --desk-border: #2a3544;
+  --desk-text: #e8edf2;
+  --desk-muted: #8b9aab;
+  --desk-accent: #2dd4bf;
+  --desk-accent-soft: rgba(45, 212, 191, 0.16);
+  --desk-accent-hover: rgba(45, 212, 191, 0.1);
+  --desk-accent-selected: rgba(45, 212, 191, 0.18);
+
+  color-scheme: dark;
 }
 
 body {
@@ -13,6 +42,8 @@ body {
   min-height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
+  background: var(--desk-bg);
+  color: var(--desk-text);
 }
 
 app-root {
@@ -37,4 +68,20 @@ app-root {
   max-width: 280px;
   font-size: 0.8rem;
   line-height: 1.35;
+}
+
+html.theme-dark .mat-mdc-outlined-button:not(:disabled) {
+  color: var(--desk-text);
+  border-color: var(--desk-border);
+}
+
+html.theme-dark .mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: var(--desk-border);
+  --mdc-outlined-text-field-label-text-color: var(--desk-muted);
+  --mdc-outlined-text-field-input-text-color: var(--desk-text);
+}
+
+html.theme-dark .mat-mdc-select-value,
+html.theme-dark .mat-mdc-select-arrow {
+  color: var(--desk-text);
 }

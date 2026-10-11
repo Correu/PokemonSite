@@ -31,15 +31,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #fafbfc 0%, #f0f3f6 100%);
-  border: 1px solid #d5dde5;
+  background: linear-gradient(
+    180deg,
+    var(--desk-surface-muted) 0%,
+    var(--desk-surface) 100%
+  );
+  border: 1px solid var(--desk-border);
   border-radius: 12px;
   box-shadow: none;
   overflow: hidden;
 }
 
 .dex-sprite-screen--empty {
-  background: linear-gradient(180deg, #f4f6f8 0%, #e8edf2 100%);
+  background: linear-gradient(
+    180deg,
+    var(--desk-surface-muted) 0%,
+    var(--desk-border) 100%
+  );
 }
 
 .dex-sprite-img {
@@ -53,7 +61,7 @@
 .dex-sprite-placeholder {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
   font-size: 2rem;
-  color: rgba(28, 36, 48, 0.2);
+  color: color-mix(in srgb, var(--desk-text) 20%, transparent);
 }
 
 .dex-sprite-label {
@@ -62,7 +70,7 @@
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: 0.01em;
-  color: #5c6b7a;
+  color: var(--desk-muted);
   text-align: center;
   max-width: 100%;
   overflow: hidden;
@@ -99,17 +107,17 @@
 }
 
 .dex-list-row:hover {
-  background: rgba(15, 118, 110, 0.08);
+  background: var(--desk-accent-hover);
 }
 
 .dex-list-row--selected {
-  background: rgba(15, 118, 110, 0.14);
-  box-shadow: inset 3px 0 0 #0f766e;
+  background: var(--desk-accent-selected);
+  box-shadow: inset 3px 0 0 var(--desk-accent);
 }
 
 .dex-list-row--selected .dex-list-id,
 .dex-list-row--selected .dex-list-name {
-  color: #0f766e;
+  color: var(--desk-accent);
   font-weight: 600;
 }
 
@@ -137,7 +145,7 @@
   font-family: Roboto, 'Helvetica Neue', sans-serif;
   font-size: 0.9rem;
   line-height: 1.35;
-  color: #5c6b7a;
+  color: var(--desk-muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -149,7 +157,7 @@
   font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.35;
-  color: #1c2430;
+  color: var(--desk-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -176,8 +184,8 @@
     justify-content: center;
     gap: 8px;
     padding: 10px 8px;
-    background: #ffffff;
-    border-right: 1px solid #d5dde5;
+    background: var(--desk-surface);
+    border-right: 1px solid var(--desk-border);
     border-radius: 10px 0 0 10px;
   }
 

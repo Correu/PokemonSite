@@ -7,6 +7,7 @@ import { BattleMove } from 'src/app/interfaces/move';
 import { Pokemon } from 'src/app/interfaces/pokemon';
 import { TypeMatchups } from 'src/app/interfaces/type-chart';
 import { PokemonService } from 'src/app/services/pokemon/pokemon.service';
+import { AppTheme, ThemeService } from 'src/app/services/theme/theme.service';
 
 export interface PokedexNavTab {
   id: string;
@@ -91,8 +92,15 @@ export class PokedexShellComponent implements OnInit {
 
   constructor(
     public pokemonService: PokemonService,
+    public themeService: ThemeService,
     private router: Router
   ) {}
+
+  onThemeChange(theme: AppTheme | null | undefined): void {
+    if (theme === 'light' || theme === 'dark') {
+      this.themeService.setTheme(theme);
+    }
+  }
 
   ngOnInit(): void {
     this.router.events

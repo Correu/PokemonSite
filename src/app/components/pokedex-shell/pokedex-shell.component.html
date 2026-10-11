@@ -241,27 +241,43 @@
                 </div>
               </div>
 
-              <nav class="pokedex-tab-grid" aria-label="Main navigation">
-                @for (tab of navTabs; track tab.id) {
-                @if (tab.disabled || tab.route === null) {
-                <span
-                  class="pokedex-tab-key pokedex-tab-key--reserved"
-                  [attr.data-tab]="tab.id"
-                  >{{ tab.label }}</span
+              <div class="pokedex-nav-row">
+                <nav class="pokedex-tab-grid" aria-label="Main navigation">
+                  @for (tab of navTabs; track tab.id) {
+                  @if (tab.disabled || tab.route === null) {
+                  <span
+                    class="pokedex-tab-key pokedex-tab-key--reserved"
+                    [attr.data-tab]="tab.id"
+                    >{{ tab.label }}</span
+                  >
+                  } @else {
+                  <a
+                    class="pokedex-tab-key"
+                    mat-stroked-button
+                    [routerLink]="tabRouterLink(tab)"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{
+                      exact: tab.exact ?? false,
+                    }"
+                    >{{ tab.label }}</a
+                  >
+                  } }
+                </nav>
+                <mat-button-toggle-group
+                  class="pokedex-theme-select"
+                  aria-label="Color theme"
+                  [value]="themeService.theme"
+                  (change)="onThemeChange($event.value)"
+                  hideSingleSelectionIndicator
                 >
-                } @else {
-                <a
-                  class="pokedex-tab-key"
-                  mat-stroked-button
-                  [routerLink]="tabRouterLink(tab)"
-                  routerLinkActive="active"
-                  [routerLinkActiveOptions]="{
-                    exact: tab.exact ?? false,
-                  }"
-                  >{{ tab.label }}</a
-                >
-                } }
-              </nav>
+                  <mat-button-toggle value="light" aria-label="Light mode">
+                    <mat-icon>light_mode</mat-icon>
+                  </mat-button-toggle>
+                  <mat-button-toggle value="dark" aria-label="Dark mode">
+                    <mat-icon>dark_mode</mat-icon>
+                  </mat-button-toggle>
+                </mat-button-toggle-group>
+              </div>
 
               <div class="kanto-nav-deco shell-panel--desktop shell-chrome" aria-hidden="true">
                 <span class="kanto-mini-led"></span>
