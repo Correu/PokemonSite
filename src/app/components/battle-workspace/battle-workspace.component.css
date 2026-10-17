@@ -38,8 +38,9 @@
 }
 
 .nav-chip {
-  border: 2px solid #37474f;
-  background: #eceff1;
+  border: 1px solid var(--desk-border);
+  background: var(--desk-surface-muted);
+  color: var(--desk-text);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 0.75rem;
@@ -53,8 +54,9 @@
 }
 
 .nav-chip.active {
-  background: #fff59d;
-  border-color: #1a1a1a;
+  background: var(--desk-accent-soft);
+  border-color: var(--desk-accent);
+  color: var(--desk-accent);
 }
 
 .bw-section {
@@ -71,7 +73,7 @@
 .bw-lead {
   margin: 0;
   font-size: 0.85rem;
-  color: #333;
+  color: var(--desk-muted);
 }
 
 .bw-subtitle {

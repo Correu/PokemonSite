@@ -1,6 +1,12 @@
+export interface PokemonCries {
+  latest?: string;
+  legacy?: string;
+}
+
 export interface Pokemon {
   abilities: Ability[];
   base_experience: number;
+  cries?: PokemonCries;
   forms: Form[];
   height: number;
   held_items: HeldItem[];

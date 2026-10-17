@@ -17,6 +17,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { CommonModule } from '@angular/common';
 
@@ -74,6 +75,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatCheckboxModule,
     MatTooltipModule,
     MatSlideToggleModule,
+    MatButtonToggleModule,
     MatProgressSpinnerModule,
   ],
   providers: [provideHttpClient(withInterceptorsFromDi())],
