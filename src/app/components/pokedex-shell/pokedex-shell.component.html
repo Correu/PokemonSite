@@ -234,28 +234,9 @@
             <div class="kanto-hinge shell-panel--desktop shell-chrome" aria-hidden="true"></div>
 
             <div class="kanto-right-panel">
-              <div class="pokedex-mobile-header shell-panel--mobile">
-                <div class="kanto-secondary-lcd">
-                  <span class="kanto-secondary-label">{{ modeLabel }}</span>
-                </div>
-              </div>
-
-              <div class="kanto-right-top shell-panel--desktop">
-                <div class="kanto-secondary-lcd">
-                  <span class="kanto-secondary-label">{{ modeLabel }}</span>
-                </div>
-              </div>
-
               <div class="pokedex-nav-row">
                 <nav class="pokedex-tab-grid" aria-label="Main navigation">
                   @for (tab of navTabs; track tab.id) {
-                  @if (tab.disabled || tab.route === null) {
-                  <span
-                    class="pokedex-tab-key pokedex-tab-key--reserved"
-                    [attr.data-tab]="tab.id"
-                    >{{ tab.label }}</span
-                  >
-                  } @else {
                   <a
                     class="pokedex-tab-key"
                     mat-stroked-button
@@ -266,7 +247,7 @@
                     }"
                     >{{ tab.label }}</a
                   >
-                  } }
+                  }
                 </nav>
                 <mat-button-toggle-group
                   class="pokedex-theme-select"

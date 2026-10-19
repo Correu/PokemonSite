@@ -54,7 +54,6 @@ export interface PokedexEntryDetail {
 })
 export class PokedexShellComponent implements OnInit {
   isBattleRoute = false;
-  modeLabel = 'Dex';
 
   readonly selectedPokemon$ = this.pokemonService.selectedPokedexPokemon$;
 
@@ -85,9 +84,6 @@ export class PokedexShellComponent implements OnInit {
   readonly navTabs: PokedexNavTab[] = [
     { id: 'list', label: 'Dex', route: '', exact: true },
     { id: 'battle', label: 'Battle', route: 'battle' },
-    { id: 'r3', label: '···', route: null, disabled: true },
-    { id: 'r4', label: '···', route: null, disabled: true },
-    { id: 'r5', label: '···', route: null, disabled: true },
   ];
 
   constructor(
@@ -185,9 +181,7 @@ export class PokedexShellComponent implements OnInit {
   }
 
   private syncRouteMode(): void {
-    const url = this.router.url;
-    this.isBattleRoute = url.includes('/battle');
-    this.modeLabel = this.isBattleRoute ? 'Battle' : 'Dex';
+    this.isBattleRoute = this.router.url.includes('/battle');
   }
 
   tabRouterLink(tab: PokedexNavTab): string | null {

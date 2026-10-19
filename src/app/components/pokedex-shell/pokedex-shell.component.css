@@ -801,12 +801,16 @@
   letter-spacing: 0.06em;
 }
 
-/* Tab grid: single row of 5 keys */
+/* Tab row: Dex + Battle */
 .pokedex-tab-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.pokedex-tab-grid .pokedex-tab-key {
+  min-width: 5.5rem;
 }
 
 .pokedex-tab-key {
@@ -1249,7 +1253,7 @@
 
   /*
    * Promote right-panel children into the chassis flex column:
-   * header → tabs → selected detail → list (thumb zone).
+   * tabs → selected detail → list (thumb zone).
    */
   .kanto-right-panel,
   .pokedex-shell-wrapper--open .kanto-right-panel {
@@ -1260,30 +1264,15 @@
     padding: 0;
   }
 
-  .pokedex-mobile-header {
+  .pokedex-nav-row,
+  .pokedex-shell-wrapper--open .pokedex-nav-row {
     order: 1;
     flex-shrink: 0;
     width: auto;
     align-self: stretch;
     max-width: 100%;
     min-width: 0;
-    padding: 4px 4px 0;
-    box-sizing: border-box;
-  }
-
-  .pokedex-shell-wrapper--open .pokedex-mobile-header .kanto-secondary-label {
-    font-size: 1.1rem;
-  }
-
-  .pokedex-nav-row,
-  .pokedex-shell-wrapper--open .pokedex-nav-row {
-    order: 2;
-    flex-shrink: 0;
-    width: auto;
-    align-self: stretch;
-    max-width: 100%;
-    min-width: 0;
-    padding: 0 0 8px;
+    padding: 4px 0 8px;
     box-sizing: border-box;
     margin-bottom: 0;
     border-bottom: none;
